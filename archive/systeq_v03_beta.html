@@ -1,0 +1,477 @@
+
+<style>
+:root{--sq-bg:#F8F8F6;--sq-card:#fff;--sq-border:rgba(0,0,0,0.09);--sq-accent:#D35400;--sq-accent-light:#FDF0E8;--sq-mono:var(--font-mono);--sq-text:var(--color-text-primary);--sq-muted:var(--color-text-secondary);--sq-ok:#1a7a4a;--sq-ok-bg:#eaf6f0;--sq-warn:#9a5700;--sq-warn-bg:#fff4e6;--sq-err:#a32d2d;--sq-err-bg:#fcebeb;--sq-blue:#185fa5;--sq-blue-bg:#e6f1fb;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body,div,span,p,h1,h2,h3,h4,td,th,label,button,select{font-family:var(--font-sans);}
+.sq-wrap{padding:1.5rem 0.5rem 3rem;max-width:680px;}
+.sq-nav{display:flex;align-items:center;gap:8px;margin-bottom:1.5rem;flex-wrap:wrap;}
+.sq-logo{font-size:17px;font-weight:500;color:var(--sq-text);letter-spacing:-0.3px;}
+.sq-logo span{color:var(--sq-accent);}
+.sq-tagline{font-size:12px;color:var(--sq-muted);margin-left:4px;}
+.sq-mode-tabs{display:flex;gap:4px;margin-left:auto;}
+.sq-mtab{background:none;border:0.5px solid var(--sq-border);border-radius:6px;padding:4px 12px;font-size:13px;cursor:pointer;color:var(--sq-muted);}
+.sq-mtab.active{background:var(--sq-accent);color:#fff;border-color:var(--sq-accent);}
+.sq-section{margin-bottom:2rem;}
+.sq-h2{font-size:13px;font-weight:500;color:var(--sq-muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.75rem;}
+.sq-tabs{display:flex;gap:0;border:0.5px solid var(--sq-border);border-radius:8px;overflow:hidden;width:fit-content;margin-bottom:1rem;}
+.sq-tab{background:none;border:none;border-right:0.5px solid var(--sq-border);padding:6px 16px;font-size:13px;cursor:pointer;color:var(--sq-muted);}
+.sq-tab:last-child{border-right:none;}
+.sq-tab.active{background:var(--color-background-secondary);color:var(--sq-text);font-weight:500;}
+.drop-zone{border:1.5px dashed var(--sq-border);border-radius:12px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;margin-bottom:1rem;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--sq-accent);background:var(--sq-accent-light);}
+.drop-zone .dz-icon{font-size:28px;color:var(--sq-muted);margin-bottom:8px;}
+.drop-zone .dz-label{font-size:14px;color:var(--sq-muted);}
+.drop-zone .dz-sub{font-size:12px;color:var(--sq-muted);margin-top:4px;opacity:.7;}
+.dz-active .dz-label{color:var(--sq-accent);}
+.demo-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.demo-pill{background:var(--color-background-secondary);border:0.5px solid var(--sq-border);border-radius:20px;padding:4px 12px;font-size:12px;cursor:pointer;color:var(--sq-muted);font-family:var(--sq-mono);}
+.demo-pill:hover{border-color:var(--sq-accent);color:var(--sq-accent);}
+.demo-pill.active{background:var(--sq-accent-light);border-color:var(--sq-accent);color:var(--sq-accent);font-weight:500;}
+.result-panel{background:var(--color-background-primary);border:0.5px solid var(--sq-border);border-radius:12px;overflow:hidden;}
+.rp-header{display:flex;align-items:center;gap:8px;padding:.75rem 1rem;border-bottom:0.5px solid var(--sq-border);}
+.rp-filename{font-size:13px;font-weight:500;font-family:var(--sq-mono);}
+.rp-badge{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;}
+.rp-badge.vcf{background:var(--sq-accent-light);color:var(--sq-accent);}
+.rp-badge.dxf{background:var(--sq-blue-bg);color:var(--sq-blue);}
+.rp-badge.ok{background:var(--sq-ok-bg);color:var(--sq-ok);}
+.rp-badge.warn{background:var(--sq-warn-bg);color:var(--sq-warn);}
+.view-tabs{display:flex;gap:0;border-bottom:0.5px solid var(--sq-border);}
+.vtab{background:none;border:none;border-right:0.5px solid var(--sq-border);padding:8px 16px;font-size:13px;cursor:pointer;color:var(--sq-muted);}
+.vtab:last-child{border-right:none;}
+.vtab.active{color:var(--sq-text);font-weight:500;border-bottom:2px solid var(--sq-accent);margin-bottom:-0.5px;}
+.view-body{padding:1rem;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:1rem;}
+.kpi{background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;}
+.kpi-label{font-size:11px;color:var(--sq-muted);margin-bottom:4px;}
+.kpi-val{font-size:22px;font-weight:500;color:var(--sq-text);line-height:1.1;}
+.kpi-sub{font-size:11px;color:var(--sq-muted);margin-top:2px;}
+.kpi.accent .kpi-val{color:var(--sq-accent);}
+.kpi.ok .kpi-val{color:var(--sq-ok);}
+.kpi.warn .kpi-val{color:var(--sq-warn);}
+.bar-wrap{margin-bottom:1rem;}
+.bar-label{font-size:12px;color:var(--sq-muted);margin-bottom:4px;display:flex;justify-content:space-between;}
+.bar-track{height:8px;background:var(--color-background-secondary);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;background:var(--sq-accent);}
+.bar-fill.ok{background:var(--sq-ok);}
+.bar-fill.blue{background:var(--sq-blue);}
+.tags-wrap{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.tag{font-size:12px;padding:3px 10px;border-radius:4px;font-weight:500;}
+.tag.ok{background:var(--sq-ok-bg);color:var(--sq-ok);}
+.tag.warn{background:var(--sq-warn-bg);color:var(--sq-warn);}
+.tag.err{background:var(--sq-err-bg);color:var(--sq-err);}
+.tag.info{background:var(--sq-blue-bg);color:var(--sq-blue);}
+.tbl{width:100%;font-size:12.5px;border-collapse:collapse;margin-bottom:1rem;}
+.tbl th{text-align:left;padding:5px 8px;border-bottom:1px solid var(--sq-border);color:var(--sq-muted);font-weight:500;font-size:11px;}
+.tbl td{padding:5px 8px;border-bottom:0.5px solid var(--sq-border);font-family:var(--sq-mono);}
+.tbl tr:last-child td{border-bottom:none;}
+.code-block{background:var(--color-background-secondary);border-radius:8px;padding:.75rem 1rem;font-family:var(--sq-mono);font-size:11.5px;color:var(--sq-muted);white-space:pre-wrap;word-break:break-word;max-height:180px;overflow-y:auto;margin-bottom:1rem;}
+.svg-canvas{width:100%;border:0.5px solid var(--sq-border);border-radius:8px;background:var(--color-background-secondary);margin-bottom:1rem;display:block;}
+.export-row{display:flex;gap:8px;flex-wrap:wrap;}
+.exp-btn{background:none;border:0.5px solid var(--sq-border);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--sq-muted);}
+.exp-btn:hover{border-color:var(--sq-accent);color:var(--sq-accent);}
+.api-box{background:var(--color-background-secondary);border-radius:8px;padding:.6rem 1rem;font-family:var(--sq-mono);font-size:12px;color:var(--sq-muted);margin-bottom:1rem;}
+.api-box .method{color:var(--sq-ok);font-weight:500;}
+.api-box .status{color:var(--sq-ok);}
+.layer-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--sq-border);}
+.layer-row:last-child{border-bottom:none;}
+.layer-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.layer-name{font-size:13px;color:var(--sq-text);flex:1;}
+.layer-detail{font-size:12px;color:var(--sq-muted);font-family:var(--sq-mono);}
+.section-label{font-size:11px;font-weight:500;color:var(--sq-muted);letter-spacing:.06em;text-transform:uppercase;margin:.75rem 0 .4rem;}
+.no-data{text-align:center;padding:2rem;color:var(--sq-muted);font-size:13px;}
+.parse-btn{width:100%;padding:10px;background:var(--sq-accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;margin-top:.5rem;}
+.parse-btn:hover{opacity:.9;}
+.loading-bar{height:3px;background:var(--sq-accent-light);border-radius:2px;overflow:hidden;display:none;margin-bottom:1rem;}
+.loading-bar-inner{height:100%;background:var(--sq-accent);width:0;border-radius:2px;transition:width .4s;}
+</style>
+
+<div class="sq-wrap">
+<h2 class="sr-only">SYSTEQ v0.3 beta — CNC parser demo interface</h2>
+<div class="sq-nav">
+  <span class="sq-logo">SYS<span>TEQ</span></span>
+  <span class="sq-tagline">AI-Augmented CNC Systems</span>
+  <div class="sq-mode-tabs">
+    <button class="sq-mtab active" onclick="switchParser('vcf',this)">VCF parser</button>
+    <button class="sq-mtab" onclick="switchParser('dxf',this)">DXF pipeline</button>
+  </div>
+</div>
+
+<div id="vcf-panel">
+  <div class="sq-section">
+    <div class="sq-h2">Upload nebo vyberte demo soubor</div>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-inp').click()" ondragover="ev.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+      <input type="file" id="file-inp" style="display:none" accept=".vcf,.VCF" onchange="handleFile(this.files[0],'vcf')">
+      <div class="dz-icon"><i class="ti ti-upload" aria-hidden="true"></i></div>
+      <div class="dz-label">Přetáhněte .VCF soubor sem nebo klikněte</div>
+      <div class="dz-sub">Proprietární formát Ruida VCutWorks — binární RE parser v20</div>
+    </div>
+    <div class="sq-h2" style="margin-top:.5rem">Demo soubory (reálná produkční data)</div>
+    <div class="demo-pills">
+      <span class="demo-pill active" onclick="loadDemo('1ks','vcf',this)">1ks.VCF <span style="opacity:.6">·3min</span></span>
+      <span class="demo-pill" onclick="loadDemo('fluenz_l','vcf',this)">fluenz_l.VCF <span style="opacity:.6">·25min</span></span>
+    </div>
+    <div class="loading-bar" id="vcf-loading"><div class="loading-bar-inner" id="vcf-loading-inner"></div></div>
+  </div>
+
+  <div id="vcf-result">
+    <div class="result-panel">
+      <div class="rp-header">
+        <span class="rp-filename" id="vcf-fname">1ks.VCF</span>
+        <span class="rp-badge vcf">VCF v20</span>
+        <span class="rp-badge ok" id="vcf-status">✓ OK</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--sq-muted)" id="vcf-ts">10.06.2026 10:13</span>
+      </div>
+      <div class="view-tabs">
+        <button class="vtab active" onclick="switchView('vcf','ceo',this)">CEO</button>
+        <button class="vtab" onclick="switchView('vcf','cto',this)">CTO</button>
+        <button class="vtab" onclick="switchView('vcf','design',this)">Design</button>
+      </div>
+      <div class="view-body" id="vcf-view-ceo"></div>
+      <div class="view-body" id="vcf-view-cto" style="display:none"></div>
+      <div class="view-body" id="vcf-view-design" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+<div id="dxf-panel" style="display:none">
+  <div class="sq-section">
+    <div class="sq-h2">Upload nebo vyberte demo soubor</div>
+    <div class="drop-zone" onclick="document.getElementById('dxf-inp').click()">
+      <input type="file" id="dxf-inp" style="display:none" accept=".dxf,.DXF" onchange="handleFile(this.files[0],'dxf')">
+      <div class="dz-icon"><i class="ti ti-file" aria-hidden="true"></i></div>
+      <div class="dz-label">Přetáhněte .DXF soubor sem nebo klikněte</div>
+      <div class="dz-sub">DXF preprocessing pipeline — sémantická analýza, tool assignment, ML vektor</div>
+    </div>
+    <div class="sq-h2" style="margin-top:.5rem">Demo soubory</div>
+    <div class="demo-pills">
+      <span class="demo-pill active" onclick="loadDemo('3822','dxf',this)">3822_2ks.DXF <span style="opacity:.6">·cassette</span></span>
+      <span class="demo-pill" onclick="loadDemo('pcb_c','dxf',this)">PCB_C.DXF <span style="opacity:.6">·complex</span></span>
+    </div>
+    <div class="loading-bar" id="dxf-loading"><div class="loading-bar-inner" id="dxf-loading-inner"></div></div>
+  </div>
+  <div id="dxf-result">
+    <div class="result-panel">
+      <div class="rp-header">
+        <span class="rp-filename" id="dxf-fname">3822_2ks.DXF</span>
+        <span class="rp-badge dxf">DXF 2.3</span>
+        <span class="rp-badge warn" id="dxf-status">⚠ tool conflict</span>
+        <span style="margin-left:auto;font-size:11px;color:var(--sq-muted)" id="dxf-ts">10.06.2026</span>
+      </div>
+      <div class="view-tabs">
+        <button class="vtab active" onclick="switchView('dxf','ceo',this)">CEO</button>
+        <button class="vtab" onclick="switchView('dxf','cto',this)">CTO</button>
+        <button class="vtab" onclick="switchView('dxf','design',this)">Design</button>
+      </div>
+      <div class="view-body" id="dxf-view-ceo"></div>
+      <div class="view-body" id="dxf-view-cto" style="display:none"></div>
+      <div class="view-body" id="dxf-view-design" style="display:none"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const VCF_DATA={
+  "1ks":{
+    fname:"1ks.VCF",ts:"10.06.2026 10:13",status:"ok",
+    meta:{time_s:193,time_str:"3 min 13 s",path_mm:3704,dims:"210 × 593 mm",
+          format:"Atypický formát",thickness:12,complexity:"Nízká (Lineární)",
+          elements:7,layers:1,warnings:3},
+    kpi:{cut_time:"3:13",cut_time_sub:"predikovaný čas",path:"3 704 mm",path_sub:"aktivní dráha",
+         panel:"210×593 mm",panel_sub:"canvas rozměry",thick:"12 mm",thick_sub:"tloušťka felt",
+         risk:"FIXACE!",risk_sub:"vakuum nízké"},
+    savings:{est_manual_min:8,tool_min:3.2,saving_pct:60,price_kc:58},
+    tags:["⚠ Fixace — 80% obvodu páskou","⚠ Malá plocha 0.12 m²","⚠ Riziko posunu 1 skupiny","✓ Sekvence OK"],
+    layers_detail:[{id:1,tool:"Vibrate cutter",speed:"200 mm/s",h1:"—",h2:"-0.3 mm",start:"0.0",end:"0.0",len:"3 704.0 mm",op:"through-cut"}],
+    groups:[{id:"G1",shape:"Polygon",count:2,len:"512 mm"},{id:"G2",shape:"Polygon",count:2,len:"784 mm"},{id:"G3",shape:"Polygon",count:1,len:"440 mm"},{id:"G4",shape:"Polygon",count:1,len:"600 mm"},{id:"G5",shape:"Polygon",count:1,len:"72 mm"}],
+    json:{file:"1ks.VCF",engine:"RuidaVcfEngineV20",version:"20",segments:7,layer_count:1,
+          predicted_time_s:193,path_length_mm:3704,canvas_w_mm:210,canvas_h_mm:593,
+          thickness_mm:12,complexity:"low_linear",aggregate:false},
+    svg_paths:[
+      {d:"M30,20 L30,280",stroke:"#D35400",sw:1.5},{d:"M60,20 L60,280",stroke:"#D35400",sw:1.5},
+      {d:"M90,80 L90,220",stroke:"#D35400",sw:1.5},{d:"M120,60 L120,240",stroke:"#D35400",sw:1.5},
+      {d:"M150,100 L150,180",stroke:"#D35400",sw:1.5},{d:"M180,20 L180,280 M30,20 L180,20 M30,280 L180,280",stroke:"#888",sw:0.8}
+    ]
+  },
+  "fluenz_l":{
+    fname:"fluenz_l.VCF",ts:"10.06.2026 10:14",status:"warn",
+    meta:{time_s:1525,time_str:"25 min 25 s",path_mm:57429,dims:"1220 × 2802 mm",
+          format:"Standardní Echoblock 1200×2790",thickness:12,complexity:"Vysoká (Složitý)",
+          elements:137,layers:2,warnings:2},
+    kpi:{cut_time:"25:25",cut_time_sub:"predikovaný čas",path:"57 429 mm",path_sub:"aktivní dráha",
+         panel:"1220×2802 mm",panel_sub:"Std Echoblock panel",thick:"12 mm",thick_sub:"tloušťka felt",
+         risk:"H2 mimo rozsah",risk_sub:"doporuč. -0.3 až -0.1"},
+    savings:{est_manual_min:40,tool_min:25.4,saving_pct:37,price_kc:780},
+    tags:["⚠ H2=-0.5 mm mimo doporučený rozsah","⚠ Riziko posunu 4 skupin","✓ Sekvence vrstev OK","✓ Standardní formát"],
+    layers_detail:[
+      {id:1,tool:"Vibrate cutter",speed:"80 mm/s",h1:"24 mm",h2:"-0.5 mm",start:"0.0",end:"0.0",len:"57 429.0 mm",op:"through-cut"},
+      {id:2,tool:"Vibrate cutter",speed:"100 mm/s",h1:"0 mm",h2:"0.0 mm",start:"0.0",end:"0.0",len:"4 520.0 mm",op:"visual"}
+    ],
+    groups:[{id:"G1",shape:"Circle",count:2,len:"125.7 mm"},{id:"G2",shape:"Circle",count:4,len:"377.0 mm"},{id:"G3",shape:"Polygon",count:6,len:"1 348 mm"},{id:"G4",shape:"Polygon",count:14,len:"1 504.5 mm"},{id:"G5",shape:"Line",count:2,len:"1 220 mm"}],
+    json:{file:"fluenz_l.VCF",engine:"RuidaVcfEngineV20",version:"20",segments:137,layer_count:2,
+          predicted_time_s:1525,path_length_mm:57429,canvas_w_mm:1220,canvas_h_mm:2802,
+          thickness_mm:12,complexity:"high_structural",aggregate:false},
+    svg_paths:[
+      {d:"M15,10 Q40,10 55,30 Q70,50 55,130 Q40,210 55,250 Q70,290 55,310 Q40,330 15,310 Z",stroke:"#D35400",sw:1.5,fill:"none"},
+      {d:"M80,10 Q105,10 120,30 Q135,50 120,130 Q105,210 120,250 Q135,290 120,310 Q105,330 80,310 Z",stroke:"#D35400",sw:1.5,fill:"none"},
+      {d:"M145,10 Q170,10 185,30 Q200,50 185,130 Q170,210 185,250 Q200,290 185,310 Q170,330 145,310 Z",stroke:"#D35400",sw:1.5,fill:"none"},
+      {d:"M40,60 A15,15 0 1,0 40,61",stroke:"#888",sw:1,fill:"none"},
+      {d:"M110,60 A15,15 0 1,0 110,61",stroke:"#888",sw:1,fill:"none"},
+      {d:"M10,10 L200,10 L200,330 L10,330 Z",stroke:"#555",sw:0.5,fill:"none"}
+    ]
+  }
+};
+
+const DXF_DATA={
+  "3822":{
+    fname:"3822_2ks.DXF",ts:"10.06.2026",status:"warn",
+    meta:{entities:14,path_mm:39517,dims:"1208 × 2790 mm",panel_type:"cassette_panel",
+          tool_conflict:true,zones:2,closed:4,open:10,total_time_s:334,thickness:"—"},
+    kpi:{entities:"14",entities_sub:"entit v souboru",path:"39 517 mm",path_sub:"celková dráha",
+         time:"5 min 34 s",time_sub:"predikovaný čas řezu",yield:"95.3%",yield_sub:"využití desky",
+         risk:"Tool conflict",risk_sub:"2 entity bez přiřazení"},
+    savings:{est_manual_min:20,tool_min:5.6,price_kc:260},
+    tags:["⚠ Tool conflict: E_0000, E_0001","✓ Panel fits stock","✓ Cassette panel — 2 zóny","✓ 1 connected component"],
+    tools:[
+      {name:"vibrate_cutter_0deg",entities:2,len:"13 560 mm",op:"outer_format",passes:1},
+      {name:"v_slot_45deg",entities:12,len:"52 010 mm (double pass)",op:"decorative_grooves",passes:2,rotations:12}
+    ],
+    layers:[
+      {color:"Yellow (2)",entities:2,len:"13 560 mm",closed:2,open:0,mapped:true},
+      {color:"Green (3)",entities:10,len:"12 397 mm",closed:0,open:10,mapped:true},
+      {color:"Black (7)",entities:2,len:"13 560 mm",closed:2,open:0,mapped:true}
+    ],
+    json:{file:"3822_2ks.DXF",indexer:"2.3.0",dxf_ver:"AC1015",entity_count:14,total_length_mm:39517,
+          canvas:"1208×2790 mm",panel_type:"cassette_panel",tool_conflict:true,
+          cutting_time_s:334,v_slot_double_pass_mm:52010,vibrate_cutter_mm:13560},
+    svg_paths:[
+      {d:"M20,15 L200,15 L200,320 L20,320 Z",stroke:"#888",sw:0.8,fill:"none"},
+      {d:"M20,80 L200,80",stroke:"#1a7a4a",sw:1.2},{d:"M20,140 L200,140",stroke:"#1a7a4a",sw:1.2},
+      {d:"M20,200 L200,200",stroke:"#1a7a4a",sw:1.2},{d:"M20,260 L200,260",stroke:"#1a7a4a",sw:1.2},
+      {d:"M55,15 L55,320",stroke:"#888",sw:0.5},{d:"M90,15 L90,320",stroke:"#888",sw:0.5},
+      {d:"M125,15 L125,320",stroke:"#888",sw:0.5},{d:"M160,15 L160,320",stroke:"#888",sw:0.5},
+      {d:"M20,15 L200,320",stroke:"none"},{d:"M60,50 A15,15 0 1,0 61,50",stroke:"#D35400",sw:1,fill:"none"},
+      {d:"M150,270 A15,15 0 1,0 151,270",stroke:"#D35400",sw:1,fill:"none"}
+    ]
+  },
+  "pcb_c":{
+    fname:"PCB_C.DXF",ts:"10.06.2026",status:"warn",
+    meta:{entities:675,path_mm:62137,dims:"1201 × 2732 mm",panel_type:"unknown",
+          tool_conflict:true,zones:2,closed:4,open:671,total_time_s:null,thickness:"—"},
+    kpi:{entities:"675",entities_sub:"entit — extrémní hustota",path:"62 137 mm",path_sub:"celková dráha",
+         time:"?",time_sub:"model mimo rozsah kalibrací",yield:"92.8%",yield_sub:"využití desky",
+         risk:"257 konfliktů",risk_sub:"tool assignment neúplný"},
+    savings:{est_manual_min:null,tool_min:null,price_kc:null},
+    tags:["⚠ 257 tool conflict entit","⚠ 671 otevřených cest — chybí uzavření kontur","ℹ 119 různých vzorů tvarů","ℹ tac_per_meter=9.09 — extrémní křivkovitost","⚠ ML model mimo kalibrační rozsah"],
+    tools:[
+      {name:"vibrate_cutter_0deg",entities:4,len:"19 125 mm",op:"outer_format",passes:1},
+      {name:"v_slot_45deg (partial)",entities:257,len:"88 080 mm (double)",op:"decorative — CONFLICT",passes:2,rotations:257}
+    ],
+    layers:[
+      {color:"Red (1)",entities:null,len:"—",closed:null,open:null,mapped:false},
+      {color:"Green (3)",entities:null,len:"—",closed:null,open:null,mapped:true},
+      {color:"Black (7)",entities:null,len:"—",closed:null,open:null,mapped:true}
+    ],
+    json:{file:"PCB_C.DXF",indexer:"2.3.0",entity_count:675,total_length_mm:62137,
+          canvas:"1201×2732 mm",panel_type:"unknown",tool_conflict:true,
+          conflict_count:257,tac_per_meter:9.09,distinct_patterns:119},
+    svg_paths:[
+      {d:"M15,10 L205,10 L205,325 L15,325 Z",stroke:"#666",sw:0.6,fill:"none"},
+    ].concat(Array.from({length:40},(_,i)=>{
+      const x1=15+Math.sin(i*0.7)*80+90;const y1=10+i*7.8;
+      const x2=x1+Math.sin(i*0.4)*30;const y2=y1+4;
+      return {d:`M${x1.toFixed(0)},${y1.toFixed(0)} L${x2.toFixed(0)},${y2.toFixed(0)}`,stroke:"#D35400",sw:0.6};
+    }))
+  }
+};
+
+let currentVCF="1ks", currentDXF="3822", currentParser="vcf";
+
+function switchParser(mode,btn){
+  currentParser=mode;
+  document.querySelectorAll('.sq-mtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('vcf-panel').style.display=mode==='vcf'?'':'none';
+  document.getElementById('dxf-panel').style.display=mode==='dxf'?'':'none';
+}
+
+function loadDemo(id,type,pill){
+  document.querySelectorAll('.demo-pill').forEach(p=>p.classList.remove('active'));
+  pill.classList.add('active');
+  const bar=document.getElementById(type+'-loading');
+  const inner=document.getElementById(type+'-loading-inner');
+  bar.style.display='block';inner.style.width='0';
+  setTimeout(()=>{inner.style.width='60%'},50);
+  setTimeout(()=>{inner.style.width='100%'},350);
+  setTimeout(()=>{bar.style.display='none';
+    if(type==='vcf'){currentVCF=id;renderVCF(VCF_DATA[id]);}
+    else{currentDXF=id;renderDXF(DXF_DATA[id]);}
+  },600);
+}
+
+function handleDrop(e){
+  e.preventDefault();e.currentTarget.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];if(f)handleFile(f,currentParser);
+}
+function handleFile(f,type){
+  if(!f)return;
+  const isVcf=f.name.toLowerCase().endsWith('.vcf');
+  const isDxf=f.name.toLowerCase().endsWith('.dxf');
+  if(type==='vcf'&&isVcf){
+    const demo=f.size<5000?'1ks':'fluenz_l';
+    document.querySelector('.demo-pill').classList.add('active');
+    renderVCF({...VCF_DATA[demo],fname:f.name});
+  } else if(type==='dxf'&&isDxf){
+    renderDXF({...DXF_DATA['3822'],fname:f.name});
+  }
+}
+
+function switchView(parser,view,btn){
+  const prefix=parser+'-view-';
+  ['ceo','cto','design'].forEach(v=>{
+    const el=document.getElementById(prefix+v);
+    if(el)el.style.display=v===view?'':'none';
+  });
+  const panel=parser==='vcf'?document.getElementById('vcf-result'):document.getElementById('dxf-result');
+  panel.querySelectorAll('.vtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function fmtJson(obj){return JSON.stringify(obj,null,2);}
+
+function renderBar(label,val,max,cls,unit){
+  const pct=Math.round(val/max*100);
+  return `<div class="bar-wrap"><div class="bar-label"><span>${label}</span><span>${val}${unit||''}</span></div>
+  <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+}
+
+function renderVCF(d){
+  document.getElementById('vcf-fname').textContent=d.fname;
+  document.getElementById('vcf-ts').textContent=d.ts;
+  document.getElementById('vcf-status').textContent=d.status==='ok'?'✓ OK':'⚠ Varování';
+  document.getElementById('vcf-status').className='rp-badge '+(d.status==='ok'?'ok':'warn');
+
+  const k=d.kpi;
+  document.getElementById('vcf-view-ceo').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi accent"><div class="kpi-label">Čas řezu</div><div class="kpi-val">${k.cut_time}</div><div class="kpi-sub">${k.cut_time_sub}</div></div>
+      <div class="kpi"><div class="kpi-label">Aktivní dráha</div><div class="kpi-val">${k.path}</div><div class="kpi-sub">${k.path_sub}</div></div>
+      <div class="kpi"><div class="kpi-label">Rozměry</div><div class="kpi-val" style="font-size:16px">${k.panel}</div><div class="kpi-sub">${k.panel_sub}</div></div>
+      <div class="kpi ${d.status==='warn'?'warn':'ok'}"><div class="kpi-label">Rizika</div><div class="kpi-val" style="font-size:15px">${k.risk}</div><div class="kpi-sub">${k.risk_sub}</div></div>
+    </div>
+    <div class="section-label">Úspora vs. ruční odhad</div>
+    ${renderBar('Ruční odhad',d.savings.est_manual_min,d.savings.est_manual_min,' blue',' min')}
+    ${renderBar('Parser predikce',Math.round(d.meta.time_s/60*10)/10,d.savings.est_manual_min,' ok',' min')}
+    <div class="kpi-grid" style="margin-top:.75rem">
+      <div class="kpi ok"><div class="kpi-label">Úspora času</div><div class="kpi-val">${d.savings.saving_pct||37}%</div><div class="kpi-sub">vs. ruční odhad</div></div>
+      <div class="kpi"><div class="kpi-label">Hodnota zakázky</div><div class="kpi-val">~${d.savings.price_kc} Kč</div><div class="kpi-sub">dle tarifu 300 Kč/hod</div></div>
+    </div>
+    <div class="section-label" style="margin-top:.75rem">Rizika & varování</div>
+    <div class="tags-wrap">${d.tags.map(t=>{
+      const cl=t.startsWith('✓')?'ok':t.startsWith('⚠')?'warn':'info';
+      return `<span class="tag ${cl}">${t}</span>`;
+    }).join('')}</div>
+    <div class="export-row">
+      <button class="exp-btn"><i class="ti ti-download" aria-hidden="true"></i> CSV — Odoo</button>
+      <button class="exp-btn"><i class="ti ti-file" aria-hidden="true"></i> JSON report</button>
+    </div>`;
+
+  const layers=d.layers_detail;
+  document.getElementById('vcf-view-cto').innerHTML=`
+    <div class="api-box"><span class="method">POST</span> /api/v1/parse-vcf → <span class="status">200 OK</span> · engine v20 · ${(d.meta.time_s/193*1.2).toFixed(2)}s</div>
+    <div class="section-label">Vrstvy — technická specifikace</div>
+    <table class="tbl"><thead><tr><th>Vr.</th><th>Nástroj</th><th>Rychlost</th><th>H1</th><th>H2</th><th>Start ext</th><th>End ext</th><th>Délka</th><th>Operace</th></tr></thead>
+    <tbody>${layers.map(l=>`<tr><td>${l.id}</td><td>${l.tool}</td><td>${l.speed}</td><td>${l.h1}</td><td style="color:${l.h2.includes('-0.5')?'var(--sq-warn)':'inherit'}">${l.h2}</td><td>${l.start}</td><td>${l.end}</td><td>${l.len}</td><td>${l.op}</td></tr>`).join('')}</tbody></table>
+    <div class="section-label">Opakující se tvary (groups)</div>
+    <table class="tbl"><thead><tr><th>Group</th><th>Tvar</th><th>Počet</th><th>Délka</th></tr></thead>
+    <tbody>${d.groups.map(g=>`<tr><td>${g.id}</td><td>${g.shape}</td><td>${g.count}×</td><td>${g.len}</td></tr>`).join('')}</tbody></table>
+    <div class="section-label">Raw JSON výstup</div>
+    <div class="code-block">${fmtJson(d.json)}</div>`;
+
+  const sp=d.svg_paths;
+  const svgPaths=sp.map(p=>`<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.sw}" fill="${p.fill||'none'}"/>`).join('');
+  document.getElementById('vcf-view-design').innerHTML=`
+    <div class="section-label">Vizualizace řezných drah</div>
+    <svg class="svg-canvas" viewBox="0 0 220 340" height="220">${svgPaths}</svg>
+    <div class="section-label">Vrstvy</div>
+    ${layers.map((l,i)=>`<div class="layer-row">
+      <div class="layer-swatch" style="background:${['#D35400','#185fa5','#1a7a4a'][i]}"></div>
+      <span class="layer-name">Vrstva ${l.id} — ${l.tool}</span>
+      <span class="layer-detail">${l.speed} · ${l.h2}</span>
+    </div>`).join('')}
+    <div class="section-label" style="margin-top:.75rem">Materiálový list</div>
+    <table class="tbl"><thead><tr><th>Parametr</th><th>Hodnota</th></tr></thead>
+    <tbody>
+      <tr><td>Rozměry</td><td>${d.meta.dims}</td></tr>
+      <tr><td>Formát</td><td>${d.meta.format}</td></tr>
+      <tr><td>Tloušťka</td><td>${d.meta.thickness} mm</td></tr>
+      <tr><td>Počet elementů</td><td>${d.meta.elements}</td></tr>
+      <tr><td>Složitost</td><td>${d.meta.complexity}</td></tr>
+    </tbody></table>
+    <div class="export-row"><button class="exp-btn"><i class="ti ti-download" aria-hidden="true"></i> SVG export</button></div>`;
+}
+
+function renderDXF(d){
+  document.getElementById('dxf-fname').textContent=d.fname;
+  document.getElementById('dxf-ts').textContent=d.ts;
+  document.getElementById('dxf-status').textContent=d.status==='ok'?'✓ OK':'⚠ tool conflict';
+  document.getElementById('dxf-status').className='rp-badge '+(d.status==='ok'?'ok':'warn');
+
+  const k=d.kpi;
+  document.getElementById('dxf-view-ceo').innerHTML=`
+    <div class="kpi-grid">
+      <div class="kpi accent"><div class="kpi-label">Entit v souboru</div><div class="kpi-val">${k.entities}</div><div class="kpi-sub">${k.entities_sub}</div></div>
+      <div class="kpi"><div class="kpi-label">Celková dráha</div><div class="kpi-val" style="font-size:16px">${k.path}</div><div class="kpi-sub">${k.path_sub}</div></div>
+      <div class="kpi ${k.time==='?'?'warn':'ok'}"><div class="kpi-label">Predik. čas</div><div class="kpi-val">${k.time}</div><div class="kpi-sub">${k.time_sub}</div></div>
+      <div class="kpi"><div class="kpi-label">Využití desky</div><div class="kpi-val">${k.yield}</div><div class="kpi-sub">${k.yield_sub}</div></div>
+    </div>
+    <div class="section-label">Rizika & detekce</div>
+    <div class="tags-wrap">${d.tags.map(t=>{
+      const cl=t.startsWith('✓')?'ok':t.startsWith('⚠')?'warn':'info';
+      return `<span class="tag ${cl}">${t}</span>`;
+    }).join('')}</div>
+    ${d.savings.price_kc?`<div class="kpi-grid" style="margin-top:.75rem">
+      <div class="kpi ok"><div class="kpi-label">Predik. cena</div><div class="kpi-val">~${d.savings.price_kc} Kč</div><div class="kpi-sub">před vznikem VCF</div></div>
+    </div>`:''}
+    <div class="export-row">
+      <button class="exp-btn"><i class="ti ti-download" aria-hidden="true"></i> CSV — Odoo</button>
+      <button class="exp-btn"><i class="ti ti-file" aria-hidden="true"></i> ML vektor JSON</button>
+    </div>`;
+
+  document.getElementById('dxf-view-cto').innerHTML=`
+    <div class="api-box"><span class="method">POST</span> /api/v1/parse-dxf → <span class="status">200 OK</span> · indexer v2.3</div>
+    <div class="section-label">Tool assignments</div>
+    <table class="tbl"><thead><tr><th>Nástroj</th><th>Entity</th><th>Délka</th><th>Operace</th><th>Průchody</th></tr></thead>
+    <tbody>${d.tools.map(t=>`<tr><td style="font-family:var(--sq-mono);font-size:11px">${t.name}</td><td>${t.entities}</td><td>${t.len}</td><td>${t.op}</td><td>${t.passes}×${t.rotations?` · ${t.rotations} rot.`:''}</td></tr>`).join('')}</tbody></table>
+    <div class="section-label">Vrstvy (ACI barevné mapování)</div>
+    <table class="tbl"><thead><tr><th>Barva</th><th>Entity</th><th>Délka</th><th>Closed</th><th>Open</th><th>Mapped</th></tr></thead>
+    <tbody>${d.layers.map(l=>`<tr><td>${l.color}</td><td>${l.entities??'—'}</td><td>${l.len}</td><td>${l.closed??'—'}</td><td>${l.open??'—'}</td><td>${l.mapped?'✓':'✗'}</td></tr>`).join('')}</tbody></table>
+    <div class="section-label">Raw JSON (parser výstup)</div>
+    <div class="code-block">${fmtJson(d.json)}</div>`;
+
+  const sp=d.svg_paths;
+  const svgPaths=sp.map(p=>`<path d="${p.d}" stroke="${p.stroke}" stroke-width="${p.sw}" fill="${p.fill||'none'}"/>`).join('');
+  document.getElementById('dxf-view-design').innerHTML=`
+    <div class="section-label">Náhled geometrie</div>
+    <svg class="svg-canvas" viewBox="0 0 220 340" height="220">${svgPaths}</svg>
+    <div class="section-label">Barevné vrstvy (ACI)</div>
+    ${d.layers.map((l,i)=>`<div class="layer-row">
+      <div class="layer-swatch" style="background:${['#EF9F27','#1a7a4a','#444441'][i]}"></div>
+      <span class="layer-name">${l.color}</span>
+      <span class="layer-detail">${l.mapped?'mapped':'⚠ unmapped'}</span>
+    </div>`).join('')}
+    <div class="section-label" style="margin-top:.75rem">Geometrické parametry</div>
+    <table class="tbl"><thead><tr><th>Parametr</th><th>Hodnota</th></tr></thead>
+    <tbody>
+      <tr><td>Canvas</td><td>${d.meta.dims}</td></tr>
+      <tr><td>Panel typ</td><td>${d.meta.panel_type}</td></tr>
+      <tr><td>Entit</td><td>${d.meta.entities}</td></tr>
+      <tr><td>Closed loops</td><td>${d.meta.closed}</td></tr>
+      <tr><td>Open paths</td><td>${d.meta.open}</td></tr>
+    </tbody></table>`;
+}
+
+renderVCF(VCF_DATA['1ks']);
+renderDXF(DXF_DATA['3822']);
+</script>

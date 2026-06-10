@@ -1,0 +1,120 @@
+## Goal
+
+Complete rebuild of `systeq.cz` — from current beta 0.2 (dark/teal Claude-generated one-pager) to **v1.0 beta**: a multi-layer B2B/B2C web with functional drag-and-drop parsing demos (VCF post-mortem, DXF preprocessing), author presentation, and wow effect on CEO Kučva (Moodpasta). The site must serve as an **argumentation shield** for IP negotiations — it transforms the author from "former CNC operator" to "independent technology platform provider."
+
+## Instructions
+
+- **Design language is LIGHT, not dark.** The design spec (`SYSTEQ_v1.0_BETA_Graficka_esteticka_vrstva.md`) defines: off-white background (#F9F9F9), orange/amber accent (#E67E22), Space Grotesk (UI) + JetBrains Mono (data/technical), 12/8/4 responsive grid, 8px vertical rhythm. This replaces the dark/teal visual identity of beta 0.2.
+- **Parser demo = priority #1.** It must have 3 role-specific views (CEO = Kč/ROI, CTO = tables/JSON/API, Design = SVG toolpath canvas + layers) switchable via tab bar.
+- **State machine**: IDLE → FILE_SELECTED → PARSING (loading) → RESULTS (with role tabs) → ERROR (with retry + fallback demo data).
+- **No external dependencies.** Pure HTML5 + CSS3 + vanilla JS. Own inline SVG icons. Google Fonts (Space Grotesk + JetBrains Mono) via @import is allowed.
+- **Multi-layer architecture**, not one-page: `/`, `/stack`, `/parser/vcf`, `/parser/dxf`, `/author`, `/solutions/{cnc,offgrid,iot}`, `/contact`, `/docs`. Each page = single purpose.
+- **GitHub integration:** Create private repo `outpost2026/systeq-web` for version control, rollback, potential CI/CD. Never commit FTP passwords — use GitHub Secrets if automating.
+- **Backend deploy is a separate chapter.** The front-end must work with fallback "demo data" JSON responses (hardcoded in JS) until real GCP Cloud Run endpoints are deployed.
+- **High SNR** — every pixel has purpose. No carousels, no stock photos, no emoji as icons, no "under construction" badges.
+- **Contact:** phone +420 735 045 256, email ondra.sousek@gmail.com, GitHub github.com/outpost2026, LinkedIn https://www.linkedin.com/in/ondřej-soušek-ba8490414/
+
+## Discoveries
+
+- The design spec (`SYSTEQ_v1.0_BETA_Graficka_esteticka_vrstva.md`) is a **complete visual pivot** from the live beta 0.2 — light mode, orange accent. This must be validated by the user (brand decision).
+- Orange accent (#E67E22) on off-white (#F9F9F9) gives ~3.5:1 contrast — below WCAG AA (4.5:1). Use darker orange (#D35400) for small text.
+- User has NOT yet provided: (1) GCP Cloud Run endpoint URL, (2) sample JSON responses from VCF/DXF parsers, (3) off-grid system technical specs (LFP, FV), (4) Energy Hub photos. These are blocked for real demo functionality — fallback with hardcoded demo JSON for now.
+- Phone number: live site shows +420 735 045 256 (confirmed OK by user).
+- User mentioned the off-grid system details: LiFePO4 17.5 kWh (630 Ah), FV 2.4 kWp, r_int mapped at 7.86 mΩ. LFP SoC predict pipeline exists as concept on GitHub.
+- IoT repo: `Outpost-security-perimeter` — weight sensor + PIR dual-stage validation for remote property security.
+- 7 public repos on GitHub under `outpost2026` org, including `vcut-parser` (primary product), `CNC_2_LLM`, `cad2llm`, `RAG-indexer`, `Outpost-security-perimeter`, `Kazuistiky-LLM-sprint`.
+- The user is very sensitive to LLM-generated "consonant vomit" naming (reacted strongly against `trk.cz`, `pnt.cz`). Brand names must sound like real companies, not random strings.
+
+## Accomplished
+
+### Completed:
+- Initial analysis of all documentation (100+ files across 9 directories)
+- GitHub mirror integration (7 repos cross-referenced)
+- Brand/web pivot analysis → systeq.cz purchased + hosting (735 Kč)
+- Beta 0.1 `index.html` created (simple upload/parse, dark teal)
+- Prompt for Claude → **beta 0.2 deployed live** on systeq.cz (professional dark one-pager)
+- De novo brand analysis v2.0 — confirmed systeq.cz as optimal choice (96/100)
+- Meta-analysis of author's decision-making process
+- **DEV_PLAN_SYSTEQ_v1.0_BETA.md** — complete architecture plan for multi-layer web with parser demos, 3 role views, state machine, site map, tech stack, execution timeline
+- **ASSESSMENT_DESIGN_GITHUB_v1.0.md** — validation of the light/orange design concept + recommendation to create private GitHub repo
+
+### In progress / blocked:
+- Real VCF/DXF parser demo **cannot be built** without sample JSON responses from the user (promised for next session)
+- GCP Cloud Run backend deploy is a separate chapter — not started
+- Actual HTML/CSS/JS implementation of v1.0 has NOT started — still in planning phase
+- User was asked for: endpoint URL, sample JSONs, off-grid specs, Energy Hub photos
+
+### Next steps (next session):
+1. User delivers: sample JSON responses from VCF/DXF parsers + GCP endpoint info
+2. Create private GitHub repo `outpost2026/systeq-web`
+3. Generate full HTML/CSS/JS per design spec + dev plan — use Claude or equivalent
+4. Deploy to Webzdarma FTP as separate directory (e.g. `/v1.0-beta/`)
+5. Test drag-and-drop with demo JSON fallback
+6. Iterate per user feedback
+
+## Relevant files / directories
+
+```
+g:\Můj disk\Moodpasta\B2B\Dokumentace\Web\                   [Web/brand working directory]
+├── index.html                                                  [Beta 0.2 — LIVE on systeq.cz, Claude-generated dark one-pager]
+├── index_0.1.html                                              [Beta 0.1 — previous simple upload/parse version]
+├── DEV_PLAN_SYSTEQ_v1.0_BETA.md                                [📌 KEY DOC — full architecture plan for v1.0]
+├── SYSTEQ_v1.0_BETA_Graficka_esteticka_vrstva.md               [📌 KEY DOC — light/orange design spec, binding for implementation]
+├── ASSESSMENT_DESIGN_GITHUB_v1.0.md                             [Design validity assessment + GitHub recommendation]
+├── ANALYZA_BRAND_DE_NOVO_v2.0.md                                [De novo brand analysis — systeq confirmed 96/100]
+├── ANALYZA_BRAND_WEB_PIVOT_v1.0.md                              [Original brand/web pivot analysis]
+├── brand_lingvistic.md                                          [Brand naming bible, 43 variants]
+├── META_ANALYZA_ROZHODOVACI_PROCES_v1.0.md                      [Cognitive profile analysis]
+├── PROMPT_CLAUDE_LANDING_PAGE_v1.0.md                           [Prompt that generated beta 0.2]
+├── web_ui_pilot.md                                              [Original B2B web UI playbook — 188 lines]
+├── systeq_webzdarma_ui.jpg                                      [UI mockup image]
+
+g:\Můj disk\Moodpasta\B2B\Dokumentace\Smlouva_docs\            [IP & negotiation core]
+├── GROUND_TRUTH_VCF_PARSER_ORIGIN_V1.0.json                    [452 lines — full VCF parser origin story]
+├── Strategic_Redline_Defense_Framework_v2_CEO.md
+├── Opencode_artifacts\
+│   ├── Amoralni_analyza_v1.0.md                                 [Author psychological profile — fluid IQ >130]
+│   └── Synteticky_analyticky_report_v1.0.md
+├── Synopse_Sousek_moodpasta.txt
+└── O.Soušek - NDA_v2.0.txt
+
+g:\Můj disk\Moodpasta\B2B\Dokumentace\Chronicles\             [Development chronicles & CV]
+├── CV_Ondrej_Sousek_Moodpasta.md                                [Author CV — CNC + off-grid + Python]
+├── semantic_analysis_full_thread_v1.md
+├── handoff_v1.json                                              [202 lines — full user profile, contacts, strategy]
+├── status_report.txt
+├── Manifest_Od_black_box_k_transparentni_intelektualni_vyrobe.txt
+└── (30+ additional chronicle files)
+
+g:\Můj disk\Moodpasta\B2B\Dokumentace\Emaily_meetingy\         [Communication records — Moodpasta]
+├── index_Emaily_meetingy.md                                     [Full index of email/meeting files]
+├── email_ceo_NAD.txt                                            [CEO NDA proposal — critical context]
+├── Email_Kucva_predani_korpusu_tyden_02.txt
+├── brief_A_CTO_CEO.txt
+├── Souhrn_pred_meetingem.txt
+├── skill_assessment_B2B_schuzka_01.txt
+└── (15+ additional files)
+
+g:\Můj disk\Moodpasta\B2B\Dokumentace\Market_eval\             [Market analysis]
+├── Strategická analýza metropolitního trhu Praha 2026.txt       [198 lines — OPC UA, multi-tier pricing]
+├── B2B_DEV_TACTIC_2026_06_02.json
+└── (7 additional files)
+
+c:\Users\PC\Documents\Repozitar_Dev\Github\Mirror\github_mirror_v3\ [GitHub mirror — 7 private repos]
+├── master_v3_full.json
+├── repo_vcut-parser.json                                        [1082 lines — PRIMARY PRODUCT, first open-source .VCF parser]
+├── repo_CNC_2_LLM.json                                          [3295 lines — DXF → ML/ERP pipeline]
+├── repo_cad2llm.json                                            [SketchUp → JSON]
+├── repo_Kazuistiky-LLM-sprint.json                              [45-day learning methodology]
+├── repo_Outpost-security-perimeter.json                         [IoT security — weight sensor + PIR]
+├── repo_RAG-indexer.json
+└── repo_outpost2026.json                                        [Profile repo with bio]
+```
+
+### Key URLs:
+- **Live site:** https://systeq.cz/ (beta 0.2 — dark/teal, will be replaced)
+- **GitHub:** https://github.com/outpost2026 (7 repos)
+- **LinkedIn:** https://www.linkedin.com/in/ond%C5%99ej-sou%C5%A1ek-ba8490414/
+- **Hosting:** Webzdarma Základ (36 Kč/měs), FTP access via Total Commander
+- **Phone:** +420 735 045 256
+- **Email:** ondra.sousek@gmail.com

@@ -1,0 +1,3 @@
+vrstva,nastroj,rychlost_mm_s,h1_mm,h2_mm,start_ext_mm,end_ext_mm,delka_mm,operace
+1,Vibrate cutter,80,24.0,-0.5,0.0,0.0,57428.98,Průřez celou tloušťkou materiálu (through-cut)
+2,Vibrate cutter,100,0.0,0.0,0.0,0.0,4519.57,Průřez celou tloušťkou materiálu (through-cut)

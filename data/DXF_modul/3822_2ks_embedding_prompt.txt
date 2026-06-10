@@ -1,0 +1,149 @@
+# SEMANTIC EMBEDDING — Deterministic Data Audit
+
+## SOURCE
+- File: C:\Users\PC\AppData\Local\Temp\tmpx2qpdayd.dxf
+- File Name: 3822_2ks.dxf
+- MD5: 293b8b836338b5b3bea1f56674d17a4e
+- Indexer Version: 2.3.0
+- DXF Version: AC1015
+
+## 1. PROSTOROVÝ LAYOUT
+- Canvas: 1208 × 2790 mm
+- Canvas Area: 3.370 m²
+- Entity Count: 14
+- Closed loops: 4 / Open paths: 10
+- Layer count: 1
+- Spatial clusters: 1
+- Max nesting depth: 1
+- Distinct shape patterns: 6
+
+## 2. BAREVNÁ MAPA
+- ACI Color Indexy: 2, 3, 7
+
+## 3. NUMERICKÁ FAKTA — Geometrie
+- Total Path Length: 39516.8 mm = 39.52 m
+- Total Vertices: 92
+- Mean segment length: 485.8 mm
+- Point density: 2.3 pts/m
+- Closed ratio: 0.286
+
+## 4. NUMERICKÁ FAKTA — Graf
+- Nodes: 14
+- Edges — Adjacency: 2
+- Edges — Containment: 2
+- Edges — Intersection: 28
+- Edges — Proximity: 28
+- Connected components: 1
+- Max degree: 12
+- Graph diameter: 14
+
+## 5. SÉMANTICKÁ ANALÝZA
+- Panel type: cassette_panel
+- Tool conflict: True
+- Tool conflict IDs: ['E_0000', 'E_0001']
+- Zones:
+  - Z1: vertical_pattern, 4 entit, rozteč 202.67 mm, regularity=-0.414
+  - Z2: cassette_bottom, 2 entit, rozteč 608.0 mm, regularity=1.0
+
+## 6. TOOL ASSIGNMENTS (deterministické — z ACI mappingu)
+{
+  "vibrate_cutter_0deg": {
+    "entity_ids": [
+      "E_0004",
+      "E_0005"
+    ],
+    "entity_count": 2,
+    "total_length_mm": 13560.0,
+    "passes": 1,
+    "operation": "outer_format"
+  },
+  "v_slot_45deg": {
+    "entity_ids": [
+      "E_0000",
+      "E_0001",
+      "B_0002",
+      "B_0003",
+      "B_0004",
+      "B_0005",
+      "B_0006",
+      "B_0007",
+      "B_0008",
+      "B_0009",
+      "B_0010",
+      "B_0011"
+    ],
+    "entity_count": 12,
+    "single_pass_length_mm": 25956.8,
+    "double_pass_length_mm": 52009.6,
+    "passes": 2,
+    "head_rotations": 12,
+    "operation": "decorative_grooves",
+    "start_extension_mm": 2.0,
+    "end_extension_mm": 2.0
+  }
+}
+
+## 7. CUTTING TIME
+{
+  "config_feed_rate_mmps": 200,
+  "vibrate_cutter_time_s": 67.8,
+  "v_slot_time_s": 260.0,
+  "head_rotation_overhead_s": 6.0,
+  "total_time_s": 333.8
+}
+
+## 8. ML VECTOR — Vysoké SNR Featury (Tier 1)
+{
+  "entity_count": 14,
+  "closed_loop_count": 4,
+  "open_path_count": 10,
+  "total_vertices": 92,
+  "total_length_mm": 39516.76,
+  "total_sharp_corners": 0,
+  "total_direction_changes": 0,
+  "total_tac_rad": 0.0,
+  "tac_per_meter": 0.0,
+  "graph_connected_components": 1,
+  "v_slot_entity_count": 12,
+  "v_slot_double_pass_length_mm": 52009.6,
+  "head_rotation_count": 12,
+  "vibrate_cutter_length_mm": 13560.0
+}
+
+## 9. LAYER CARD — Per-Color Agregace
+{
+  "2": {
+    "color_index": "2",
+    "color_name": "Yellow",
+    "entity_count": "2",
+    "total_length_mm": "13560.0",
+    "point_density_per_meter": "1.2",
+    "closed_count": "2",
+    "open_count": "0",
+    "is_mapped": "True"
+  },
+  "3": {
+    "color_index": "3",
+    "color_name": "Green",
+    "entity_count": "10",
+    "total_length_mm": "12396.76",
+    "point_density_per_meter": "4.8",
+    "closed_count": "0",
+    "open_count": "10",
+    "is_mapped": "True"
+  },
+  "7": {
+    "color_index": "7",
+    "color_name": "Black",
+    "entity_count": "2",
+    "total_length_mm": "13560.0",
+    "point_density_per_meter": "1.2",
+    "closed_count": "2",
+    "open_count": "0",
+    "is_mapped": "True"
+  }
+}
+
+## INSTRUCTION for Multimodal LLM:
+You are analyzing a DXF CNC drawing rendered as a 2D PNG visualization.
+Use the numerical data ABOVE as ground truth.

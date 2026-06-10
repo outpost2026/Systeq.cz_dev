@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="SYSTEQ — CAM Automation Platform. Deterministic VCF/DXF parsing engine for industrial CNC workflows.">
+<title>SYSTEQ // CAM Automation Platform</title>
+<style>
+  :root {
+    --bg-deep: #0f1419;
+    --bg-panel: #1a1f2c;
+    --bg-card: #1e2433;
+    --border-subtle: #2a3344;
+    --border-active: #0d9488;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #0d9488;
+    --accent-glow: rgba(13,148,136,0.25);
+    --danger: #ef4444;
+    --success: #22c55e;
+    --warn: #f59e0b;
+    --radius: 3px;
+    --font-mono: 'Courier New', 'Consolas', 'Lucida Console', monospace;
+    --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .logo-bracket { color: var(--accent); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .header-link {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.2s;
+  }
+
+  .header-link:hover { color: var(--accent); }
+
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 6px var(--success);
+    margin-right: 0.4rem;
+    display: inline-block;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    flex: 1;
+    max-width: 960px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 3rem 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    border: 1px solid var(--border-active);
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 1.25rem;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-family: var(--font-mono);
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-tagline {
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  .upload-section h2 {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  .dropzone {
+    border: 2px dashed var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 3rem 2rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .dropzone.drag-over {
+    border-color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .dropzone.has-file {
+    border-color: var(--accent);
+    border-style: solid;
+  }
+
+  .dropzone-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    opacity: 0.6;
+  }
+
+  .dropzone-text {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.03em;
+  }
+
+  .dropzone-formats {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  .dropzone input[type="file"] { display: none; }
+
+  .file-name {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 0.75rem;
+    word-break: break-all;
+    display: none;
+  }
+
+  .file-name.visible { display: block; }
+
+  .upload-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 0.6rem 1.5rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .btn:hover:not(:disabled) {
+    border-color: var(--text-secondary);
+    color: var(--text-primary);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #0faa9d;
+    border-color: #0faa9d;
+    color: #fff;
+  }
+
+  .btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .btn-clear {
+    border-color: transparent;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+  }
+
+  .btn-clear:hover:not(:disabled) {
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+
+  /* ── STATUS MESSAGE ── */
+  .status-msg {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 1rem;
+    min-height: 1.2em;
+    transition: color 0.2s;
+  }
+
+  .status-msg.loading { color: var(--warn); }
+  .status-msg.error { color: var(--danger); }
+  .status-msg.success { color: var(--success); }
+
+  /* ── RESULTS ── */
+  .results-section { display: none; }
+
+  .results-section.visible {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+
+  .result-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .result-card .label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .result-card .value {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+
+  .result-card .unit {
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-left: 0.2rem;
+  }
+
+  .result-card .detail {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  .result-card .detail-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+  }
+
+  .result-card .detail-row .key { color: var(--text-muted); }
+  .result-card .detail-row .val { color: var(--text-primary); }
+
+  /* ── META TABLE ── */
+  .meta-section { display: none; }
+
+  .meta-section.visible {
+    display: block;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .meta-section h3 {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.4rem 1.5rem;
+  }
+
+  .meta-grid .row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    padding: 0.3rem 0;
+    border-bottom: 1px solid rgba(42,51,68,0.5);
+  }
+
+  .meta-grid .k { color: var(--text-muted); }
+  .meta-grid .v { color: var(--text-primary); font-weight: 500; }
+
+  /* ── CAPABILITIES ── */
+  .capabilities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .cap-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+  }
+
+  .cap-card h3 {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .cap-card p {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border-subtle);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .footer-text {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+  }
+
+  .footer-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+    margin-right: 0.35rem;
+    vertical-align: middle;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .header, .footer { padding: 0 1rem; }
+    .main { padding: 2rem 1rem 3rem; gap: 2rem; }
+    .hero h1 { font-size: 1.8rem; }
+    .dropzone { padding: 2rem 1rem; }
+    .upload-actions { flex-direction: column; align-items: stretch; }
+    .results-section.visible { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <a href="/" class="logo">
+    <span class="logo-bracket">[</span> SYSTEQ <span class="logo-bracket">]</span>
+  </a>
+  <nav class="header-right">
+    <span class="header-link"><span class="status-dot"></span>API ONLINE</span>
+    <span class="header-link">v1.0</span>
+  </nav>
+</header>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">B2B Industrial Core</div>
+    <h1>CAM <span>Automation</span> Platform</h1>
+    <p class="hero-tagline">
+      Deterministic parsing engine for proprietary CNC formats. Raw VCF/DXF → structured ERP-ready JSON.
+    </p>
+  </section>
+
+  <!-- UPLOAD -->
+  <section class="upload-section" id="uploadSection">
+    <h2>▸ Parse a File</h2>
+    <div class="dropzone" id="dropzone">
+      <span class="dropzone-icon">⬇</span>
+      <p class="dropzone-text">Drop your file here or click to browse</p>
+      <p class="dropzone-formats">.VCF &nbsp; .DXF</p>
+      <input type="file" id="fileInput" accept=".vcf,.dxf">
+    </div>
+    <p class="file-name" id="fileName"></p>
+    <div class="upload-actions">
+      <button class="btn btn-clear" id="btnClear" disabled>✕ Clear</button>
+      <button class="btn btn-primary" id="btnParse" disabled>▶ Parse File</button>
+    </div>
+    <p class="status-msg" id="statusMsg"></p>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="results-section" id="resultsSection">
+    <div class="result-card">
+      <span class="label">Cut Time</span>
+      <span class="value" id="resCutTime">—</span>
+      <span class="detail" id="resCutDetail"></span>
+    </div>
+    <div class="result-card">
+      <span class="label">Waste Factor</span>
+      <span class="value" id="resWaste">—</span>
+      <span class="detail" id="resWasteDetail"></span>
+    </div>
+    <div class="result-card">
+      <span class="label">Velocity Profile</span>
+      <span class="value" id="resVelocity">—</span>
+      <div class="detail" id="resVelDetail"></div>
+    </div>
+  </section>
+
+  <!-- META -->
+  <section class="meta-section" id="metaSection">
+    <h3>▸ Parse Metadata</h3>
+    <div class="meta-grid" id="metaGrid"></div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section class="capabilities">
+    <div class="cap-card">
+      <h3>└─ VCF Reverse Engineering</h3>
+      <p>Binary protocol dissection for industrial cutting machines. Extracts toolpaths, velocities, and segment geometry from proprietary .VCF format.</p>
+    </div>
+    <div class="cap-card">
+      <h3>└─ DXF → CAM Pipeline</h3>
+      <p>Deterministic conversion of design-layer DXF into structured machine instructions. Zero hallucination, full geometric fidelity.</p>
+    </div>
+    <div class="cap-card">
+      <h3>└─ ERP Integration Bridge</h3>
+      <p>REST API delivering JSON payloads directly consumable by Odoo and other ERP systems. No manual re-entry, no format friction.</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer class="footer">
+  <span class="footer-text"><span class="footer-dot"></span> Engine: v18.3 deterministic</span>
+  <span class="footer-text">SYSTEQ © 2026</span>
+</footer>
+
+<!-- ── SCRIPT ── -->
+<script>
+(function() {
+  'use strict';
+
+  const API_ENDPOINT = 'YOUR_CLOUD_RUN_URL/api/v1/parse-vcf';
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const fileName = document.getElementById('fileName');
+  const btnClear = document.getElementById('btnClear');
+  const btnParse = document.getElementById('btnParse');
+  const statusMsg = document.getElementById('statusMsg');
+  const resultsSection = document.getElementById('resultsSection');
+  const metaSection = document.getElementById('metaSection');
+  const metaGrid = document.getElementById('metaGrid');
+
+  let selectedFile = null;
+
+  /* ── DROPZONE EVENTS ── */
+  dropzone.addEventListener('click', function() {
+    fileInput.click();
+  });
+
+  dropzone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    dropzone.classList.add('drag-over');
+  });
+
+  dropzone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+  });
+
+  dropzone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    var files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFile(files[0]);
+    }
+  });
+
+  fileInput.addEventListener('change', function() {
+    if (fileInput.files.length > 0) {
+      handleFile(fileInput.files[0]);
+    }
+  });
+
+  function handleFile(file) {
+    var name = file.name.toLowerCase();
+    if (!name.endsWith('.vcf') && !name.endsWith('.dxf')) {
+      setStatus('Unsupported format. Please upload .VCF or .DXF', 'error');
+      return;
+    }
+    selectedFile = file;
+    fileName.textContent = 'Selected: ' + file.name;
+    fileName.classList.add('visible');
+    dropzone.classList.add('has-file');
+    btnParse.disabled = false;
+    btnClear.disabled = false;
+    setStatus('Ready to parse', '');
+    hideResults();
+  }
+
+  /* ── BUTTONS ── */
+  btnClear.addEventListener('click', resetUpload);
+
+  btnParse.addEventListener('click', function() {
+    if (!selectedFile) return;
+    parseFile();
+  });
+
+  function resetUpload() {
+    selectedFile = null;
+    fileInput.value = '';
+    fileName.textContent = '';
+    fileName.classList.remove('visible');
+    dropzone.classList.remove('has-file');
+    btnParse.disabled = true;
+    btnClear.disabled = true;
+    setStatus('', '');
+    hideResults();
+  }
+
+  /* ── API CALL ── */
+  async function parseFile() {
+    btnParse.disabled = true;
+    setStatus('Parsing...', 'loading');
+
+    var formData = new FormData();
+    formData.append('file', selectedFile);
+
+    try {
+      var response = await fetch(API_ENDPOINT, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        var errText = await response.text();
+        throw new Error(errText || 'HTTP ' + response.status);
+      }
+
+      var data = await response.json();
+      renderResults(data);
+      setStatus('Parse complete', 'success');
+    } catch (err) {
+      setStatus('Error: ' + err.message, 'error');
+    } finally {
+      btnParse.disabled = false;
+    }
+  }
+
+  /* ── RENDER ── */
+  function renderResults(data) {
+    var ct = data.cut_time_s;
+    var waste = data.waste_factor_pct;
+    var vel = data.velocity_profile;
+
+    /* Card 1: Cut Time */
+    var ctEl = document.getElementById('resCutTime');
+    var ctDetail = document.getElementById('resCutDetail');
+    if (ct !== undefined && ct !== null) {
+      ctEl.innerHTML = formatNum(ct) + '<span class="unit">s</span>';
+      var min = ct / 60;
+      ctDetail.textContent = formatNum(min) + ' min total cutting time';
+    } else {
+      ctEl.textContent = '—';
+      ctDetail.textContent = 'Not available in payload';
+    }
+
+    /* Card 2: Waste Factor */
+    var wEl = document.getElementById('resWaste');
+    var wDetail = document.getElementById('resWasteDetail');
+    if (waste !== undefined && waste !== null) {
+      wEl.innerHTML = formatNum(waste) + '<span class="unit">%</span>';
+      wDetail.textContent = waste < 5 ? 'Excellent material efficiency' : waste < 15 ? 'Acceptable yield' : 'Review nesting layout';
+    } else {
+      wEl.textContent = '—';
+      wDetail.textContent = 'Not available in payload';
+    }
+
+    /* Card 3: Velocity Profile */
+    var vEl = document.getElementById('resVelocity');
+    var vDetail = document.getElementById('resVelDetail');
+    if (vel) {
+      if (typeof vel === 'object') {
+        vEl.textContent = vel.mode || vel.label || '—';
+        var rows = '';
+        for (var k in vel) {
+          if (vel.hasOwnProperty(k) && typeof vel[k] !== 'object') {
+            rows += '<div class="detail-row"><span class="key">' + escapeHtml(k) + '</span><span class="val">' + escapeHtml(String(vel[k])) + '</span></div>';
+          }
+        }
+        vDetail.innerHTML = rows || 'Profile attached';
+      } else {
+        vEl.textContent = String(vel);
+        vDetail.textContent = 'Velocity value';
+      }
+    } else {
+      vEl.textContent = '—';
+      vDetail.textContent = 'Not available in payload';
+    }
+
+    /* Meta grid */
+    var metaItems = {};
+    if (data.version) metaItems['Parser Version'] = data.version;
+    if (data.file_type) metaItems['File Type'] = data.file_type;
+    if (data.segment_count !== undefined) metaItems['Segments'] = data.segment_count;
+    if (data.tool_count !== undefined) metaItems['Tools'] = data.tool_count;
+    if (data.parse_time_ms !== undefined) metaItems['Parse Time'] = data.parse_time_ms + ' ms';
+    if (data.bbox) metaItems['Bounding Box'] = typeof data.bbox === 'object' ? JSON.stringify(data.bbox) : String(data.bbox);
+    metaItems['Timestamp'] = new Date().toISOString();
+
+    metaGrid.innerHTML = '';
+    for (var key in metaItems) {
+      if (metaItems.hasOwnProperty(key)) {
+        metaGrid.innerHTML += '<div class="row"><span class="k">' + escapeHtml(key) + '</span><span class="v">' + escapeHtml(String(metaItems[key])) + '</span></div>';
+      }
+    }
+
+    if (Object.keys(metaItems).length > 0) {
+      metaSection.classList.add('visible');
+    } else {
+      metaSection.classList.remove('visible');
+    }
+
+    resultsSection.classList.add('visible');
+  }
+
+  function hideResults() {
+    resultsSection.classList.remove('visible');
+    metaSection.classList.remove('visible');
+  }
+
+  function setStatus(text, cls) {
+    statusMsg.textContent = text;
+    statusMsg.className = 'status-msg ' + cls;
+  }
+
+  function formatNum(n) {
+    if (typeof n === 'number') {
+      return Number.isInteger(n) ? String(n) : n.toFixed(2);
+    }
+    return String(n);
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+})();
+</script>
+
+</body>
+</html>
