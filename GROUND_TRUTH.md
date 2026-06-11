@@ -223,7 +223,7 @@ web_integrace_systeq/
 | vcut-parser | github.com/outpost2026/vcut-parser |
 | CNC_2_LLM | github.com/outpost2026/CNC_2_LLM |
 | cad2llm | github.com/outpost2026/cad2llm |
-| Autor | ondra.sousek@gmail.com, +420 735 052 56 |
+| Autor | sousek@systeq.cz, +420 735 045 256 |
 | Web hosting | Webzdarma (FTP) — doména systeq.cz |
 
 ---

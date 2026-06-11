@@ -12,7 +12,7 @@ Complete rebuild of `systeq.cz` — from current beta 0.2 (dark/teal Claude-gene
 - **GitHub integration:** Create private repo `outpost2026/systeq-web` for version control, rollback, potential CI/CD. Never commit FTP passwords — use GitHub Secrets if automating.
 - **Backend deploy is a separate chapter.** The front-end must work with fallback "demo data" JSON responses (hardcoded in JS) until real GCP Cloud Run endpoints are deployed.
 - **High SNR** — every pixel has purpose. No carousels, no stock photos, no emoji as icons, no "under construction" badges.
-- **Contact:** phone +420 735 045 256, email ondra.sousek@gmail.com, GitHub github.com/outpost2026, LinkedIn https://www.linkedin.com/in/ondřej-soušek-ba8490414/
+- **Contact:** phone +420 735 045 256, email sousek@systeq.cz, GitHub github.com/outpost2026, LinkedIn https://www.linkedin.com/in/ondřej-soušek-ba8490414/
 
 ## Discoveries
 
@@ -117,4 +117,4 @@ c:\Users\PC\Documents\Repozitar_Dev\Github\Mirror\github_mirror_v3\ [GitHub mirr
 - **LinkedIn:** https://www.linkedin.com/in/ond%C5%99ej-sou%C5%A1ek-ba8490414/
 - **Hosting:** Webzdarma Základ (36 Kč/měs), FTP access via Total Commander
 - **Phone:** +420 735 045 256
-- **Email:** ondra.sousek@gmail.com
+- **Email:** sousek@systeq.cz
