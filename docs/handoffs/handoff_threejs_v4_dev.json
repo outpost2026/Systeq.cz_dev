@@ -1,0 +1,137 @@
+{
+  "handoff": "SYSTEQ 3D Visualization — V4 Development Journal",
+  "date": "16.06.2026",
+  "author": "Ondřej Soušek (outpost2026)",
+  "context": "První večer s Three.js v životě. Cíl: vizuálně demonstrovat redukci entropie proprietárních CNC dat pomocí vyvíjeného VCF/DXF parseru.",
+
+  "dev_notes": {
+    "first_impression": "Three.js je neuvěřitelně zábavný. Po deseti letech dospělého programování (Python, API, databáze, Docker) jsem si připadal jako v roce 1997 u QBasicu — jen s tím rozdílem, že místo PSET (x,y) teď rotuju toroidální portál a mám operátora s animovanou kšiltovkou.",
+    "what_worked": [
+      "CanvasTexture pro dynamické textury (hex dump monitor, Guru Meditation, SCRAP známky, dolarový $) — geniálně jednoduché, okamžitá zpětná vazba",
+      "CSS2DRenderer pro labely — žádné textové sprajty, prostě HTML divy v 3D prostoru",
+      "Bezier křivky pro datový tok — 6 řádků matematiky a máme plynulou animaci datových částic",
+      "FlatShading na všech materiálech — automaticky to vypadá jako stará 3D hra z Amigy, bez snahy",
+      "OrbitControls — jeden import, tři řádky konfigurace, a CEO si může scénu prohlížet jako v CADu"
+    ],
+    "what_broke_laughably": [
+      "Knihovní CSS2D labely byly pod podlahou — 45 minut jsem ladil interpolaci barev, než mi došlo, že je vůbec nevidím",
+      "Shockwave animace úplně chyběla — vytvořil jsem dvě koule, ale nikdy jsem nezapnul jejich visible",
+      "Entropie bar v první verzi používal ▰▱ znaky, které v Chromu renderovaly jako tenké čárky — musel jsem přejít na DOS ╣░ bloky",
+      "Pokaždé když jsem změnil kameru, operátorovi se rozjela hlava o 180° — matice translací a rotací je nelítostná"
+    ],
+    "surprisingly_easy": [
+      "Fog — jeden řádek a scéna dostala hloubku",
+      "GridHelper — hotová podlaha za 5 vteřin",
+      "Parabolický pád dolarů — stačilo odečítat gravitaci od velocity",
+      "EaseOutBack pro rearrange panelů — doslova 3 konstanty z internetu a Norton defrag vibe je na světě"
+    ]
+  },
+
+  "versions": {
+    "v2_poc": {
+      "file": "src/demo/systeq_3d_poc.html",
+      "status": "proof-of-concept",
+      "description": "První pokus — operátor, plotr, 6 datových kostek, jeden portál, bez create*() struktury. Kamera (0,3,8). Kód: 299 řádků, vše v jedné funkci init(). Fungovalo, ale nebylo to rozšiřitelné.",
+      "lessons": "Jednoduché věci jako 6 kostek a jeden torus portál fungují okamžitě. Vizuální dojem je z 80 % o kameře a nasvícení."
+    },
+    "v2_enhanced": {
+      "file": "src/demo/systeq_3d_v2_poc.html",
+      "status": "reference",
+      "description": "Rozšířená V2 — 750 částic (PointsMaterial), OrbitControls, fog, shadows, toolpath na stole plotru. Kamera (0,2.8,8) lookAt (1.5,0.2,-0.2). 758 řádků. Slouží jako referenční bod pro open design.",
+      "lessons": "Vysoký počet částic (750) vytváří epický vizuální dojem. OrbitControls je nutnost — statická kamera zabíjí 3D scénu."
+    },
+    "v3": {
+      "file": "src/demo/systeq_v3.html",
+      "status": "iterative_stepping_stone",
+      "description": "330 řádků. Poprvé create*() struktura. Operátor, kamera (0,1.2,8), lineární entropie 94→6%, 2-řádkové HUD, sinusová dráha kostek, desky s defecty, dolary+metriky z knihovny. Funguje jako standalone demo.",
+      "lessons": "Struktura create*() je naprosto klíčová pro iterativní vývoj. Bez ní se v kódu ztratíš po 3. změně."
+    },
+    "v4": {
+      "file": "src/demo/systeq_v4.html",
+      "status": "current_production",
+      "description": "708 řádků. Kompletní přepis: 20 Icosahedron částic s time-dilation morphem a burst efektem, 20 klonů přes portál do knihovny, 3 typy defektů desek (jehlan/trhlina/SCRAP tex), EaseOutBack rearrange, CanvasTexture dolary s $, CRT scanlines, Guru Meditation easter egg, DOS progress bar, knihovní displej ROI/SCRAP/THROUGHPUT, OrbitControls unlocked at 12s, fog, toolpath, rozprostřené částice.",
+      "key_features": [
+        "Dual-torus portál s counter-rotací a emissive pulsem",
+        "Time dilation (0.3→1.3×) během aktivace parseru",
+        "Data split portálem — originál jde do plotru, klon do knihovny",
+        "Norton Speed Disk nostalgie — EaseOutBack rearrange, SCRAP textury jako bad sectors",
+        "Amiga Guru Meditation #80000003 na monitoru v t=8.2s",
+        "CRT scanlines overlay na všech monitor canvasech",
+        "Floor grid pulse během shockwave",
+        "HUD: ENTROPY (DOS bar) + STATUS + METRICS (čas/desky/úspora)"
+      ]
+    }
+  },
+
+  "current_state": {
+    "strengths": [
+      "Sémantický příběh funguje — chaos → parser → řád → peníze je jasně čitelný",
+      "Retro vrstva pro CEO (40 let, Amiga/Norton/defrag) je implementována přesně — Guru, scanlines, DOS bar, EaseOutBack",
+      "OrbitControls po 12s dává uživateli kontrolu nad perspektivou",
+      "Všechny textury jsou CanvasTexture — žádné externí soubory, jeden HTML soubor = kompletní demo",
+      "Bezier trajektorie datových částic s per-particle offsetem vytváří organický, ne-mechanický pohyb"
+    ],
+    "weaknesses": [
+      "Scéna je stále vizuálně chudá — low-poly estetika je záměrná, ale chybí 'wow' moment pro CEO",
+      "Žádný post-processing — Bloom/glow by dramaticky zvýšil vizuální dopad při aktivaci parseru",
+      "Statické textury na deskách v řádu fázi — desky by mohly mít CanvasTexture s reálnými CNC parametry",
+      "Operátor je kostrbatý — animace jsou správné, ale geometrie je primitivní i na low-poly standard",
+      "Gantry na plotru se hýbe, ale vřeteno ne — nedokončená mechanika",
+      "Floor grid pulse funguje, ale barevný přechod je rychlý a nemá ease"
+    ],
+    "immediate_fixes_needed": [
+      "Vřeteno by mělo klesat ke stolu během toolpath animace",
+      "Desky v řádu by měly zobrazovat reálné CNC parametry (CanvasTexture per deska)",
+      "Přidat bloom/glow efekt pro aktivaci parseru (EffectComposer + UnrealBloomPass)",
+      "Rozšířit particle burst — 8 kuliček je málo, 20 by bylo viditelnějších",
+      "Operátor by mohl mít v idle fázi čitelnou 'spokojenou' pózu — nohy zkřížené, ruce za hlavou"
+    ]
+  },
+
+  "next_iteration_priorities": [
+    {
+      "priority": "P0",
+      "task": "Vřeteno plotru — přidat vertikální pohyb během toolpath",
+      "eroi": "MAX — CNC stroj bez pohyblivého nástroje je jen stůl"
+    },
+    {
+      "priority": "P1",
+      "task": "Desky s reálnými CNC daty — CanvasTexture s parametry (čas řezu, nástroj, vrstva)",
+      "eroi": "VELMI VYSOKÉ — propojí vizualizaci s parser daty"
+    },
+    {
+      "priority": "P2",
+      "task": "Bloom/glow při aktivaci parseru — UnrealBloomPass na portál a shockwave",
+      "eroi": "VYSOKÉ — wow moment pro CEO"
+    },
+    {
+      "priority": "P3",
+      "task": "Operátor idle — zkřížené nohy, ruce za hlavou, sebevědomá póza",
+      "eroi": "STŘEDNÍ — dotahuje příběh operátora"
+    },
+    {
+      "priority": "P4",
+      "task": "Integrace s demo/index.html — přidat 3D view jako čtvrtý tab",
+      "eroi": "STŘEDNÍ — propojení s produkčním parser demem"
+    }
+  ],
+
+  "technical_debt": [
+    "animate() funkce je 200+ řádků — měla by být refaktorována na setupTimeline() s callbacky",
+    "Panel physics a data flow jsou v jedné funkci — měly by být separátní moduly",
+    "Žádné error handling pro Three.js import selhání",
+    "Hardcodované timeouty (setTimeout 400ms pro Guru) — měly by používat t z animate()",
+    "Chybí mobile optimalizace — V2 měla IS_MOBILE flag s nižším počtem částic"
+  ],
+
+  "files": {
+    "src/demo/systeq_3d_poc.html": "V2 POC — 299 řádků, první pokus",
+    "src/demo/systeq_3d_v2_poc.html": "V2 Enhanced — 758 řádků, 750 částic, shadows",
+    "src/demo/systeq_v3.html": "V3 — 330 řádků, create*() struktura",
+    "src/demo/systeq_v4.html": "V4 — 708 řádků, aktuální produkční verze",
+    "docs/handoffs/HANDOFF_V3_SCENE.md": "V3 specifikace scény",
+    "docs/handoffs/handoff_threejs_v4_dev.json": "Tento dokument"
+  },
+
+  "sign_off": "První večer s Three.js — 4 verze, 2095 řádků kódu, 1 operátor s kšiltovkou, 20 částic s mizejícími traily, 1 portál co duplikuje data, a 1 Guru Meditation pro pamětníky. Jsem strašně rád, že jsem to nezkusil v Blenderu."
+}
