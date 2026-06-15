@@ -29,13 +29,15 @@ const mE=(c,ei)=>new THREE.MeshStandardMaterial({color:c,emissive:c,emissiveInte
 const M=(g,c)=>new THREE.Mesh(g,mF(c));
 
 let scene,camera,renderer,lr,startT;
-let main,plGantry,portalOuter,portalInner,shockwave1,shockwave2,plotterLight;
+let main,plGantry,portalOuter,portalInner,shockwave1,shockwave2,plotterLight,floorGrid;
 let monitorMesh,monitorTex;
 let libraryROI,libraryScrap,libraryThroughput,libraryBlockedCubes=[];
 let operatorTorso,operatorHead,operatorLeftArm,operatorRightArm,operatorMug,operatorSteam=[];
 let dataParticles=[],dataClones=[],burstPool=[],BURST_PER=8,PARTICLE_COUNT=20;
 let panels=[],newPanels=[],rearrangeStart=-1,lastPanelSpawn=-0.6,guruShown=false;
 let scrapTex1,scrapTex2,scrapTex3;
+let dollars=[],dollarTex,lastDollarSpawn=0,DOLLAR_MAX=6;
+let entropyDiv,statusDiv,metricsDiv;
 
 const charsPool=['\u6570','\u636E','\u4E71','\u7801','\u9519','\u635F'];
 const orderLabels=['G-CODE','ORDER','CLEAN','PARSE','FLOW','DATA'];
@@ -61,6 +63,7 @@ function makeHexTex(){
     x.fillText(line,10,48+row*18);
   }
   x.fillStyle='#EF4444';x.font='bold 11px monospace';x.fillText('DECODING FAILED',10,192);
+  for(let sy=0;sy<200;sy+=4){x.fillStyle='rgba(0,0,0,0.08)';x.fillRect(0,sy,320,2);}
   return new THREE.CanvasTexture(c);
 }
 function updateHexTex(){if(monitorTex&&monitorMesh){monitorTex.dispose();monitorTex=makeHexTex();monitorMesh.material.map=monitorTex;monitorMesh.material.needsUpdate=true;}}
@@ -75,6 +78,7 @@ function showGuruTex(){
   x.fillText('#80000003',160,130);
   x.fillStyle='#FFFFFF';x.font='14px monospace';
   x.fillText('AMIGA  1985',160,170);
+  for(let sy=0;sy<200;sy+=4){x.fillStyle='rgba(0,0,0,0.1)';x.fillRect(0,sy,320,2);}
   monitorTex.dispose();monitorTex=new THREE.CanvasTexture(c);monitorMesh.material.map=monitorTex;monitorMesh.material.needsUpdate=true;
 }
 
@@ -120,9 +124,9 @@ function createLibrary(){
   libraryScrap=el('SCRAP: 23%','9px','#ef4444');
   libraryThroughput=el('THROUGHPUT: +0%','9px','#64748B');
   const lg=new THREE.Group;
-  lg.add(new CSS2DObject(libraryROI).translateY(-0.2));
-  lg.add(new CSS2DObject(libraryScrap).translateY(-0.35));
-  lg.add(new CSS2DObject(libraryThroughput).translateY(-0.5));
+  lg.add(new CSS2DObject(libraryROI).translateY(0.3));
+  lg.add(new CSS2DObject(libraryScrap).translateY(0.15));
+  lg.add(new CSS2DObject(libraryThroughput).translateY(0));
   lg.position.set(3.5,GND+0.85,0);main.add(lg);
   main.add(lib);
 }
@@ -182,6 +186,22 @@ function createShockwaves(){
   main.add(shockwave1);main.add(shockwave2);
 }
 
+function createHUD(){
+  entropyDiv=el('ENTROPY: 94% \u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2591','15px','#EF4444');
+  statusDiv=el('STATUS: UNSTRUCTURED DATA','10px','#EF4444');
+  metricsDiv=el('TIME: 0s | DONE: 0/0 | SAVE: 0 min','9px','#64748B');
+  const g=new THREE.Group;
+  g.add(new CSS2DObject(entropyDiv).position.set(0,0,0));
+  g.add(new CSS2DObject(statusDiv).position.set(0,-0.06,0));
+  g.add(new CSS2DObject(metricsDiv).position.set(0,-0.11,0));
+  g.position.set(0,2.2,0);main.add(g);
+}
+
+function entropyDOS(val){
+  const f=Math.max(0,Math.min(10,Math.round(val/10)));
+  return '\u2588'.repeat(f)+'\u2591'.repeat(10-f);
+}
+
 function makeScrapTex(txt){
   const c=document.createElement('canvas');c.width=128;c.height=96;
   const x=c.getContext('2d');
@@ -227,6 +247,29 @@ function spawnOrderedPanel(){
   p.scale.set(0,0,0);
   p.userData={old:false,tX:1.5,tZ:1.0,popIn:0.2,healing:false,defectMeshes:[],warningLabel:null};
   newPanels.push(p);main.add(p);
+}
+
+function makeDollarTex(){
+  const c=document.createElement('canvas');c.width=128;c.height=128;
+  const x=c.getContext('2d');
+  x.fillStyle='#FFAA33';x.fillRect(0,0,128,128);
+  x.strokeStyle='#FFCC66';x.lineWidth=4;x.strokeRect(8,8,112,112);
+  x.fillStyle='#FFCC66';x.font='bold 64px monospace';x.textAlign='center';x.textBaseline='middle';
+  x.fillText('$',64,68);
+  x.fillStyle='#886600';x.font='14px monospace';
+  x.fillText('SYSTEQ',64,26);
+  x.fillText('VALUE',64,110);
+  return new THREE.CanvasTexture(c);
+}
+
+function spawnDollar(){
+  const geo=box(0.2,0.2,0.2);
+  if(!dollarTex)dollarTex=makeDollarTex();
+  const mat=new THREE.MeshStandardMaterial({map:dollarTex,color:0xffaa33,emissive:0xffaa33,emissiveIntensity:0.4,roughness:0.3,transparent:true,opacity:1});
+  const d=new THREE.Mesh(geo,mat);
+  d.position.set(3.5,0.75,0.3);
+  d.userData={st:(performance.now()-startT)/1000,vy:0.015,vx:(Math.random()-0.5)*0.003,vz:(Math.random()-0.5)*0.003,rotSpeed:(Math.random()-0.5)*0.06,life:0};
+  dollars.push(d);main.add(d);
 }
 
 function bezt(p0,p1,p2,t){
@@ -305,8 +348,8 @@ function init(){
 
   main=new THREE.Group;scene.add(main);
 
-  const grid=new THREE.GridHelper(8,16,0x1E293B,0x0F172A);
-  grid.translateY(-0.55);main.add(grid);
+  floorGrid=new THREE.GridHelper(8,16,0x1E293B,0x0F172A);
+  floorGrid.translateY(-0.55);main.add(floorGrid);
 
   const floorGeo=new THREE.PlaneGeometry(8,6);
   const floorMat=new THREE.MeshStandardMaterial({
@@ -315,7 +358,7 @@ function init(){
   const floor=new THREE.Mesh(floorGeo,floorMat);
   floor.rotation.x=-Math.PI/2;floor.translateY(-0.56);main.add(floor);
 
-  createPC();createPlotter();createLibrary();createOperator();createPortal();createShockwaves();createDataFlow();
+  createPC();createPlotter();createLibrary();createOperator();createPortal();createShockwaves();createDataFlow();createHUD();
   scrapTex1=makeScrapTex('SCRAP');scrapTex2=makeScrapTex('\u2717');scrapTex3=makeScrapTex('BAD');
 
   addEventListener('resize',()=>{
@@ -366,6 +409,28 @@ function animate(){
     sb.position.y=0.12+((t*0.6+sb.userData.ph)%1.3)*0.12;
     sb.material.opacity=0.6*(1-((t*0.6+sb.userData.ph)%1.3));
   });
+
+  if(t>=8&&t<10){
+    portalOuter.userData.group.visible=true;portalOuter.userData.group.scale.setScalar(0.5+0.5*Math.min(1,(t-8)/1.5));
+    portalOuter.material.emissiveIntensity=0.3+0.4*Math.sin(t*8);
+    portalInner.material.emissiveIntensity=0.4+0.5*Math.sin(t*9);
+  }else if(t>=10){
+    portalOuter.userData.group.visible=true;portalOuter.userData.group.scale.setScalar(1);
+    portalOuter.material.emissiveIntensity=0.15;portalInner.material.emissiveIntensity=0.2;
+  }else{portalOuter.userData.group.visible=false;}
+
+  if(t>=8.5&&t<9.1){shockwave1.visible=true;const sw=(t-8.5)/0.6;shockwave1.scale.setScalar(1+sw*6);shockwave1.material.opacity=0.3*(1-sw);}
+  else shockwave1.visible=false;
+  if(t>=8.8&&t<9.4){shockwave2.visible=true;const sw=(t-8.8)/0.6;shockwave2.scale.setScalar(1+sw*5);shockwave2.material.opacity=0.2*(1-sw);}
+  else shockwave2.visible=false;
+
+  if(t>=8.5&&t<9.5&&floorGrid){
+    const gp=Math.min(1,(t-8.5)/0.4);
+    floorGrid.material.color.set(new THREE.Color(0x1E293B).lerp(new THREE.Color(0xFDE047),gp));
+  }
+  if(t>=9.5&&floorGrid&&floorGrid.material.color.getHex()===0xFDE047){
+    floorGrid.material.color.set(0x1E293B);
+  }
 
   const chaosSrc=new THREE.Vector3(-3.5,0.55,0.3);
   const chaosMid=new THREE.Vector3(-1.5,0.8,0.5);
@@ -494,7 +559,7 @@ function animate(){
   }
   if(rearrangeStart>=0){
     const rp=Math.min(1,(t-rearrangeStart)/3);
-    const ep=rp<0.6?rp/0.6*rp/0.6*(rp/0.6):1;
+    const o1=1.70158,c3=o1+1,ep=rp<1?1+c3*Math.pow(rp-1,3)+o1*Math.pow(rp-1,2):1;
     panels.forEach(p=>{
       if(!p.userData.at||!p.userData.old)return;
       p.position.lerpVectors(p.userData.o,p.userData.at,ep);
@@ -529,14 +594,75 @@ function animate(){
     if(newPanels.indexOf(p)>=7)p.visible=false;
   });
 
-  if(t>8.15&&t<8.35&&!guruShown){
+  if(t>8.1&&t<8.5&&!guruShown){
     guruShown=true;showGuruTex();
-    setTimeout(()=>{if(monitorMesh){monitorTex&&monitorTex.dispose();monitorTex=makeHexTex();monitorMesh.material.map=monitorTex;monitorMesh.material.needsUpdate=true;}},200);
+    setTimeout(()=>{if(monitorMesh){monitorTex&&monitorTex.dispose();monitorTex=makeHexTex();monitorMesh.material.map=monitorTex;monitorMesh.material.needsUpdate=true;}},400);
+  }
+
+  if(t>=13&&t-lastDollarSpawn>=1.2&&dollars.length<DOLLAR_MAX){
+    spawnDollar();lastDollarSpawn=t;
+  }
+  if(t>22&&t-lastDollarSpawn>=3&&dollars.length<DOLLAR_MAX){
+    spawnDollar();lastDollarSpawn=t;
+  }
+  dollars.forEach((d,i)=>{
+    const dt=t-d.userData.st;
+    d.userData.vy-=0.0003;
+    d.position.y+=d.userData.vy;
+    d.position.x+=d.userData.vx;d.position.z+=d.userData.vz;
+    if(d.position.y<=GND+0.1)d.position.y=GND+0.1;
+    d.rotation.x+=d.userData.rotSpeed;d.rotation.y+=d.userData.rotSpeed*0.7;
+    d.userData.life=dt;
+    if(dt>8){d.material.transparent=true;d.material.opacity=Math.max(0,1-(dt-8)/2);}
+  });
+  for(let i=dollars.length-1;i>=0;i--){
+    if(dollars[i].userData.life>10){main.remove(dollars[i]);dollars.splice(i,1);}
+  }
+
+  const rTime=Math.min(1,(t-10)/10);
+  if(rTime>=0){
+    const R=Math.round(340*rTime),S=Math.round(23-21*rTime),T=Math.round(187*rTime);
+    libraryROI.textContent='ROI: +'+R+'%';libraryROI.style.color='#'+new THREE.Color(0x64748B).lerp(new THREE.Color(0x22C55E),rTime).getHexString();
+    libraryScrap.textContent='SCRAP: '+S+'%';libraryScrap.style.color='#'+new THREE.Color(0xef4444).lerp(new THREE.Color(0x22C55E),rTime).getHexString();
+    libraryThroughput.textContent='THROUGHPUT: +'+T+'%';libraryThroughput.style.color='#'+new THREE.Color(0x64748B).lerp(new THREE.Color(0x0D9488),rTime).getHexString();
+  }
+  if(t>=10){
+    libraryBlockedCubes.forEach(cb=>{
+      const ct=Math.min(1,(t-10)/4);
+      const cc=new THREE.Color(0x475569).lerp(new THREE.Color(0x3B82F6),ct);cb.material.color.copy(cc);
+      cb.scale.setScalar(1+0.05*Math.sin(t*3));
+    });
   }
 
   if(t>=8&&isOrdered)plotterLight.color.set(0x22C55E);
   else if(t>=8)plotterLight.color.set(0xFDE047);
   else plotterLight.color.set(0xffaa66);
+
+  let entropy;
+  if(t<8)entropy=94;else if(t<=22)entropy=94-(t-8)*(88/14);else entropy=6;
+  const eVal=Math.round(Math.max(6,entropy));
+  let ec;
+  if(entropy>=50)ec=new THREE.Color(0xFDE047).lerp(new THREE.Color(0xEF4444),(entropy-50)/44);
+  else ec=new THREE.Color(0x22C55E).lerp(new THREE.Color(0xFDE047),(entropy-6)/44);
+  entropyDiv.textContent='ENTROPY: '+eVal+'% '+entropyDOS(eVal);
+  entropyDiv.style.color='#'+ec.getHexString();
+
+  let st,sc;
+  if(t<8){st='STATUS: UNSTRUCTURED DATA';sc='#EF4444';}
+  else if(t<10){st=Math.floor(t*4)%2===0?'STATUS: DECODING \u26A1':'STATUS: DECODING';sc='#FDE047';}
+  else{st='STATUS: DETERMINISTIC OUTPUT';sc='#22C55E';}
+  if(t>22){st='ENGINE V20 \u00B7 IDLE';}
+  statusDiv.textContent=st;statusDiv.style.color=sc;
+
+  const doneCount=panels.filter(p=>p.userData.at!=null&&!p.userData.defective).length+newPanels.length;
+  const totalP=panels.length+newPanels.length;
+  const savedMin=Math.floor(t*0.4);
+  metricsDiv.textContent='TIME: '+Math.floor(t)+'s | DONE: '+doneCount+'/'+totalP+' | SAVE: '+savedMin+' min';
+  metricsDiv.style.color=t>10?'#22C55E':'#64748B';
+
+  if(t>=9.2&&t<9.4)scene.background=new THREE.Color(0xFFFFFF);
+  else if(t>=9.4&&scene.background.getHex()===0xFFFFFF)scene.background=new THREE.Color(0x0a0e14);
+  else if(t>10){const bgT=Math.min(1,(t-10)/6);scene.background=new THREE.Color(0x0a0e14).lerp(new THREE.Color(0x0a1218),bgT);}
 
   renderer.render(scene,camera);lr.render(scene,camera);
   requestAnimationFrame(animate);
