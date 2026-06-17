@@ -1,0 +1,93 @@
+---
+## Goal
+
+Create a **single‑file HTML (≈ < 100 KB)** that visualizes a B2B CAM‑data parser using Three.js r160.  
+The animation follows a 4‑phase storyline (Chaos → Activation → Defragmentation → Idle) in a retro 8‑bit DOS / Norton Commander aesthetic using the **EGA‑16 palette**, CRT scan‑line overlay, and `Press Start 2P` font.  
+The scene must include: a wall with 12 panels, a PC with an animated CRT monitor, a seated operator (red cap, ginger beard, coffee mug), a CNC plotter with moving gantry/spindle/laser, and a dual‑torus magical parser portal with vortex, shockwave, and energetic filaments.
+
+---
+
+## Instructions
+
+- Produce a **complete monolithic HTML** with no external dependencies beyond Three.js CDN (`three@0.160.0` from unpkg).
+- Use `importmap` for Three.js and its add‑ons (`OrbitControls`, `CSS2DRenderer`).
+- Renderer must use `antialias: false`, `pixelRatio: 1`, flat‑shaded materials throughout.
+- All colors must come from the `EGA` constant object ( 16 EGA colours ).
+- CRT overlay is an absolutely positioned `div` with `repeating-linear-gradient` (rgba(0,0,0,0.12) 1px, transparent 2px, transparent 4px) and a radial vignette; plus a `#flash-overlay` for the activation whiteout.
+- The 2D HUD is laid out as an MS‑DOS / Norton Commander dashboard:
+  - Top bar with title and live clock.
+  - Right sidebar with a **cluster‑map** (64 ASCII sectors that animate from chaotic red/magenta to parsed green), diagnostic rows (ENTROPY, PROGRESS, STATUS), B2B conversion metrics (YIELD, TIME, SAVINGS).
+  - Bottom key bar with F‑key buttons (F1–F10).
+- Operator is a low‑poly block figure: blue torso, red cap with visor, BROWN beard, small black pixel eyes, left arm holding a red cylinder mug, right arm resting. An emissive red smile block (`opSmileMesh`) is hidden in CHAOS/ACTIVATION and shown in ORDER/IDLE.
+- The wall must be **behind** all other scene objects (not between camera and the scene). Currently `WALL_Z = -2.5` and this must be preserved.
+- Four animation phases (timeline in seconds):
+  - **CHAOS (t < 7)**: panels spawn on plotter and fly to scattered chaotic positions near the wall; red/brown defective panels have wireframe warning boxes; question‑mark CSS labels float up; data cubes (red/magenta/yellow) flow from PC monitor to plotter spindle; operator slouches; laser flickers.
+  - **ACTIVATION (7 ≤ t < 10)**: white‑screen flash at t≈7.5; shockwave expands from portal; energetic filament lines connect portal to each panel; operator sits up; PC monitor changes to "PARSING…" text; plotter carriage returns to centre.
+  - **ORDER / DEFRAG (10 ≤ t < 22)**: panels snap to exact grid positions with `ease-out-back` interpolation; defective panels heal (colour lerp from RED→GREEN, wireframes hidden); golden 3D dollar signs and CSS metric labels float up from portal; green ordered data cubes flow PC→portal; operator bounces happily; smile block visible; cluster‑map progressively turns green sector‑by‑sector.
+  - **IDLE (t ≥ 22)**: scene settles; camera auto‑rotate activates; HUD shows "PARSED ENGINE V3 – IDLE" with 6.1% residual entropy.
+- Manual reset via F2 button or keyboard `R` key – must clear all arrays, remove meshes, re‑seed cluster map, redraw PC screen.
+- The whole file must stay **< 100 KB**; no comments inside `<script>` tags.
+
+---
+
+## Discoveries
+
+- The original spec (`TECH_SPEC_SCENE_V3.1_REFACTOR.md`) was 1257 lines; a trimmed “lite” version and a narrative prompt `V3.3_PROMPT.md` were created earlier.
+- The skeleton in the prompt had `WALL_Z = 3.0` which, combined with camera at `(0,1.4,7)` and target `(0,0.3,1.2)`, placed the wall **in front of all other objects**. This blocked the view completely during the animation start.
+- **Fixed by changing `WALL_Z` from `3.0` to `-2.5`**. Now the wall sits behind everything (depth order: camera → plotter/PC/operator at z≈0.8–1.4 → portal at z=-1.2 → wall at z=-2.5).
+- The `spawnPanelOnPlotter` function creates the 3D panel group (base plate + inner bevel) and stores `chaosOffsetPos` (scattered near target) and `targetPos` (exact grid position). In chaos the panel lerps from `startPos` → `chaosOffsetPos`; in order it lerps `chaosOffsetPos` → `targetPos` using `easeOutBack`.
+- The `triggerManualReset` function in the current code creates a small helper function `qmLbl(q)` inside the `forEach` which would cause the first call to fail because `qmLbl` isn’t hoisted as expected – the code uses `dataCubes.forEach(dc=>scene.remove(dc))` (works) but then `questionMarks.forEach(qm=>scene.remove(qmLbl(qm)))` / `goldenDollars.forEach(gd=>scene.remove(dcGeo(gd)))` uses locally‑scoped inner functions that may break in strict module mode. **This reset function needs to be rewritten** (simply use `scene.remove(qm)` directly).
+- The `orderSec > panels.length - 7` condition in ORDER spawn logic assumes ≈7 panels exist by t=10; may need adjustment if timing is tweaked.
+- **EGA palette** is correctly defined and used for all materials. Scene lights are EGA.DKGRAY (ambient), EGA.LTGRAY (directional), EGA.YELLOW (point light on plotter).
+- The portal shockwave uses a `SphereGeometry` whose opacity is animated, and filaments are `BoxGeometry` segments aligned with `lookAt`.
+
+---
+
+## Accomplished
+
+✅ Read the original V3.1 spec, created the V3.2 lite version, and the V3.3 narrative prompt.  
+✅ Analysed the existing `systeq_v3.html` (330 lines, simple version without DOS HUD or detailed wall).  
+✅ Wrote a **complete V3 ** HTML (≈ 30 KB, single‑file) with:
+  - Full 3D scene: wall (4×3 slot grid + ornamental bezels), PC (desk, CRT canvas monitor with live‑state drawing), operator (block head with beard/cap/mug, animatable arms), plotter (rails, gantry, spindle, laser point light), dual‑torus portal (two rings + vortex + shockwave + energetic filaments).
+  - DOS Norton‑Commander HUD overlaid with CSS: top bar, right sidebar (cluster map, legend, diagnostics, metrics), bottom F‑key bar. The cluster map updates every third of a second.
+  - 4‑phase timeline engine with correct transitions.
+  - Panel spawning (up to 12) with launch animation and ease‑out‑back defrag rearrangement.
+  - Data cubes (chaotic red → ordered green) flowing between PC and plotter/portal.
+  - Floating `?` labels (CHAOS) and golden `$` symbols + CSS metric words (ORDER).
+  - Manual reset stub (`triggerManualReset` attached to F2 and keyboard `R`).
+✅ **Fixed critical wall‑in‑front bug**: `WALL_Z = 3.0` → `WALL_Z = -2.5`.
+
+⚠️ **Known issue – Reset function is broken** – the current `triggerManualReset` uses locally–defined helper functions inside `forEach` that will throw a ReferenceError in module scripts (the functions `qmLbl` and `dcGeo` are defined with function declarations inside `forEach` callbacks, but they are not hoisted into the outer scope). This must be rewritten to simply call `scene.remove(qm)` etc. without helper wrappers.
+
+**Still in‑progress / needs attention:**
+- **Reset function broken** – see above.
+- **Activation phase white flash** currently only lasts 300 ms (t=7.5–7.8). The spec wants a longer burst (≈1 s) and the energetic field should remain visible for the whole activation window (7–10 s). Currently filaments disappear at t=9.5.
+- **Operator right‑arm rotation** isn’t fully animated: in ORDER/IDLE the arm stays static, no subtle typing gesture.
+- **Cluster‑map initial state** is all `░` (dark gray). It should start as chaotic red/magenta like the legend.
+- **Bottom‑bar F‑key styling** uses `#00aaaa` background on hover, which is fine but `F4 VCF_Parse` and `F5 G‑Code` aren’t wired to anything.
+- **Camera auto‑rotate** in IDLE is set to `controls.autoRotate = true` but speed is `0.15` which might be too slow; also `controls.enabled = false` in init – needs to be `true` for auto‑rotate to work.
+- **No question‑mark → symbol replacement** – the spec says “otazníky mizí a jsou nahrazeny symbolickými objekty” but currently question marks just fade out in ORDER. The `spawnFloatingMetricWord` function does spawn the correct CSS symbols (`ČAS ZPRACOVÁNÍ`, `MARŽE`, etc.) but they spawn from portal, not from question‑mark position. The spec wants them to visually replace the `?`.
+- **Layout for wider aspect ratios** – the HUD sidebar is positioned absolute with pixel values; on ultrawide monitors the sidebar may overlap the 3D scene.
+
+---
+
+## Relevant files / directories
+
+- **Main output file (the final monolithic HTML)**  
+  `c:\Users\PC\Documents\Repozitar_Dev\_github\web_integrace_systeq\Demo_Threejs\`  
+  (≈ 1546 lines, 30 KB, last edit: WALL_Z fix)
+
+- **Earlier simple version** (before the rewrite)  
+  `c:\Users\PC\Documents\Repozitar_Dev\_github\web_integrace_systeq\src\demo\systeq_v3.html`  
+  (same path – the file was overwritten with the new version; previous content was 330 line simple Three.js scene)
+
+- **Specification / design documents**  
+  `C:\Users\PC\Documents\Repozitar_Dev\_github\web_integrace_systeq\docs\design\TECH_SPEC_SCENE_V3.1_REFACTOR.md` (1257 lines, full spec)  
+  `C:\Users\PC\Documents\Repozitar_Dev\_github\web_integrace_systeq\docs\design\TECH_SPEC_SCENE_V3.2_LITE.md` (minimal code‑only version)  
+  `C:\Users\PC\Documents\Repozitar_Dev\_github\web_integrace_systeq\src\demo\TECH_SPEC_SCENE_V3.3_PROMPT.md` (narrative prompt used as blueprint)
+
+- **Other referencing files**  
+  `C:\Users\PC\Documents\Repozitar_Dev\_github\KB\LLM_routing.txt`  
+  `C:\Users\PC\Documents\Repozitar_Dev\_github\KB\LLM free models.txt`
+
+---

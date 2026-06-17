@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SYSTEQ // B2B VCF Parser & CNC Defragmenter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: 'Press Start 2P', monospace;
+      color: #aaaaaa;
+      user-select: none;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+    
+    /* CRT Scanline and Flicker Overlay */
+    #crt {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      background: 
+        radial-gradient(circle, transparent 60%, rgba(0,0,0,0.4) 100%),
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 2px, transparent 4px);
+      animation: crt-flicker 0.2s infinite;
+    }
+    @keyframes crt-flicker {
+      0% { opacity: 0.985; }
+      50% { opacity: 1.0; }
+      100% { opacity: 0.985; }
+    }
+
+    /* CSS 3D floating labels */
+    .css-label {
+      font-family: 'Press Start 2P', monospace;
+      white-space: nowrap;
+      text-shadow: 2px 2px 0px #000;
+      pointer-events: none;
+      font-size: 8px;
+      transition: color 0.3s, transform 0.2s;
+    }
+
+    /* ==== RETRO MS-DOS / NORTON COMMANDER HUD ==== */
+    #hud-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+      z-index: 10;
+    }
+
+    /* DOS style panels */
+    .dos-panel {
+      background: rgba(0, 0, 170, 0.75); /* Retro blue window with 75% opacity */
+      border: 4px double #55ffff; /* Bright cyan double border */
+      box-shadow: 4px 4px 0px #000000;
+      pointer-events: auto;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      width: calc(100% - 340px);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 9px;
+      color: #ffffff;
+      background: #0000aa;
+    }
+    .top-bar span {
+      text-shadow: 2px 2px 0px #000;
+    }
+    #live-clock {
+      color: #ffff55;
+    }
+
+    /* Right Sidebar (Speed Disk Defragmenter Diagnostics) */
+    .right-sidebar {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      bottom: 50px;
+      width: 310px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      font-size: 8px;
+      color: #aaaaaa;
+      overflow-y: auto;
+    }
+    .dos-title {
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 10px;
+      text-shadow: 1px 1px 0px #000;
+    }
+    .cluster-header {
+      color: #55ffff;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .cluster-map {
+      background: #000000;
+      border: 2px solid #aaaaaa;
+      padding: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.3;
+      letter-spacing: 2px;
+      word-break: break-all;
+      color: #ff5555;
+      margin-bottom: 12px;
+    }
+    .dos-divider {
+      color: #55ffff;
+      text-align: center;
+      margin: 8px 0;
+      letter-spacing: -1px;
+    }
+    .metrics-list p {
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .metrics-label {
+      color: #ffffff;
+    }
+    .metrics-value {
+      font-weight: bold;
+    }
+    .perf-metrics p {
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Legend colors */
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: 8px 0;
+      font-size: 7px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+    }
+    .legend-box {
+      margin-right: 6px;
+      font-size: 11px;
+    }
+
+    /* Bottom Key Bar */
+    .bottom-keys {
+      width: 100%;
+      height: 28px;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      border: 2px solid #aaaaaa;
+    }
+    .key-btn {
+      flex: 1;
+      text-align: center;
+      font-size: 8px;
+      color: #000000;
+      background: #00aaaa; /* Cyan background */
+      margin: 0 3px;
+      padding: 4px 0;
+      cursor: pointer;
+      border: 1px solid #ffffff;
+    }
+    .key-btn:hover {
+      background: #55ffff;
+    }
+    .key-num {
+      color: #ffffff;
+      background: #000000;
+      padding: 0 4px;
+      margin-right: 4px;
+      font-weight: bold;
+    }
+
+    /* Big Magical Flash Overlay */
+    #flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div id="crt"></div>
+  <div id="flash-overlay"></div>
+
+  <!-- Norton Commander Dashboard Overlay -->
+  <div id="hud-container">
+    <!-- Top Bar -->
+    <div class="dos-panel top-bar">
+      <span>╔════ SYSTEQ CAM-DEFRAG V3.3 ═══════════════════════════════════════════╗</span>
+      <span id="live-clock">00:00:00</span>
+    </div>
+
+    <!-- Right Sidebar (Defrag Monitor) -->
+    <div class="dos-panel right-sidebar">
+      <div class="dos-title">╔ SPEED DISK REDUCTION ╗</div>
+      
+      <div class="cluster-header">Cluster Map (VCF Sectors):</div>
+      <div class="cluster-map" id="cluster-map">
+        ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+      </div>
+
+      <div class="legend-grid">
+        <div class="legend-item"><span class="legend-box" style="color: #ff5555;">▓</span><span>Chaotic</span></div>
+        <div class="legend-item"><span class="legend-box" style="color: #ff55ff;">▒</span><span>Bad Sector</span></div>
+        <div class="legend-item"><span class="legend-box" style="color: #55ff55;">█</span><span>Parsed OK</span></div>
+        <div class="legend-item"><span class="legend-box" style="color: #555555;">░</span><span>Empty</span></div>
+      </div>
+
+      <div class="dos-divider">╟───────────────────────────╢</div>
+      
+      <div class="metrics-list">
+        <div class="cluster-header">Defrag Diagnostics:</div>
+        <p>
+          <span class="metrics-label">ENTROPY:</span>
+          <span class="metrics-value" id="hud-entropy" style="color: #ff5555;">94.2%</span>
+        </p>
+        <p>
+          <span class="metrics-label">PROGRESS:</span>
+          <span class="metrics-value" id="hud-progress" style="color: #ffff55;">[░░░░░░░░░░] 0%</span>
+        </p>
+        <p>
+          <span class="metrics-label">STATUS:</span>
+          <span class="metrics-value" id="hud-status" style="color: #ff5555;">UNSTRUCTURED_DATA</span>
+        </p>
+      </div>
+
+      <div class="dos-divider">╟─── B2B CAM CONVERSION ────╢</div>
+      
+      <div class="perf-metrics">
+        <p>
+          <span class="metrics-label">PROCESS YIELD:</span>
+          <span class="metrics-value" id="hud-yield" style="color: #ff5555;">34.8%</span>
+        </p>
+        <p>
+          <span class="metrics-label">PROCESS TIME:</span>
+          <span class="metrics-value" id="hud-time">0.00s</span>
+        </p>
+        <p>
+          <span class="metrics-label">EST. SAVED:</span>
+          <span class="metrics-value" id="hud-savings" style="color: #55ff55;">0 CZK</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Classic DOS Function Keys -->
+    <div class="bottom-keys">
+      <div class="key-btn"><span class="key-num">F1</span>Help</div>
+      <div class="key-btn" onclick="triggerManualReset()"><span class="key-num">F2</span>Restart</div>
+      <div class="key-btn"><span class="key-num">F3</span>Setup</div>
+      <div class="key-btn"><span class="key-num">F4</span>VCF_Parse</div>
+      <div class="key-btn"><span class="key-num">F5</span>G-Code</div>
+      <div class="key-btn"><span class="key-num">F9</span>Metrics</div>
+      <div class="key-btn" onclick="window.close()"><span class="key-num">F10</span>Quit</div>
+    </div>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+    // ==== CONSTANTS & EGA-16 PALETTE ===================================
+    const GND = -0.55;
+    const DSK_Y = 0.22;
+    const WALL_Z = -2.5;
+    const WALL_W = 5.5;
+    const WALL_H = 3.2;
+    const WALL_Y = 0.55;
+
+    const PHASE = { CHAOS: 0, ACTIVATION: 7, ORDER: 10, IDLE: 22 };
+
+    const EGA = {
+      BLACK: 0x000000, BLUE: 0x0000AA, GREEN: 0x00AA00, CYAN: 0x00AAAA,
+      RED: 0xAA0000, MAGENTA: 0xAA00AA, BROWN: 0xAA5500, LTGRAY: 0xAAAAAA,
+      DKGRAY: 0x555555, LTBLUE: 0x5555FF, LTGREEN: 0x55FF55, LTCYAN: 0x55FFFF,
+      LTRED: 0xFF5555, LTMAGENTA: 0xFF55FF, YELLOW: 0xFFFF55, WHITE: 0xFFFFFF
+    };
+
+    // ==== HELPERS ======================================================
+    const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+    const cyl = (r, h, s) => new THREE.CylinderGeometry(r, r, h, s || 8);
+    const tor = (R, r, rs, ts) => new THREE.TorusGeometry(R, r, rs || 8, ts || 16);
+    const mF = c => new THREE.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85 });
+    const M = (g, c) => new THREE.Mesh(g, mF(c));
+
+    // ==== STATE VARIABLES ==============================================
+    let scene, camera, renderer, cssRenderer, controls;
+    let startT = performance.now();
+    let lastSecond = -1;
+
+    // Groups & Animatable Meshes
+    let wallGroup, pcGroup, operatorGroup, plotterGroup, portalGroup;
+    let pcMonitorScreenMesh, monitorCanvas, monitorCtx;
+    let plGantry, plSpindle, plLaserLight;
+    
+    // Operator body parts
+    let opHead, opLeftArm, opRightArm, opSmileMesh;
+    
+    // Portal objects
+    let portalTorus1, portalTorus2, portalVortex, portalShockwave;
+    let energeticFilamentsGroup;
+
+    // Lists for tracking animated items
+    let dataCubes = [];       // Chaotic flying binary cubes
+    let questionMarks = [];   // CSS2D "?" labels
+    let panels = [];          // 3D structural panels flying to/mounted on wall
+    let goldenDollars = [];    // Golden floaters spawned in Order phase
+    let floatingTexts = [];   // CSS2D parsed G-code labels in Order phase
+
+    // Cluster map array for Norton Speed Disk HUD display
+    let clusterSectorColors = []; // 64 slots of DOS colors
+    const CLUSTER_COUNT = 64;
+
+    // Custom CSS Label Creator
+    function makeCssLabel(txt, color) {
+      const div = document.createElement('div');
+      div.className = 'css-label';
+      div.style.color = color || '#ff5555';
+      div.textContent = txt;
+      return new CSS2DObject(div);
+    }
+
+    // ==== INITIALIZATION ===============================================
+    function init() {
+      // 1. Core scene setup
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(EGA.BLACK);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / innerHeight, 0.1, 40);
+      camera.position.set(0, 1.4, 7);
+
+      // WebGL Renderer (No antialiasing, hard pixels for 8-bit aesthetic)
+      renderer = new THREE.WebGLRenderer({ antialias: false });
+      renderer.setPixelRatio(1);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // CSS 2D Renderer for pixel sharp HUD text labels in 3D Space
+      cssRenderer = new CSS2DRenderer();
+      cssRenderer.setSize(window.innerWidth, window.innerHeight);
+      cssRenderer.domElement.style.position = 'absolute';
+      cssRenderer.domElement.style.top = '0px';
+      cssRenderer.domElement.style.pointerEvents = 'none';
+      document.body.appendChild(cssRenderer.domElement);
+
+      // Controls
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 0.3, 1.2);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enablePan = false;
+      controls.autoRotate = false;
+      controls.autoRotateSpeed = 0.15;
+
+      // Lights (Chunky directional & ambient with point light spots)
+      const ambientLight = new THREE.AmbientLight(EGA.DKGRAY, 1.2);
+      scene.add(ambientLight);
+
+      const mainDirLight = new THREE.DirectionalLight(EGA.LTGRAY, 1.4);
+      mainDirLight.position.set(3, 8, 4);
+      scene.add(mainDirLight);
+
+      const yellowPointLight = new THREE.PointLight(EGA.YELLOW, 1.5, 6);
+      yellowPointLight.position.set(1.2, 0.8, 1.0); // Plotter spotlight
+      scene.add(yellowPointLight);
+
+      // Floor & Retro Grid
+      const floor = M(box(12, 0.02, 6), EGA.BLACK);
+      floor.position.y = GND - 0.01;
+      scene.add(floor);
+
+      const gridHelper = new THREE.GridHelper(12, 24, EGA.DKGRAY, EGA.BLACK);
+      gridHelper.position.y = GND;
+      scene.add(gridHelper);
+
+      // Setup Cluster Map sectors
+      for (let i = 0; i < CLUSTER_COUNT; i++) {
+        clusterSectorColors.push(Math.random() < 0.3 ? 'red' : 'darkgray');
+      }
+
+      // Build 3D Scenery
+      createWall();
+      createPC();
+      createOperator();
+      createPlotter();
+      createPortal();
+
+      // Listeners
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'r' || e.key === 'R') triggerManualReset();
+      });
+
+      startT = performance.now();
+      animate();
+    }
+
+    // ==== 3D GEOMETRY GENERATORS =======================================
+
+    // 1. The Wall with Ornamental EGA Bezel & Grid slots
+    function createWall() {
+      wallGroup = new THREE.Group();
+      wallGroup.position.set(0, WALL_Y, WALL_Z);
+
+      // Outer ornamental geometric frame (Double layered boxes)
+      const outerFrame = M(box(WALL_W + 0.4, WALL_H + 0.4, 0.15), EGA.LTGRAY);
+      wallGroup.add(outerFrame);
+
+      const innerBezel = M(box(WALL_W + 0.1, WALL_H + 0.1, 0.2), EGA.DKGRAY);
+      wallGroup.add(innerBezel);
+
+      // Black wall paneling
+      const plate = M(box(WALL_W, WALL_H, 0.18), EGA.BLACK);
+      plate.position.z = 0.02;
+      wallGroup.add(plate);
+
+      // Grid helper on wall to visualize target disk slots
+      // 4 Columns, 3 Rows of slots for panels
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; colIdx(r, c) < 12; c++) {
+          const slotFrame = M(box(1.0, 0.6, 0.02), EGA.DKGRAY);
+          slotFrame.position.set(c * 1.25 - 1.87, r * 0.95 - 0.7, 0.14);
+          wallGroup.add(slotFrame);
+        }
+      }
+
+      scene.add(wallGroup);
+    }
+
+    function colIdx(r, c) { return r * 4 + c; }
+
+    // 2. PC Terminal with CRT canvas screen & flashing LEDs
+    function createPC() {
+      pcGroup = new THREE.Group();
+      pcGroup.position.set(-2.4, GND, 1.2);
+
+      // Wooden desk
+      const table = M(box(1.2, 0.04, 0.8), EGA.BROWN);
+      table.position.y = DSK_Y + 0.02;
+      pcGroup.add(table);
+
+      // Table legs (Cylinder boxes)
+      for (let x of [-0.5, 0.5]) {
+        for (let z of [-0.3, 0.3]) {
+          const leg = M(cyl(0.04, DSK_Y + 0.02, 6), EGA.DKGRAY);
+          leg.position.set(x, (DSK_Y + 0.02) / 2, z);
+          pcGroup.add(leg);
+        }
+      }
+
+      // Computer Chassis (Horizontal beige desktop)
+      const chassis = M(box(0.44, 0.16, 0.44), EGA.LTGRAY);
+      chassis.position.set(-0.3, DSK_Y + 0.12, 0.1);
+      pcGroup.add(chassis);
+
+      // Chassis detailing: Floppy drive slots & glowing power button
+      const floppy = M(box(0.18, 0.02, 0.05), EGA.BLACK);
+      floppy.position.set(-0.3, DSK_Y + 0.14, 0.32);
+      pcGroup.add(floppy);
+
+      const floppy2 = M(box(0.18, 0.02, 0.05), EGA.BLACK);
+      floppy2.position.set(-0.3, DSK_Y + 0.08, 0.32);
+      pcGroup.add(floppy2);
+
+      // Red power LED
+      const powerLed = M(box(0.03, 0.03, 0.03), EGA.RED);
+      powerLed.position.set(-0.14, DSK_Y + 0.12, 0.322);
+      pcGroup.add(powerLed);
+
+      // Chunky beige monitor stand
+      const monStand = M(box(0.18, 0.1, 0.18), EGA.LTGRAY);
+      monStand.position.set(0.15, DSK_Y + 0.09, 0.0);
+      pcGroup.add(monStand);
+
+      // Chunky beige monitor shell (Tapered box simulation)
+      const monHousing = M(box(0.56, 0.46, 0.44), EGA.LTGRAY);
+      monHousing.position.set(0.15, DSK_Y + 0.34, 0.0);
+      pcGroup.add(monHousing);
+
+      const monBezel = M(box(0.48, 0.38, 0.04), EGA.DKGRAY);
+      monBezel.position.set(0.15, DSK_Y + 0.34, 0.22);
+      pcGroup.add(monBezel);
+
+      // 2D Canvas Monitor Screen for interactive, live retro graphics
+      monitorCanvas = document.createElement('canvas');
+      monitorCanvas.width = 128;
+      monitorCanvas.height = 96;
+      monitorCtx = monitorCanvas.getContext('2d');
+      drawPCDosScreen('CHAOS'); // Initial paint
+
+      const monitorTex = new THREE.CanvasTexture(monitorCanvas);
+      monitorTex.minFilter = THREE.NearestFilter;
+      monitorTex.magFilter = THREE.NearestFilter;
+
+      const screenMat = new THREE.MeshBasicMaterial({ map: monitorTex });
+      pcMonitorScreenMesh = new THREE.Mesh(box(0.42, 0.32, 0.01), screenMat);
+      pcMonitorScreenMesh.position.set(0.15, DSK_Y + 0.34, 0.245);
+      pcGroup.add(pcMonitorScreenMesh);
+
+      // Keyboard
+      const keyboard = M(box(0.4, 0.02, 0.14), EGA.LTGRAY);
+      keyboard.position.set(0.1, DSK_Y + 0.05, 0.32);
+      pcGroup.add(keyboard);
+
+      // Dark keys segment
+      const keys = M(box(0.36, 0.01, 0.1), EGA.DKGRAY);
+      keys.position.set(0.1, DSK_Y + 0.065, 0.32);
+      pcGroup.add(keys);
+
+      scene.add(pcGroup);
+    }
+
+    // Draws custom retro text/flicker onto the PC Monitor Canvas
+    function drawPCDosScreen(phase) {
+      const ctx = monitorCtx;
+      ctx.fillStyle = '#0000aa'; // DOS Blue screen
+      ctx.fillRect(0, 0, 128, 96);
+
+      // Double Frame Border
+      ctx.strokeStyle = '#55ffff'; // Light cyan
+      ctx.lineWidth = 2;
+      ctx.strokeRect(3, 3, 122, 90);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '6px "Press Start 2P", monospace';
+
+      if (phase === 'CHAOS') {
+        ctx.fillStyle = '#ff5555';
+        ctx.fillText('! ENTROPY ERR !', 12, 18);
+        ctx.fillStyle = '#ff55ff';
+        ctx.fillText('vcf_stream: CRASH', 8, 32);
+        ctx.fillStyle = '#aaaaaa';
+        ctx.fillText('HEX  F3 B6 8A 00', 10, 52);
+        ctx.fillText('BIN  1101 0110', 10, 64);
+        ctx.fillStyle = '#ff5555';
+        ctx.fillText('NO HEADER FOUND', 12, 82);
+      } else if (phase === 'ACTIVATION') {
+        ctx.fillStyle = '#ffff55';
+        ctx.fillText('* PARSING... *', 12, 18);
+        ctx.fillStyle = '#55ffff';
+        ctx.fillText('REDUCING NOISE', 10, 40);
+        ctx.fillText('STABILIZING CNC', 10, 56);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('B2B KEY DETECTED', 10, 78);
+      } else {
+        // ORDER & IDLE
+        ctx.fillStyle = '#55ff55'; // EGA bright green
+        ctx.fillText('SYSTEM READY', 18, 18);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('CAM DATA OK', 12, 38);
+        ctx.fillStyle = '#ffff55';
+        ctx.fillText('EGA PARSED v3.3', 8, 56);
+        ctx.fillStyle = '#55ff55';
+        ctx.fillText('ENTROPY: 6.1%', 14, 78);
+      }
+    }
+
+    // Update the monitor screen texture flag
+    function updatePCMonitorTexture() {
+      if (pcMonitorScreenMesh && pcMonitorScreenMesh.material.map) {
+        pcMonitorScreenMesh.material.map.needsUpdate = true;
+      }
+    }
+
+    // 3. 8-Bit CNC Operator (Red Cap, Ginger beard, holding mug, animatable)
+    function createOperator() {
+      operatorGroup = new THREE.Group();
+      operatorGroup.position.set(-2.0, GND + 0.38, 1.4); // Seated slightly shifted
+
+      // Chair / Stool
+      const stoolBase = M(cyl(0.18, 0.04, 6), EGA.DKGRAY);
+      stoolBase.position.y = -0.16;
+      operatorGroup.add(stoolBase);
+      const stoolLeg = M(cyl(0.03, 0.22, 4), EGA.LTGRAY);
+      stoolLeg.position.y = -0.28;
+      operatorGroup.add(stoolLeg);
+
+      // Torso/Body (Blue work jacket)
+      const body = M(box(0.38, 0.44, 0.26), EGA.BLUE);
+      body.position.y = 0.18;
+      operatorGroup.add(body);
+
+      // Red Cap visor extension
+      // Head Group (So we can rotate/tilt head)
+      opHead = new THREE.Group();
+      opHead.position.set(0, 0.52, 0.0);
+
+      // Face skin mesh
+      const face = M(box(0.28, 0.28, 0.28), 0xffcc99); // Skin tone
+      opHead.add(face);
+
+      // Visor Red Cap
+      const capCap = M(box(0.3, 0.08, 0.3), EGA.RED);
+      capCap.position.y = 0.16;
+      opHead.add(capCap);
+
+      const capVisor = M(box(0.3, 0.03, 0.14), EGA.RED);
+      capVisor.position.set(0, 0.14, 0.18); // Projecting forward
+      opHead.add(capVisor);
+
+      // Big Ginger Beard (Orange-brown chunky box blocks wrapping face)
+      const beard = M(box(0.3, 0.16, 0.12), EGA.BROWN);
+      beard.position.set(0, -0.12, 0.1);
+      opHead.add(beard);
+
+      // Black voxel eyes
+      const eyeL = M(box(0.04, 0.04, 0.02), EGA.BLACK);
+      eyeL.position.set(-0.06, 0.05, 0.145);
+      opHead.add(eyeL);
+      const eyeR = M(box(0.04, 0.04, 0.02), EGA.BLACK);
+      eyeR.position.set(0.06, 0.05, 0.145);
+      opHead.add(eyeR);
+
+      // Smiley face piece (Emissive green pixel block, visible only in Order/Idle)
+      opSmileMesh = M(box(0.12, 0.03, 0.02), EGA.LTRED);
+      opSmileMesh.position.set(0, -0.06, 0.146);
+      opHead.add(opSmileMesh);
+
+      operatorGroup.add(opHead);
+
+      // Left Arm (holding coffee mug)
+      opLeftArm = new THREE.Group();
+      opLeftArm.position.set(-0.24, 0.3, 0.0);
+      const shoulderL = M(box(0.12, 0.24, 0.12), EGA.BLUE);
+      opLeftArm.add(shoulderL);
+      
+      const forearmL = M(box(0.1, 0.22, 0.1), 0xffcc99);
+      forearmL.position.set(0, -0.18, 0.08);
+      forearmL.rotation.x = -1.1; // Rotated forward
+      opLeftArm.add(forearmL);
+
+      // Red Coffee Mug
+      const mug = M(cyl(0.06, 0.14, 6), EGA.RED);
+      mug.position.set(0, -0.22, 0.2);
+      mug.rotation.x = 0.4;
+      opLeftArm.add(mug);
+      
+      const mugHandle = M(tor(0.05, 0.015, 6, 12), EGA.RED);
+      mugHandle.position.set(-0.06, -0.22, 0.2);
+      opLeftArm.add(mugHandle);
+
+      operatorGroup.add(opLeftArm);
+
+      // Right Arm (typing or resting)
+      opRightArm = new THREE.Group();
+      opRightArm.position.set(0.24, 0.3, 0.0);
+      const shoulderR = M(box(0.12, 0.24, 0.12), EGA.BLUE);
+      opRightArm.add(shoulderR);
+
+      const forearmR = M(box(0.1, 0.24, 0.1), 0xffcc99);
+      forearmR.position.set(0, -0.18, 0.12);
+      forearmR.rotation.x = -1.3;
+      forearmR.rotation.y = -0.3;
+      opRightArm.add(forearmR);
+
+      operatorGroup.add(opRightArm);
+
+      scene.add(operatorGroup);
+    }
+
+    // 4. CNC Plotter Table with Gantry & tool Carriage
+    function createPlotter() {
+      plotterGroup = new THREE.Group();
+      plotterGroup.position.set(1.4, GND, 0.8);
+
+      // Solid Plotter Bed
+      const bed = M(box(2.2, 0.06, 1.4), EGA.DKGRAY);
+      bed.position.y = DSK_Y + 0.03;
+      plotterGroup.add(bed);
+
+      const bedBorder = M(box(2.24, 0.08, 1.44), EGA.LTGRAY);
+      bedBorder.position.y = DSK_Y + 0.02;
+      plotterGroup.add(bedBorder);
+
+      // Solid chunky frame legs
+      for (let x of [-0.9, 0.9]) {
+        for (let z of [-0.5, 0.5]) {
+          const leg = M(box(0.08, DSK_Y + 0.05, 0.08), EGA.BLUE);
+          leg.position.set(x, (DSK_Y + 0.05) / 2, z);
+          plotterGroup.add(leg);
+        }
+      }
+
+      // Linear Rails on X-axis (metallic bars)
+      const rail1 = M(cyl(0.02, 2.1, 4), EGA.WHITE);
+      rail1.rotation.z = Math.PI / 2;
+      rail1.position.set(0, DSK_Y + 0.09, -0.62);
+      plotterGroup.add(rail1);
+
+      const rail2 = M(cyl(0.02, 2.1, 4), EGA.WHITE);
+      rail2.rotation.z = Math.PI / 2;
+      rail2.position.set(0, DSK_Y + 0.09, 0.62);
+      plotterGroup.add(rail2);
+
+      // Gantry Bridge (Sliding X-carriage structure)
+      plGantry = new THREE.Group();
+      plGantry.position.set(0, DSK_Y + 0.12, 0);
+
+      const bridgeBeam = M(box(0.12, 0.14, 1.42), EGA.LTGRAY);
+      plGantry.add(bridgeBeam);
+
+      const endCapL = M(box(0.16, 0.22, 0.12), EGA.BLUE);
+      endCapL.position.z = -0.62;
+      plGantry.add(endCapL);
+
+      const endCapR = M(box(0.16, 0.22, 0.12), EGA.BLUE);
+      endCapR.position.z = 0.62;
+      plGantry.add(endCapR);
+
+      // Spindle Carriage (Slides along Gantry beam on Z axis)
+      plSpindle = new THREE.Group();
+      plSpindle.position.set(0, 0.1, 0);
+
+      const spindleBox = M(box(0.18, 0.18, 0.18), EGA.BROWN);
+      plSpindle.add(spindleBox);
+
+      const drillBit = M(cyl(0.025, 0.22, 6), EGA.WHITE);
+      drillBit.position.y = -0.16;
+      plSpindle.add(drillBit);
+
+      // Emissive laser spotlight
+      plLaserLight = new THREE.PointLight(EGA.YELLOW, 0, 1.5);
+      plLaserLight.position.set(0, -0.27, 0);
+      plSpindle.add(plLaserLight);
+
+      const plLaserIndicator = M(box(0.03, 0.03, 0.03), EGA.YELLOW);
+      plLaserIndicator.position.set(0, -0.24, 0);
+      plSpindle.add(plLaserIndicator);
+
+      plGantry.add(plSpindle);
+      plotterGroup.add(plGantry);
+
+      scene.add(plotterGroup);
+    }
+
+    // 5. Dual Torus Portal with spinning vortex & filaments
+    function createPortal() {
+      portalGroup = new THREE.Group();
+      portalGroup.position.set(0.0, 0.8, -1.2); // Backdrop position, behind plotters
+
+      // Outer glowing torus
+      portalTorus1 = new THREE.Mesh(tor(0.52, 0.04, 8, 24), mF(EGA.CYAN));
+      portalGroup.add(portalTorus1);
+
+      // Inner glowing torus (angled)
+      portalTorus2 = new THREE.Mesh(tor(0.40, 0.03, 8, 20), mF(EGA.LTCYAN));
+      portalTorus2.rotation.x = Math.PI / 4;
+      portalGroup.add(portalTorus2);
+
+      // Spinning vector vortex star
+      portalVortex = new THREE.Group();
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const lineRay = M(box(0.015, 0.48, 0.015), EGA.LTBLUE);
+        lineRay.position.set(Math.cos(angle) * 0.22, Math.sin(angle) * 0.22, 0);
+        lineRay.rotation.z = angle + Math.PI / 2;
+        portalVortex.add(lineRay);
+      }
+      portalGroup.add(portalVortex);
+
+      // Expanding Shockwave Sphere (invisible initially)
+      const shGeom = new THREE.SphereGeometry(0.1, 16, 16);
+      const shMat = new THREE.MeshBasicMaterial({
+        color: EGA.WHITE,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide
+      });
+      portalShockwave = new THREE.Mesh(shGeom, shMat);
+      portalGroup.add(portalShockwave);
+
+      // Energetic Filaments Group (lines connecting to panels during Activation)
+      energeticFilamentsGroup = new THREE.Group();
+      scene.add(energeticFilamentsGroup);
+
+      scene.add(portalGroup);
+    }
+
+    // ==== PARTICLE & OBJECT SPAWNERS ===================================
+
+    // Spawns chaotic colorful data chunks flowing from Monitor to Plotter
+    function spawnChaosDataCube(t) {
+      const src = new THREE.Vector3(-2.2, DSK_Y + 0.34, 1.44); // Monitor coords
+      const tgt = new THREE.Vector3(1.4 + plGantry.position.x, DSK_Y + 0.28, 0.8 + plSpindle.position.z); // Spindle tip
+
+      const colors = [EGA.RED, EGA.MAGENTA, EGA.YELLOW, EGA.BROWN];
+      const selectedColor = colors[Math.floor(Math.random() * colors.length)];
+
+      const dc = M(box(0.05, 0.05, 0.05), selectedColor);
+      dc.position.copy(src);
+      
+      dc.userData = {
+        progress: 0,
+        speed: 0.02 + Math.random() * 0.015,
+        src: src.clone(),
+        tgt: tgt.clone(),
+        wiggleOffset: Math.random() * 100
+      };
+
+      scene.add(dc);
+      dataCubes.push(dc);
+    }
+
+    // Spawns green ordered packets flowing during Order phase
+    function spawnOrderedDataCube(t) {
+      const src = new THREE.Vector3(-2.2, DSK_Y + 0.34, 1.44);
+      const tgt = new THREE.Vector3(portalGroup.position.x, portalGroup.position.y, portalGroup.position.z);
+
+      const dc = M(box(0.045, 0.045, 0.045), EGA.LTGREEN);
+      dc.position.copy(src);
+
+      dc.userData = {
+        progress: 0,
+        speed: 0.04, // Very fast clean stream
+        src: src.clone(),
+        tgt: tgt.clone(),
+        wiggleOffset: Math.random() * 50
+      };
+
+      scene.add(dc);
+      dataCubes.push(dc);
+    }
+
+    // Spawns flying "?" question marks in 3D (Chaos Phase)
+    function spawnQuestionMark() {
+      const plX = 1.4 + plGantry.position.x;
+      const plZ = 0.8 + plSpindle.position.z;
+      
+      const qLabel = makeCssLabel('?', '#ff5555');
+      qLabel.position.set(plX + (Math.random()-0.5)*0.2, DSK_Y + 0.3, plZ + (Math.random()-0.5)*0.2);
+      
+      qLabel.userData = {
+        velY: 0.02 + Math.random() * 0.01,
+        velX: (Math.random() - 0.5) * 0.015,
+        rotZ: (Math.random() - 0.5) * 0.4,
+        scale: 1.0,
+        age: 0
+      };
+
+      scene.add(qLabel);
+      questionMarks.push(qLabel);
+    }
+
+    // Spawns golden dollars floating up from Portal (Order Phase)
+    function spawnGoldenDollar() {
+      // 3D Blocky dollar sign structure ($)
+      const dGroup = new THREE.Group();
+      dGroup.position.copy(portalGroup.position);
+      
+      const baseCol = M(cyl(0.015, 0.28, 4), EGA.YELLOW);
+      dGroup.add(baseCol);
+      
+      const loopTop = M(tor(0.07, 0.018, 5, 10), EGA.YELLOW);
+      loopTop.position.set(0, 0.05, 0);
+      dGroup.add(loopTop);
+
+      const loopBtm = M(tor(0.07, 0.018, 5, 10), EGA.YELLOW);
+      loopBtm.position.set(0, -0.05, 0);
+      dGroup.add(loopBtm);
+
+      dGroup.userData = {
+        velY: 0.012 + Math.random() * 0.01,
+        velX: (Math.random() - 0.5) * 0.02,
+        velZ: (Math.random() - 0.5) * 0.01,
+        rotY: (Math.random() - 0.5) * 0.05,
+        age: 0
+      };
+
+      scene.add(dGroup);
+      goldenDollars.push(dGroup);
+    }
+
+    // Spawns floating CSS G-Code metric labels from portal (Order Phase)
+    const ORDERED_METRICS = [
+      "ČAS ZPRACOVÁNÍ", "MARŽE", "ERP SAVINGS", "DOLLAR YIELD", "NEDOTAŽENÁ KŘIVKA", "AGREGOVANÁ ZAKÁZKA", "G-CODE COMPILATION"
+    ];
+    let metricWordIndex = 0;
+
+    function spawnFloatingMetricWord() {
+      const txt = ORDERED_METRICS[metricWordIndex % ORDERED_METRICS.length];
+      metricWordIndex++;
+
+      const fLabel = makeCssLabel(txt, '#55ff55');
+      fLabel.position.copy(portalGroup.position);
+      
+      fLabel.userData = {
+        velY: 0.01 + Math.random() * 0.008,
+        velX: (Math.random() - 0.5) * 0.015,
+        age: 0
+      };
+
+      scene.add(fLabel);
+      floatingTexts.push(fLabel);
+    }
+
+    // Spawns a physical panel block (Chaos Phase: launches to wall / Order Phase: placed clean)
+    function spawnPanelOnPlotter(isDefective) {
+      // Create detailed low-poly panel: base block + sub beveled center plate
+      const panel = new THREE.Group();
+      panel.position.set(1.4, DSK_Y + 0.18, 0.8); // On plotter center
+
+      const baseMatCol = isDefective ? EGA.RED : EGA.BROWN;
+      const basePlate = M(box(0.9, 0.12, 0.55), baseMatCol);
+      panel.add(basePlate);
+
+      // Inner bevel look
+      const innerPlate = M(box(0.8, 0.14, 0.45), isDefective ? EGA.LTRED : EGA.DKGRAY);
+      innerPlate.position.y = 0.01;
+      panel.add(innerPlate);
+
+      // Red protective/warning bounding box for defective ones
+      let warnFrame = null;
+      let warnLbl = null;
+      if (isDefective) {
+        warnFrame = M(box(1.0, 0.16, 0.65), EGA.RED);
+        warnFrame.material.wireframe = true;
+        panel.add(warnFrame);
+
+        warnLbl = makeCssLabel("! BAD DATA !", '#ff5555');
+        warnLbl.position.set(0, 0.24, 0);
+        panel.add(warnLbl);
+      }
+
+      // Find an empty slot index on the wall (0 - 11)
+      const slotIndex = panels.length;
+      if (slotIndex >= 12) {
+        // Wall fully populated, remove/recycle panel
+        return;
+      }
+
+      const r = Math.floor(slotIndex / 4);
+      const c = slotIndex % 4;
+      
+      // Perfect destination target on the wall coordinate frame
+      const tgtX = c * 1.25 - 1.87;
+      const tgtY = r * 0.95 - 0.7 + WALL_Y;
+      const tgtZ = WALL_Z - 0.08;
+
+      panel.userData = {
+        isDefective: isDefective,
+        isHealed: false,
+        slotIndex: slotIndex,
+        startPos: panel.position.clone(),
+        targetPos: new THREE.Vector3(tgtX, tgtY, tgtZ),
+        launchProgress: 0,
+        launchSpeed: 0.02 + Math.random() * 0.01,
+        warnFrame: warnFrame,
+        warnLabel: warnLbl,
+        chaosOffsetPos: new THREE.Vector3(
+          tgtX + (Math.random() - 0.5) * 0.36,
+          tgtY + (Math.random() - 0.5) * 0.28,
+          tgtZ + 0.05
+        ),
+        chaosOffsetRotZ: (Math.random() - 0.5) * 0.35,
+        mounted: false,
+        gridProgress: 0 // Easing lerp factor for defragmentation rearrangement
+      };
+
+      scene.add(panel);
+      panels.push(panel);
+    }
+
+    // Helper: Ease Out Back interpolation curve
+    function easeOutBack(x) {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    // ==== RESET LOGIC ==================================================
+    function triggerManualReset() {
+      // Clear animatable lists
+      dataCubes.forEach(dc => scene.remove(dc));
+      dataCubes = [];
+
+      questionMarks.forEach(qm => scene.remove(qmLbl(qm)));
+      function qmLbl(q) { scene.remove(q); return q; }
+      questionMarks = [];
+
+      panels.forEach(p => scene.remove(p));
+      panels = [];
+
+      goldenDollars.forEach(gd => scene.remove(dcGeo(gd)));
+      function dcGeo(g) { scene.remove(g); return g; }
+      goldenDollars = [];
+
+      floatingTexts.forEach(ft => scene.remove(ft));
+      floatingTexts = [];
+
+      energeticFilamentsGroup.clear();
+
+      // Reset Operator and PlGantry positions
+      if (operatorGroup) {
+        operatorGroup.position.set(-2.0, GND + 0.38, 1.4);
+        operatorGroup.rotation.set(0, 0, 0);
+      }
+      if (opHead) opHead.rotation.set(0, 0, 0);
+      if (opSmileMesh) opSmileMesh.visible = false;
+      if (plLaserLight) plLaserLight.intensity = 0;
+
+      // Re-seed cluster map sectors
+      for (let i = 0; i < CLUSTER_COUNT; i++) {
+        clusterSectorColors[i] = Math.random() < 0.35 ? 'red' : 'darkgray';
+      }
+
+      startT = performance.now();
+      drawPCDosScreen('CHAOS');
+      updatePCMonitorTexture();
+    }
+
+    // ==== WINDOW RESIZE ================================================
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      cssRenderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ==== PRIMARY ANIMATION LOOP (4 PHASES) ============================
+    function getPhase(t) {
+      if (t < PHASE.ACTIVATION) return 'CHAOS';
+      if (t < PHASE.ORDER) return 'ACTIVATION';
+      if (t < PHASE.IDLE) return 'ORDER';
+      return 'IDLE';
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const now = performance.now();
+      const t = (now - startT) / 1000; // Total run seconds
+      const phase = getPhase(t);
+
+      // 1. Time / Live HUD metrics calculation
+      const date = new Date();
+      document.getElementById('live-clock').textContent = date.toTimeString().split(' ')[0];
+
+      let entropyVal = 94.2;
+      let progressPercent = 0;
+      let statusStr = "CHAOTIC STREAM";
+      let statusColor = "#ff5555";
+      let yieldVal = "34.8%";
+      let savedVal = "0 CZK";
+
+      if (phase === 'CHAOS') {
+        entropyVal = 94.2 + Math.sin(t * 12) * 1.5;
+        progressPercent = Math.min(25, Math.floor(t * 3.5));
+        statusStr = "UNSTRUCTURED_DATA";
+        statusColor = "#ff5555";
+        yieldVal = "34.8%";
+        savedVal = "0 CZK";
+      } else if (phase === 'ACTIVATION') {
+        entropyVal = 94.2 - (t - PHASE.ACTIVATION) * 15;
+        progressPercent = 25 + Math.floor((t - PHASE.ACTIVATION) * 12);
+        statusStr = "DECODING_VCF...";
+        statusColor = "#ffff55";
+        yieldVal = "76.4%";
+        savedVal = "18 500 CZK";
+      } else if (phase === 'ORDER') {
+        const orderT = t - PHASE.ORDER; // 0 to 12s
+        const ratio = orderT / 12; // 0 to 1
+        entropyVal = 64.2 - ratio * 58.1;
+        progressPercent = 45 + Math.floor(ratio * 55);
+        statusStr = "DETERMINISTIC_GCODE";
+        statusColor = "#55ff55";
+        yieldVal = (34.8 + ratio * 64.2).toFixed(1) + "%";
+        savedVal = Math.floor(ratio * 137260) + " CZK";
+      } else {
+        // IDLE STATE
+        entropyVal = 6.1;
+        progressPercent = 100;
+        statusStr = "PARSED ENGINE V3 - IDLE";
+        statusColor = "#55ff55";
+        yieldVal = "99.0%";
+        savedVal = "137 260 CZK";
+      }
+
+      // Update HTML HUD Displays
+      document.getElementById('hud-entropy').textContent = entropyVal.toFixed(1) + "%";
+      document.getElementById('hud-entropy').style.color = (entropyVal > 40) ? '#ff5555' : '#55ff55';
+      document.getElementById('hud-time').textContent = t.toFixed(2) + "s";
+      document.getElementById('hud-status').textContent = statusStr;
+      document.getElementById('hud-status').style.color = statusColor;
+      document.getElementById('hud-yield').textContent = yieldVal;
+      document.getElementById('hud-yield').style.color = (phase === 'CHAOS') ? '#ff5555' : '#55ff55';
+      document.getElementById('hud-savings').textContent = savedVal;
+
+      // Construct visual ascii bar progress
+      const barFilled = Math.min(10, Math.floor(progressPercent / 10));
+      const barStr = "[" + "█".repeat(barFilled) + "░".repeat(10 - barFilled) + "] " + progressPercent + "%";
+      document.getElementById('hud-progress').textContent = barStr;
+
+      // ==== 2. NORTON SPEED DISK CLUSTER GRID SIMULATION ====
+      const currentSecFloor = Math.floor(t * 3);
+      if (currentSecFloor !== lastSecond) {
+        lastSecond = currentSecFloor;
+
+        if (phase === 'CHAOS') {
+          // Keep flashing some bad blocks and allocated blocks chaoticly
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            if (Math.random() < 0.15) {
+              clusterSectorColors[i] = Math.random() < 0.4 ? 'red' : 'magenta';
+            }
+          }
+        } else if (phase === 'ACTIVATION') {
+          // Fast blinking transition of clusters
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            clusterSectorColors[i] = Math.random() < 0.5 ? 'cyan' : 'magenta';
+          }
+        } else if (phase === 'ORDER') {
+          // Defrag scanning: progressively convert all indices to solid green
+          const orderRatio = (t - PHASE.ORDER) / 12; // 0 to 1
+          const thresholdIndex = Math.floor(orderRatio * CLUSTER_COUNT);
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            if (i < thresholdIndex) {
+              clusterSectorColors[i] = 'green';
+            } else {
+              // Remaining sectors flicker before being touched
+              if (Math.random() < 0.2) clusterSectorColors[i] = Math.random() < 0.3 ? 'red' : 'magenta';
+            }
+          }
+        } else {
+          // Clean solid green layout
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            clusterSectorColors[i] = 'green';
+          }
+        }
+
+        // Reconstruct innerHTML representation of Speed Disk sectors
+        let clusterHtml = "";
+        for (let i = 0; i < CLUSTER_COUNT; i++) {
+          let char = "░";
+          let color = "#555555"; // Empty
+
+          if (clusterSectorColors[i] === 'red') {
+            char = "▓";
+            color = "#ff5555";
+          } else if (clusterSectorColors[i] === 'magenta') {
+            char = "▒";
+            color = "#ff55ff";
+          } else if (clusterSectorColors[i] === 'cyan') {
+            char = "█";
+            color = "#55ffff";
+          } else if (clusterSectorColors[i] === 'green') {
+            char = "█";
+            color = "#55ff55";
+          }
+
+          clusterHtml += `<span style="color: ${color};">${char}</span>`;
+          if ((i + 1) % 16 === 0) clusterHtml += "<br>"; // 16x4 Grid rows
+        }
+        document.getElementById('cluster-map').innerHTML = clusterHtml;
+      }
+
+      // ==== 3. ANIMATION STAGE HANDLING ====
+
+      // A. CHAOS PHASE (0 - 7s)
+      if (phase === 'CHAOS') {
+        // Slow chaotic spindle sliding movement
+        if (plGantry) plGantry.position.x = Math.sin(t * 3) * 0.4;
+        if (plSpindle) plSpindle.position.z = Math.cos(t * 2) * 0.4;
+        if (plLaserLight) {
+          plLaserLight.intensity = 1.0 + Math.sin(t * 30) * 0.5; // Flicker laser pointer
+        }
+
+        // Spawn chaotic flying raw binary cubes
+        if (Math.random() < 0.24) {
+          spawnChaosDataCube(t);
+        }
+
+        // Spawn question marks above plotter carriage
+        if (Math.random() < 0.08) {
+          spawnQuestionMark();
+        }
+
+        // Spawn defective and standard panels onto plotter and fly them to wall
+        const spawnSec = Math.floor(t);
+        if (spawnSec > panels.length && panels.length < 12) {
+          const isThird = (panels.length + 1) % 3 === 0;
+          spawnPanelOnPlotter(isThird);
+        }
+
+        // Sad slouching Operator pose
+        if (opHead) {
+          opHead.rotation.x = 0.28; // Looking down/sad
+          opHead.rotation.y = 0.1 * Math.sin(t * 2);
+        }
+        if (opLeftArm) {
+          opLeftArm.position.y = 0.3 + Math.sin(t * 3) * 0.015; // Slouched heavy arm holding mug
+        }
+        if (opSmileMesh) opSmileMesh.visible = false; // Sad face (no smile block)
+
+        // Reset full-screen flash alpha
+        document.getElementById('flash-overlay').style.opacity = 0;
+      }
+
+      // B. ACTIVATION PHASE (7 - 10s)
+      else if (phase === 'ACTIVATION') {
+        // Visual Parser Trigger Flash (exactly at t = 7.5s)
+        if (t >= 7.5 && t < 7.8) {
+          const flashAmt = 1.0 - (t - 7.5) / 0.3;
+          document.getElementById('flash-overlay').style.opacity = flashAmt;
+          scene.background.setHex(EGA.WHITE); // Flash backdrop to solid white
+          
+          // Switch Monitor texture to processing status
+          drawPCDosScreen('ACTIVATION');
+          updatePCMonitorTexture();
+        } else {
+          document.getElementById('flash-overlay').style.opacity = 0;
+          scene.background.setHex(EGA.BLACK);
+        }
+
+        // Expand portal shockwave ring
+        if (t >= 7.5) {
+          portalShockwave.visible = true;
+          const ratio = (t - 7.5) / 2.0; // Grows for 2 seconds
+          portalShockwave.scale.setScalar(0.1 + ratio * 48);
+          portalShockwave.material.opacity = Math.max(0, 1.0 - ratio * 1.2);
+        }
+
+        // Plotter stops laser, returns carriage back center
+        if (plLaserLight) plLaserLight.intensity = 0;
+        if (plGantry) plGantry.position.x += (0 - plGantry.position.x) * 0.08;
+        if (plSpindle) plSpindle.position.z += (0 - plSpindle.position.z) * 0.08;
+
+        // Operator perking up, reacting to the flash!
+        if (opHead) {
+          opHead.rotation.x = -0.15; // Looking straight and high
+          opHead.rotation.y = 0;
+        }
+        if (opLeftArm) {
+          // Lift arm slightly, putting down the mug onto the PC desk table
+          opLeftArm.rotation.x = -0.5;
+          opLeftArm.position.x = -0.22;
+        }
+
+        // Energetic glowing vector lines (Filaments) connecting portal directly to misaligned panels
+        energeticFilamentsGroup.clear();
+        if (t >= 7.6 && t < 9.5) {
+          const count = panels.length;
+          panels.forEach((p, idx) => {
+            const start = portalGroup.position;
+            const end = p.position;
+
+            // Generate simple block wire filament line segment
+            const distance = start.distanceTo(end);
+            const filGeo = box(0.015, 0.015, distance);
+            const filMesh = M(filGeo, EGA.LTCYAN);
+            
+            // Align mesh along direction vector
+            filMesh.position.copy(start).add(end).multiplyScalar(0.5);
+            filMesh.lookAt(end);
+            
+            // Pulsing scaling factor
+            filMesh.scale.x = 1.0 + Math.sin(t * 40 + idx) * 0.4;
+            energeticFilamentsGroup.add(filMesh);
+          });
+        }
+      }
+
+      // C. DEFRAGMENTATION & ORDER PHASE (10 - 22s)
+      else if (phase === 'ORDER') {
+        // Clear old shockwave
+        portalShockwave.visible = false;
+        energeticFilamentsGroup.clear();
+
+        // High speed clean particles flowing from PC into the Portal
+        if (Math.random() < 0.45) {
+          spawnOrderedDataCube(t);
+        }
+
+        // Spawn beautiful metrics and golden dollar icons floating out from portal
+        if (Math.random() < 0.04) {
+          spawnGoldenDollar();
+        }
+        if (Math.random() < 0.03) {
+          spawnFloatingMetricWord();
+        }
+
+        // Update PC screen to green success status
+        if (currentSecFloor % 24 === 0) {
+          drawPCDosScreen('ORDER');
+          updatePCMonitorTexture();
+        }
+
+        // Operator sitting happily, placing mug onto desk, slight dancing vibration
+        if (opHead) {
+          opHead.rotation.x = -0.05 + Math.sin(t * 15) * 0.03; // Bouncing head
+          opHead.rotation.y = 0.2 * Math.cos(t * 4);
+        }
+        if (opSmileMesh) opSmileMesh.visible = true; // Large satisfied red pixel smile visible!
+        if (operatorGroup) {
+          // Bouncing/vibrating happily
+          operatorGroup.position.y = GND + 0.38 + Math.abs(Math.sin(t * 8)) * 0.06;
+          operatorGroup.position.x = -2.0 + Math.sin(t * 12) * 0.02;
+        }
+
+        // Moving Plotter carriage back to work - printing perfect structured green segments
+        if (plGantry) plGantry.position.x = Math.sin(t * 1.5) * 0.35;
+        if (plSpindle) plSpindle.position.z = Math.cos(t * 1.5) * 0.35;
+        if (plLaserLight) {
+          plLaserLight.color.setHex(EGA.LTGREEN); // Parsing green laser
+          plLaserLight.intensity = 1.2;
+        }
+
+        // Spawn perfect panels
+        const orderSec = Math.floor((t - PHASE.ORDER) / 1.5);
+        if (orderSec > panels.length - 7 && panels.length < 12) {
+          spawnPanelOnPlotter(false); // isDefective = false
+          const lastP = panels[panels.length - 1];
+          lastP.userData.chaosOffsetPos.copy(lastP.userData.targetPos);
+          lastP.userData.chaosOffsetRotZ = 0;
+        }
+
+        // Rearrange Wall Panels: Slide them into their perfect coordinate grids (Ease Out Back)
+        panels.forEach((p, idx) => {
+          if (!p.userData.mounted) {
+            p.userData.gridProgress += 0.008; // Smooth interpolation progress
+
+            if (p.userData.gridProgress >= 1.0) {
+              p.userData.gridProgress = 1.0;
+              p.userData.mounted = true;
+            }
+
+            // Interpolate from chaotic misaligned offset coordinates to perfect target
+            const easeVal = easeOutBack(p.userData.gridProgress);
+            p.position.lerpVectors(p.userData.chaosOffsetPos, p.userData.targetPos, easeVal);
+            p.rotation.z = THREE.MathUtils.lerp(p.userData.chaosOffsetRotZ, 0, easeVal);
+
+            // Defective Panel Healing conversion
+            if (p.userData.isDefective) {
+              // Smooth color fade from Red warn to clean green
+              const redPart = p.children[0]; // base plate
+              const greenPart = p.children[1]; // inner bevel plate
+              
+              const colRatio = p.userData.gridProgress;
+              redPart.material.color.lerpColors(new THREE.Color(EGA.RED), new THREE.Color(EGA.GREEN), colRatio);
+              greenPart.material.color.lerpColors(new THREE.Color(EGA.LTRED), new THREE.Color(EGA.LTGREEN), colRatio);
+
+              // Fade out the physical wireframe outline warning and labels
+              if (colRatio > 0.4) {
+                if (p.userData.warnFrame) p.userData.warnFrame.visible = false;
+                if (p.userData.warnLabel) p.userData.warnLabel.visible = false;
+              }
+            }
+          }
+        });
+      }
+
+      // D. IDLE STABILIZED PHASE (t >= 22s+)
+      else {
+        // Safe idle stabilization
+        if (plLaserLight) plLaserLight.intensity = 0.2; // Dim laser spot
+        if (plGantry) plGantry.position.x += (0 - plGantry.position.x) * 0.04;
+        if (plSpindle) plSpindle.position.z += (0 - plSpindle.position.z) * 0.04;
+        
+        // Gentle scene orbit rotation automatically triggered for high presentation look
+        controls.autoRotate = true;
+
+        // Operator relaxed looking satisfiedly towards screen
+        if (opHead) {
+          opHead.rotation.x = -0.06;
+          opHead.rotation.y = 0.18;
+          opHead.rotation.z = Math.sin(t * 1.5) * 0.015;
+        }
+        if (operatorGroup) {
+          operatorGroup.position.y = GND + 0.38;
+          operatorGroup.position.x = -2.0;
+        }
+
+        // Complete lock panels on wall grid
+        panels.forEach(p => {
+          p.position.copy(p.userData.targetPos);
+          p.rotation.z = 0;
+          if (p.userData.isDefective) {
+            if (p.userData.warnFrame) p.userData.warnFrame.visible = false;
+            if (p.userData.warnLabel) p.userData.warnLabel.visible = false;
+          }
+        });
+      }
+
+      // ==== 4. GENERAL ANIMATIONS (Applies to all phases) ====
+
+      // Portal rotational spinning
+      if (portalTorus1) {
+        portalTorus1.rotation.z += 0.01;
+        portalTorus1.rotation.y += 0.006;
+      }
+      if (portalTorus2) {
+        portalTorus2.rotation.z -= 0.015;
+        portalTorus2.rotation.x += 0.008;
+      }
+      if (portalVortex) {
+        portalVortex.rotation.z += 0.035; // Vector rays rotate rapidly
+      }
+
+      // Process flying chaotic/ordered data cubes (Data flows between monitor & plotter)
+      for (let i = dataCubes.length - 1; i >= 0; i--) {
+        const dc = dataCubes[i];
+        dc.userData.progress += dc.userData.speed;
+
+        if (dc.userData.progress >= 1.0) {
+          // Recycle
+          scene.remove(dc);
+          dataCubes.splice(i, 1);
+        } else {
+          // Wiggle trajectory simulation
+          const basePos = new THREE.Vector3().lerpVectors(dc.userData.src, dc.userData.tgt, dc.userData.progress);
+          const wiggleAmp = (phase === 'CHAOS') ? 0.16 : 0.03; // Structured streams are razor clean
+          
+          dc.position.x = basePos.x;
+          dc.position.y = basePos.y + Math.sin(dc.userData.progress * 16 + dc.userData.wiggleOffset) * wiggleAmp;
+          dc.position.z = basePos.z + Math.cos(dc.userData.progress * 12 + dc.userData.wiggleOffset) * wiggleAmp;
+
+          // Align parsing colors
+          if (phase === 'ORDER' || phase === 'IDLE') {
+            dc.material.color.setHex(EGA.LTGREEN);
+          }
+        }
+      }
+
+      // General unified panel flight progress handler
+      panels.forEach(p => {
+        if (p.userData.launchProgress < 1.0) {
+          p.userData.launchProgress += p.userData.launchSpeed;
+          if (p.userData.launchProgress >= 1.0) {
+            p.userData.launchProgress = 1.0;
+          }
+          p.position.lerpVectors(p.userData.startPos, p.userData.chaosOffsetPos, p.userData.launchProgress);
+          p.rotation.z = THREE.MathUtils.lerp(0, p.userData.chaosOffsetRotZ, p.userData.launchProgress);
+        }
+      });
+
+      // Process floating Question Marks (Chaos phase only)
+      for (let i = questionMarks.length - 1; i >= 0; i--) {
+        const qm = questionMarks[i];
+        qm.userData.age += 0.016;
+
+        if (qm.userData.age > 1.2 || phase === 'ORDER' || phase === 'IDLE') {
+          scene.remove(qm);
+          questionMarks.splice(i, 1);
+        } else {
+          qm.position.y += qm.userData.velY;
+          qm.position.x += qm.userData.velX;
+          // Slowly shrink/fade CSS font
+          const progress = qm.userData.age / 1.2;
+          qm.element.style.transform = `scale(${1.0 - progress})`;
+          qm.element.style.opacity = 1.0 - progress;
+        }
+      }
+
+      // Process floating golden dollars (Order phase only)
+      for (let i = goldenDollars.length - 1; i >= 0; i--) {
+        const gd = goldenDollars[i];
+        gd.userData.age += 0.016;
+
+        if (gd.userData.age > 2.0) {
+          scene.remove(gd);
+          goldenDollars.splice(i, 1);
+        } else {
+          gd.position.y += gd.userData.velY;
+          gd.position.x += gd.userData.velX;
+          gd.position.z += gd.userData.velZ;
+          gd.rotation.y += gd.userData.rotY;
+
+          // Scale down smoothly before disappearing
+          const rem = 2.0 - gd.userData.age;
+          if (rem < 0.5) {
+            gd.scale.setScalar(rem / 0.5);
+          }
+        }
+      }
+
+      // Process floating G-Code label words (Order phase only)
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.userData.age += 0.016;
+
+        if (ft.userData.age > 2.2) {
+          scene.remove(ft);
+          floatingTexts.splice(i, 1);
+        } else {
+          ft.position.y += ft.userData.velY;
+          ft.position.x += ft.userData.velX;
+          
+          const progress = ft.userData.age / 2.2;
+          ft.element.style.transform = `scale(${1.0 - progress})`;
+          ft.element.style.opacity = 1.0 - progress;
+        }
+      }
+
+      // Render loop calls
+      controls.update();
+      renderer.render(scene, camera);
+      cssRenderer.render(scene, camera);
+    }
+
+    // ==== BOOTSTRAP INITIALIZATION =====================================
+    window.onload = init;
+    window.triggerManualReset = triggerManualReset;
+  </script>
+</body>
+</html>
