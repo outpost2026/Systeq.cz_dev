@@ -304,7 +304,7 @@
 
     // ==== CONSTANTS & EGA-16 PALETTE ===================================
     const GND = -0.55;
-    const DSK_Y = 0.22;
+    const DSK_Y = 0.33;
     const WALL_Z = -2.5;
     const WALL_W = 5.5;
     const WALL_H = 3.2;
@@ -337,7 +337,7 @@
     let plGantry, plSpindle, plLaserLight;
     
     // Operator body parts
-    let opHead, opLeftArm, opRightArm, opSmileMesh;
+    let opHead, opLeftArm, opRightArm, opSmileMesh, opLegL, opLegR;
     
     // Portal objects
     let portalTorus1, portalTorus2, portalVortex, portalShockwave;
@@ -396,15 +396,19 @@
       controls.autoRotateSpeed = 0.15;
 
       // Lights (Chunky directional & ambient with point light spots)
-      const ambientLight = new THREE.AmbientLight(EGA.DKGRAY, 1.2);
+      const ambientLight = new THREE.AmbientLight(EGA.DKGRAY, 1.8);
       scene.add(ambientLight);
 
-      const mainDirLight = new THREE.DirectionalLight(EGA.LTGRAY, 1.4);
+      const mainDirLight = new THREE.DirectionalLight(EGA.LTGRAY, 2.0);
       mainDirLight.position.set(3, 8, 4);
       scene.add(mainDirLight);
 
-      const yellowPointLight = new THREE.PointLight(EGA.YELLOW, 1.5, 6);
-      yellowPointLight.position.set(1.2, 0.8, 1.0); // Plotter spotlight
+      const fillDirLight = new THREE.DirectionalLight(EGA.LTGRAY, 0.8);
+      fillDirLight.position.set(-4, 6, -2);
+      scene.add(fillDirLight);
+
+      const yellowPointLight = new THREE.PointLight(EGA.YELLOW, 2.0, 8);
+      yellowPointLight.position.set(0, 1.0, 1.0); // Plotter spotlight
       scene.add(yellowPointLight);
 
       // Floor & Retro Grid
@@ -491,24 +495,34 @@
         }
       }
 
-      // Computer Chassis (Horizontal beige desktop)
-      const chassis = M(box(0.44, 0.16, 0.44), EGA.LTGRAY);
-      chassis.position.set(-0.3, DSK_Y + 0.12, 0.1);
-      pcGroup.add(chassis);
+      // Computer Tower Case (vertical)
+      const tower = M(box(0.20, 0.44, 0.38), EGA.DKGRAY);
+      tower.position.set(-0.40, DSK_Y + 0.24, 0.0);
+      pcGroup.add(tower);
 
-      // Chassis detailing: Floppy drive slots & glowing power button
-      const floppy = M(box(0.18, 0.02, 0.05), EGA.BLACK);
-      floppy.position.set(-0.3, DSK_Y + 0.14, 0.32);
+      // Tower front panel
+      const towerFront = M(box(0.22, 0.40, 0.02), EGA.BLACK);
+      towerFront.position.set(-0.40, DSK_Y + 0.24, 0.19);
+      pcGroup.add(towerFront);
+
+      // Floppy drive slots
+      const floppy = M(box(0.14, 0.02, 0.04), EGA.LTGRAY);
+      floppy.position.set(-0.40, DSK_Y + 0.38, 0.195);
       pcGroup.add(floppy);
 
-      const floppy2 = M(box(0.18, 0.02, 0.05), EGA.BLACK);
-      floppy2.position.set(-0.3, DSK_Y + 0.08, 0.32);
+      const floppy2 = M(box(0.14, 0.02, 0.04), EGA.LTGRAY);
+      floppy2.position.set(-0.40, DSK_Y + 0.34, 0.195);
       pcGroup.add(floppy2);
 
-      // Red power LED
-      const powerLed = M(box(0.03, 0.03, 0.03), EGA.RED);
-      powerLed.position.set(-0.14, DSK_Y + 0.12, 0.322);
+      // Power LED (green glow)
+      const powerLed = M(box(0.03, 0.03, 0.03), EGA.LTGREEN);
+      powerLed.position.set(-0.40, DSK_Y + 0.12, 0.196);
       pcGroup.add(powerLed);
+
+      // Ventilation grille on side
+      const ventGrille = M(box(0.02, 0.20, 0.18), EGA.BLACK);
+      ventGrille.position.set(-0.30, DSK_Y + 0.24, 0.0);
+      pcGroup.add(ventGrille);
 
       // Chunky beige monitor stand
       const monStand = M(box(0.18, 0.1, 0.18), EGA.LTGRAY);
@@ -608,7 +622,7 @@
     // 3. 8-Bit CNC Operator (Red Cap, Ginger beard, holding mug, animatable)
     function createOperator() {
       operatorGroup = new THREE.Group();
-      operatorGroup.position.set(-2.0, GND + 0.38, 1.4); // Seated slightly shifted
+      operatorGroup.position.set(-1.2, GND + 0.38, 1.5); // Seated next to desk
 
       // Chair / Stool
       const stoolBase = M(cyl(0.18, 0.04, 6), EGA.DKGRAY);
@@ -622,6 +636,22 @@
       const body = M(box(0.38, 0.44, 0.26), EGA.BLUE);
       body.position.y = 0.18;
       operatorGroup.add(body);
+
+      // Black shorts (over upper legs)
+      const shortsL = M(box(0.14, 0.10, 0.16), EGA.BLACK);
+      shortsL.position.set(-0.10, 0.04, 0.0);
+      operatorGroup.add(shortsL);
+      const shortsR = M(box(0.14, 0.10, 0.16), EGA.BLACK);
+      shortsR.position.set(0.10, 0.04, 0.0);
+      operatorGroup.add(shortsR);
+
+      // Legs (cylinders below shorts)
+      opLegL = M(cyl(0.06, 0.30, 8), EGA.DKGRAY);
+      opLegL.position.set(-0.10, -0.16, 0.0);
+      operatorGroup.add(opLegL);
+      opLegR = M(cyl(0.06, 0.30, 8), EGA.DKGRAY);
+      opLegR.position.set(0.10, -0.16, 0.0);
+      operatorGroup.add(opLegR);
 
       // Red Cap visor extension
       // Head Group (So we can rotate/tilt head)
@@ -704,7 +734,7 @@
     // 4. CNC Plotter Table with Gantry & tool Carriage
     function createPlotter() {
       plotterGroup = new THREE.Group();
-      plotterGroup.position.set(1.4, GND, 0.8);
+      plotterGroup.position.set(-0.5, GND + 0.15, 0.8);
 
       // Solid Plotter Bed
       const bed = M(box(2.2, 0.06, 1.4), EGA.DKGRAY);
@@ -824,7 +854,7 @@
     // Spawns chaotic colorful data chunks flowing from Monitor to Plotter
     function spawnChaosDataCube(t) {
       const src = new THREE.Vector3(-2.2, DSK_Y + 0.34, 1.44); // Monitor coords
-      const tgt = new THREE.Vector3(1.4 + plGantry.position.x, DSK_Y + 0.28, 0.8 + plSpindle.position.z); // Spindle tip
+      const tgt = new THREE.Vector3(-0.5 + plGantry.position.x, DSK_Y + 0.28, 0.8 + plSpindle.position.z); // Spindle tip
 
       const colors = [EGA.RED, EGA.MAGENTA, EGA.YELLOW, EGA.BROWN];
       const selectedColor = colors[Math.floor(Math.random() * colors.length)];
@@ -866,7 +896,7 @@
 
     // Spawns flying "?" question marks in 3D (Chaos Phase)
     function spawnQuestionMark() {
-      const plX = 1.4 + plGantry.position.x;
+      const plX = -0.5 + plGantry.position.x;
       const plZ = 0.8 + plSpindle.position.z;
       
       const qLabel = makeCssLabel('?', '#ff5555');
@@ -940,7 +970,7 @@
     function spawnPanelOnPlotter(isDefective) {
       // Create detailed low-poly panel: base block + sub beveled center plate
       const panel = new THREE.Group();
-      panel.position.set(1.4, DSK_Y + 0.18, 0.8); // On plotter center
+      panel.position.set(-0.5, DSK_Y + 0.18, 0.8); // On plotter center
 
       const baseMatCol = isDefective ? EGA.RED : EGA.BROWN;
       const basePlate = M(box(0.9, 0.12, 0.55), baseMatCol);
@@ -1034,7 +1064,7 @@
 
       // Reset Operator and PlGantry positions
       if (operatorGroup) {
-        operatorGroup.position.set(-2.0, GND + 0.38, 1.4);
+        operatorGroup.position.set(-1.2, GND + 0.38, 1.5);
         operatorGroup.rotation.set(0, 0, 0);
       }
       if (opHead) opHead.rotation.set(0, 0, 0);
