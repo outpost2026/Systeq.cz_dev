@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Sledujte na vlastní oči, jak náš algoritmus převádí nerozluštitelný čínský VCF formát na čistá technologická data.">
+<title>SYSTEQ // VCF Parser — Entropy Reduction</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e14; overflow: hidden; font-family: 'JetBrains Mono', monospace; }
+canvas { display: block; }
+
+.css-label {
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgba(0,0,0,0.9);
+  pointer-events: none;
+}
+.label-entropy-high { color: #EF4444; font-size: 12px; }
+.label-entropy-low  { color: #22C55E; font-size: 12px; }
+.label-coffee { color: #E2E8F0; font-size: 14px; }
+.label-hud {
+  color: #94A3B8;
+  font-size: 10px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+@media (max-width: 767px) {
+  .css-label { font-size: 9px; }
+  .label-entropy-high, .label-entropy-low { font-size: 10px; }
+  .label-coffee { font-size: 11px; }
+  .label-hud { font-size: 8px; }
+}
+</style>
+</head>
+<body>
+
+<script type="importmap">
+{
+  "imports": {
+    "three":            "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/":    "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ──────── Helpers ────────
+const box = (w,h,d) => new THREE.BoxGeometry(w,h,d);
+const cyl = (r,h,s) => new THREE.CylinderGeometry(r,r,h,s||8);
+const tor = (R,r,rs,ts) => new THREE.TorusGeometry(R,r,rs||6,ts||8);
+const tGeom = (R,r,p,q) => new THREE.TorusKnotGeometry(R||0.55, r||0.05, p||80, q||12);
+const matF = c => new THREE.MeshStandardMaterial({ color: c, flatShading: true });
+const matE = (c,ei) => new THREE.MeshStandardMaterial({ color: c, emissive: c, emissiveIntensity: ei||0.5, flatShading: true });
+const matB = c => new THREE.MeshBasicMaterial({ color: c });
+const M = (g, c, m) => new THREE.Mesh(g, m ? m(g.color||c) : matF(c));
+
+// ──────── Globals ────────
+let startT;
+let workspace, portalGroup, cncTable, cncGantry, spindleGroup, cncBoard;
+let particleData, particleGeo, particleMat, positions, colors;
+let toolLine, toolSegs, toolGeo;
+let entropyDiv, entropyLab, hudDiv, coffeeDiv;
+let operatorGroup, headGrp, mugGrp, steamBoxes = [];
+let hudLabelsGroup;
+
+const N_PARTICLES  = window.innerWidth < 768 ? 300 : 750;
+const N_SEGMENTS   = window.innerWidth < 768 ? 120 : 300;
+const GND       = -0.45;
+const TBL_TOP   = 0.02;
+const DSK_TOP   = 0.28;
+const IS_MOBILE = window.innerWidth < 768;
+
+// ──────── Init ────────
+function init() {
+  const W = window.innerWidth, H = window.innerHeight;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x0a0e14);
+  if (!IS_MOBILE) scene.fog = new THREE.Fog(0x0a0e14, 8, 22);
+
+  const camera = new THREE.PerspectiveCamera(45, W/H, 0.1, 1000);
+  camera.position.set(0, 2.8, 8);
+  camera.lookAt(1.5, 0.2, -0.2);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  const labelR = new CSS2DRenderer();
+  labelR.setSize(W, H);
+  labelR.domElement.style.position = 'absolute';
+  labelR.domElement.style.top = '0px';
+  labelR.domElement.style.pointerEvents = 'none';
+  document.body.appendChild(labelR.domElement);
+
+  // OrbitControls — locked until 15s
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.target.set(1.5, 0.2, -0.2);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.08;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.35;
+  controls.enablePan = false;
+  controls.minDistance = 4;
+  controls.maxDistance = 14;
+  controls.enabled = false;
+
+  // Lights
+  scene.add(new THREE.AmbientLight(0x303050, IS_MOBILE ? 0.6 : 0.5));
+  const sun = new THREE.DirectionalLight(0xffeedd, 0.9);
+  sun.position.set(3, 6, 4); sun.castShadow = true;
+  sun.shadow.mapSize.set(512,512);
+  sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 30;
+  sun.shadow.camera.left = -8; sun.shadow.camera.right = 8;
+  sun.shadow.camera.top = 6; sun.shadow.camera.bottom = -4;
+  scene.add(sun);
+  const fill = new THREE.PointLight(0x4466aa, 0.4);
+  fill.position.set(-2, 2, 2); scene.add(fill);
+  const pts = new THREE.PointLight(0xFDE047, 1.0, 5);
+  pts.position.set(0, 0.5, -0.3); scene.add(pts); // portal glow
+  const pt2 = new THREE.PointLight(0x22C55E, 0.6, 4);
+  pt2.position.set(3, 0.3, -1); scene.add(pt2); // toolpath zone
+
+  // Floor
+  const floor = M(box(6.5, 0.03, 5.5), 0x0F172A);
+  floor.position.set(1.5, GND - 0.015, -0.5);
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Build all groups
+  workspace     = buildWorkspace();     scene.add(workspace);
+  portalGroup   = buildPortal();        scene.add(portalGroup);
+  const cncGrps = buildCNC();           scene.add(cncGrps.root);
+  cncTable = cncGrps.table;
+  cncGantry = cncGrps.gantry;
+  spindleGroup = cncGrps.spindle;
+  cncBoard = cncGrps.board;
+  const ptsRes  = buildParticles();     scene.add(ptsRes.group);
+  const toolRes = buildToolpath();      scene.add(toolRes.group);
+  toolLine = toolRes.line;
+  const hudObjs = buildHUD();           scene.add(hudObjs.group);
+  hudLabelsGroup = hudObjs.group;
+  operatorGroup = buildOperator(hudObjs.coffeeGroup); scene.add(operatorGroup);
+
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h); labelR.setSize(w, h);
+  });
+
+  startT = performance.now();
+  renderer.setAnimationLoop(() => animate(renderer, labelR, scene, camera, controls));
+}
+
+// ──────── 1. PC Workstation ────────
+function buildWorkspace() {
+  const g = new THREE.Group();
+
+  // Desk
+  const desk = M(box(0.85, 0.04, 0.55), 0x475569);
+  desk.position.set(-3.0, DSK_TOP + 0.02, 0.8);
+  desk.receiveShadow = true; desk.castShadow = true;
+  g.add(desk);
+
+  // Legs
+  const legL = M(box(0.06, 0.72, 0.5), 0x334155);
+  legL.position.set(-3.35, GND + 0.36, 0.8);
+  legL.castShadow = true;
+  g.add(legL);
+  const legR = M(box(0.06, 0.72, 0.5), 0x334155);
+  legR.position.set(-2.65, GND + 0.36, 0.8);
+  legR.castShadow = true;
+  g.add(legR);
+
+  // Monitor
+  const monTex = createMonitorTexture();
+  const monGeom = box(0.55, 0.38, 0.03);
+  const monMat = new THREE.MeshStandardMaterial({ map: monTex, roughness: 0.2 });
+  const mon = new THREE.Mesh(monGeom, monMat);
+  mon.position.set(-3.0, DSK_TOP + 0.27, 0.78);
+  mon.castShadow = true;
+  g.add(mon);
+
+  // Monitor stand
+  const stand = M(box(0.16, 0.12, 0.16), 0x475569);
+  stand.position.set(-3.0, DSK_TOP + 0.06, 0.95);
+  g.add(stand);
+
+  // PC tower
+  const tower = M(box(0.14, 0.44, 0.38), 0x1E293B);
+  tower.position.set(-3.5, GND + 0.22, 1.05);
+  tower.castShadow = true;
+  g.add(tower);
+
+  // Keyboard
+  const kbd = M(box(0.38, 0.03, 0.13), 0x334155);
+  kbd.position.set(-3.0, DSK_TOP + 0.035, 1.08);
+  g.add(kbd);
+
+  return g;
+}
+
+function createMonitorTexture() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 160;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0A0E14';
+  ctx.fillRect(0, 0, 256, 160);
+  ctx.strokeStyle = '#EF4444';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(6, 6, 244, 148);
+  ctx.fillStyle = '#E2E8F0';
+  ctx.font = 'bold 15px "JetBrains Mono", monospace';
+  ctx.fillText('数据处理失敗', 14, 34);
+  ctx.fillStyle = '#94A3B8';
+  ctx.font = '11px "JetBrains Mono", monospace';
+  ctx.fillText('E8 A3 6F  7E 2B 4C', 14, 60);
+  ctx.fillText('A1 B2 C3  D4 E5 F6', 14, 78);
+  ctx.fillText('00 11 22  33 44 55', 14, 96);
+  ctx.fillText('B0 5F 9C  A8 1D 3E', 14, 114);
+  ctx.fillStyle = '#EF4444';
+  ctx.font = 'bold 12px "JetBrains Mono", monospace';
+  ctx.fillText('FORMAT: UNKNOWN', 14, 140);
+  return new THREE.CanvasTexture(c);
+}
+
+// ──────── 2. CNC Flatbed Plotter ────────
+function buildCNC() {
+  const root = new THREE.Group();
+  const TX = 3.0, TZ = -1.0;
+
+  // Table surface
+  const table = M(box(3.0, 0.06, 1.5), 0x334155);
+  table.position.set(TX, TBL_TOP + 0.03, TZ);
+  table.receiveShadow = true; table.castShadow = true;
+  root.add(table);
+
+  // 6 legs
+  const legGeo = box(0.08, 0.46, 0.08);
+  const legColor = 0x1E293B;
+  const legXs = [1.65, 3.0, 4.35];
+  for (const lx of legXs) {
+    for (const lz of [TZ - 0.6, TZ + 0.6]) {
+      const leg = M(legGeo, legColor);
+      leg.position.set(lx, GND + 0.23, lz);
+      leg.castShadow = true;
+      root.add(leg);
+    }
+  }
+
+  // Rails (X-axis)
+  const railGeo = box(3.0, 0.04, 0.04);
+  for (const rz of [TZ - 0.62, TZ + 0.62]) {
+    const rail = M(railGeo, 0x64748B);
+    rail.position.set(TX, TBL_TOP + 0.05, rz);
+    root.add(rail);
+  }
+
+  // Gantry bridge (moves X)
+  const gantry = new THREE.Group();
+  const bridge = M(box(0.14, 0.18, 1.38), 0x64748B);
+  bridge.position.set(0, 0, 0);
+  bridge.castShadow = true;
+  gantry.add(bridge);
+  // Gantry sides
+  const sideL = M(box(0.14, 0.36, 0.08), 0x475569);
+  sideL.position.set(0, -0.18, -0.65);
+  gantry.add(sideL);
+  const sideR = M(box(0.14, 0.36, 0.08), 0x475569);
+  sideR.position.set(0, -0.18, 0.65);
+  gantry.add(sideR);
+  gantry.position.set(TX, TBL_TOP + 0.10, TZ);
+  root.add(gantry);
+
+  // Spindle carriage (moves Z on gantry)
+  const spindle = new THREE.Group();
+  const carriage = M(box(0.22, 0.16, 0.22), 0x334155);
+  carriage.position.set(0, 0, 0);
+  spindle.add(carriage);
+  const tool = M(cyl(0.04, 0.18, 8), 0x94A3B8);
+  tool.position.set(0, -0.17, 0);
+  spindle.add(tool);
+  spindle.position.set(TX, TBL_TOP + 0.20, TZ);
+  root.add(spindle);
+
+  // Board (output product)
+  const board = M(box(2.2, 0.02, 1.0), 0xF5F0D5);
+  board.position.set(TX, TBL_TOP + 0.035, TZ);
+  board.receiveShadow = true;
+  board.visible = false;
+  root.add(board);
+
+  return { root, table, gantry, spindle, board };
+}
+
+// ──────── 3. Portal ────────
+function buildPortal() {
+  const g = new THREE.Group();
+  g.visible = false;
+
+  const knot = new THREE.Mesh(tGeom(), matE(0xFDE047, 0.4));
+  g.add(knot);
+
+  // Outer ring accent
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.03, 8, 32), matB(0xFFFFFF));
+  g.add(ring);
+
+  g.position.set(0, 0.42, -0.35);
+  return g;
+}
+
+// ──────── 4. Particle System ────────
+function buildParticles() {
+  const group = new THREE.Group();
+
+  particleGeo = new THREE.BufferGeometry();
+  positions = new Float32Array(N_PARTICLES * 3);
+  colors = new Float32Array(N_PARTICLES * 3);
+  particleData = [];
+
+  const chaosCX = -3.0, chaosCY = 0.55, chaosCZ = 0.8; // around PC monitor
+
+  for (let i = 0; i < N_PARTICLES; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 0.6 + Math.random() * 1.3;
+    const py = (Math.random() - 0.5) * 2.0;
+
+    positions[i*3]   = chaosCX + Math.cos(angle) * radius;
+    positions[i*3+1] = chaosCY + py;
+    positions[i*3+2] = chaosCZ + Math.sin(angle) * radius;
+
+    colors[i*3]   = 0.9 + Math.random() * 0.1;
+    colors[i*3+1] = 0.1 + Math.random() * 0.2;
+    colors[i*3+2] = 0.05 + Math.random() * 0.1;
+
+    particleData.push({
+      chaosPos: new THREE.Vector3(positions[i*3], positions[i*3+1], positions[i*3+2]),
+      angle, radius, py,
+      chaosSpeed: 0.6 + Math.random() * 1.6,
+      chaosAxisSign: Math.random() > 0.5 ? 1 : -1,
+      streamDelay: Math.random() * 1.5,       // 0–1.5s delay before streaming to portal
+      transformDelay: Math.random() * 1.2,     // delay before emerging on toolpath side
+      targetPos: new THREE.Vector3(),          // set later via toolpath sampling
+      state: 'chaos'
+    });
+  }
+
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  particleMat = new THREE.PointsMaterial({ size: 0.04, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  const pts = new THREE.Points(particleGeo, particleMat);
+  group.add(pts);
+
+  return { group };
+}
+
+// ──────── 5. Toolpath ────────
+function buildToolpath() {
+  const group = new THREE.Group();
+  const TX = 3.0, TY = TBL_TOP + 0.05, TZ = -1.0;
+
+  // Generate CNC ornamental toolpath
+  const tp = [];
+  // Outer rectangle
+  const ox = TX - 1.0, oy = TX + 1.0, oz0 = TZ - 0.40, oz1 = TZ + 0.40;
+  const innerX0 = TX - 0.7, innerX1 = TX + 0.7, innerZ0 = TZ - 0.25, innerZ1 = TZ + 0.25;
+
+  // Outer perimeter
+  sampleLine(ox, TY, oz0, oy, TY, oz0, 30, tp);
+  sampleLine(oy, TY, oz0, oy, TY, oz1, 30, tp);
+  sampleLine(oy, TY, oz1, ox, TY, oz1, 30, tp);
+  sampleLine(ox, TY, oz1, ox, TY, oz0, 30, tp);
+
+  // Inner rectangle
+  sampleLine(innerX0, TY, innerZ0, innerX1, TY, innerZ0, 20, tp);
+  sampleLine(innerX1, TY, innerZ0, innerX1, TY, innerZ1, 20, tp);
+  sampleLine(innerX1, TY, innerZ1, innerX0, TY, innerZ1, 20, tp);
+  sampleLine(innerX0, TY, innerZ1, innerX0, TY, innerZ0, 20, tp);
+
+  // Diagonals
+  sampleLine(TX - 0.5, TY, TZ - 0.35, TX + 0.3, TY, TZ - 0.15, 15, tp);
+  sampleLine(TX - 0.3, TY, TZ + 0.15, TX + 0.5, TY, TZ + 0.35, 15, tp);
+  sampleLine(TX - 0.5, TY, TZ + 0.35, TX + 0.3, TY, TZ + 0.15, 15, tp);
+  sampleLine(TX - 0.3, TY, TZ - 0.15, TX + 0.5, TY, TZ - 0.35, 15, tp);
+
+  // Zigzag cross
+  for (let i = 0; i < 8; i++) {
+    const z = innerZ0 + (i/(7)) * (innerZ1 - innerZ0);
+    tp.push(new THREE.Vector3(innerX0 + (i%2)*0.25, TY, z));
+    tp.push(new THREE.Vector3(innerX1 - (i%2)*0.25, TY, z));
+  }
+
+  // Center circle (approximated)
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2;
+    tp.push(new THREE.Vector3(TX + 0.1 + Math.cos(a) * 0.15, TY, TZ + Math.sin(a) * 0.15));
+  }
+  // Second smaller circle
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    tp.push(new THREE.Vector3(TX - 0.15 + Math.cos(a) * 0.08, TY, TZ - 0.10 + Math.sin(a) * 0.08));
+  }
+
+  toolSegs = tp.length - 1;
+
+  // Build LineSegments geometry
+  const verts = [];
+  for (let i = 0; i < tp.length - 1; i++) {
+    verts.push(tp[i].x, tp[i].y, tp[i].z, tp[i+1].x, tp[i+1].y, tp[i+1].z);
+  }
+  toolGeo = new THREE.BufferGeometry();
+  toolGeo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+  toolGeo.setDrawRange(0, 0);
+
+  const toolMat = new THREE.LineBasicMaterial({ color: 0x22C55E, linewidth: 1, transparent: true, opacity: 0.9 });
+  const line = new THREE.LineSegments(toolGeo, toolMat);
+  group.add(line);
+
+  // Distribute particle targets along all path points
+  const allPts = tp;
+  for (let i = 0; i < N_PARTICLES; i++) {
+    const idx = Math.floor((i / N_PARTICLES) * allPts.length);
+    particleData[i].targetPos.copy(allPts[idx]);
+    // small jitter
+    particleData[i].targetPos.x += (Math.random() - 0.5) * 0.04;
+    particleData[i].targetPos.y += (Math.random() - 0.5) * 0.02;
+    particleData[i].targetPos.z += (Math.random() - 0.5) * 0.04;
+  }
+
+  line.visible = false;
+  return { group, line };
+}
+
+function sampleLine(x1, y1, z1, x2, y2, z2, n, out) {
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    out.push(new THREE.Vector3(
+      x1 + (x2 - x1) * t,
+      y1 + (y2 - y1) * t,
+      z1 + (z2 - z1) * t
+    ));
+  }
+}
+
+// ──────── 6. HUD ────────
+function buildHUD() {
+  const group = new THREE.Group();
+
+  entropyDiv = document.createElement('div');
+  entropyDiv.className = 'css-label label-entropy-high';
+  entropyDiv.textContent = 'ENTROPY: 94% ▰▰▰▰▰▰▰▰▰▰';
+  entropyLab = new CSS2DObject(entropyDiv);
+  entropyLab.position.set(-3, 1.1, 0.8);
+  group.add(entropyLab);
+
+  const lowDiv = document.createElement('div');
+  lowDiv.className = 'css-label label-entropy-low';
+  lowDiv.textContent = 'ENTROPY: 6% ▱▱▱▱▱▱▱▱▱▱';
+  const lowLab = new CSS2DObject(lowDiv);
+  lowLab.position.set(3, 1.1, -1);
+  group.add(lowLab);
+
+  hudDiv = document.createElement('div');
+  hudDiv.className = 'css-label label-hud';
+  hudDiv.innerHTML =
+    'FEED RATE:   &nbsp;0 mm/s<br>' +
+    'SPINDLE:     &nbsp;0 rpm<br>' +
+    'TOOL:        &nbsp;V-slot / Vibrate<br>' +
+    'CYCLE TIME:  &nbsp;0.0 s';
+  const hudLab = new CSS2DObject(hudDiv);
+  hudLab.position.set(3, -0.9, -1);
+  group.add(hudLab);
+
+  const coffeeGroup = new THREE.Group();
+
+  coffeeDiv = document.createElement('div');
+  coffeeDiv.className = 'css-label label-coffee';
+  coffeeDiv.innerHTML = '☕ CNC operator drinks coffee now';
+  const coffeeLab = new CSS2DObject(coffeeDiv);
+  coffeeLab.position.set(5.2, 1.1, 1.5);
+  coffeeGroup.add(coffeeLab);
+
+  group.visible = false;
+  return { group, coffeeGroup };
+}
+
+// ──────── 7. Operator (shorts, cap, coffee) ────────
+function buildOperator(coffeeGroup) {
+  const g = new THREE.Group();
+  const ox = 5.2, oz = 1.5;
+
+  // Ground reference: feet at GND
+  const btm = GND;
+
+  // Boots
+  g.add(M(box(0.19, 0.07, 0.22), 0x1E293B).translateX(ox).translateZ(oz).translateY(btm + 0.035));
+  g.add(M(box(0.19, 0.07, 0.22), 0x1E293B).translateX(ox + 0.22).translateZ(oz).translateY(btm + 0.035));
+
+  // Shins (bare legs)
+  const shinTop = btm + 0.07 + 0.32;
+  g.add(M(box(0.15, 0.32, 0.15), 0xF5D0A9).translateX(ox).translateZ(oz).translateY(btm + 0.07 + 0.16));
+  g.add(M(box(0.15, 0.32, 0.15), 0xF5D0A9).translateX(ox + 0.22).translateZ(oz).translateY(btm + 0.07 + 0.16));
+
+  // Shorts
+  const shortH = 0.14;
+  g.add(M(box(0.17, shortH, 0.17), 0x1E3A5F).translateX(ox).translateZ(oz).translateY(shinTop + shortH/2));
+  g.add(M(box(0.17, shortH, 0.17), 0x1E3A5F).translateX(ox + 0.22).translateZ(oz).translateY(shinTop + shortH/2));
+
+  // Waist
+  const waistBtm = shinTop + shortH;
+  g.add(M(box(0.48, 0.22, 0.28), 0x1E3A5F).translateX(ox + 0.11).translateZ(oz).translateY(waistBtm + 0.11));
+
+  // Torso
+  const torsoBtm = waistBtm + 0.22;
+  g.add(M(box(0.54, 0.42, 0.32), 0x1E3A5F).translateX(ox + 0.11).translateZ(oz).translateY(torsoBtm + 0.21));
+
+  // Arms (left: relaxed, right: bent — holding mug)
+  const shoulderY = torsoBtm + 0.35;
+
+  // Left arm: hangs down
+  g.add(M(box(0.12, 0.22, 0.12), 0x1E3A5F).translateX(ox - 0.2).translateZ(oz).translateY(shoulderY - 0.11));
+  g.add(M(box(0.10, 0.22, 0.10), 0x1E3A5F).translateX(ox - 0.2).translateZ(oz).translateY(shoulderY - 0.33));
+  g.add(M(box(0.09, 0.09, 0.09), 0xF5D0A9).translateX(ox - 0.2).translateZ(oz).translateY(shoulderY - 0.48));
+
+  // Right arm: upper arm + forearm (bent up toward mouth)
+  g.add(M(box(0.12, 0.22, 0.12), 0x1E3A5F).translateX(ox + 0.42).translateZ(oz).translateY(shoulderY - 0.11));
+  const raGroup = new THREE.Group();
+  raGroup.position.set(ox + 0.42, shoulderY - 0.33, oz);
+  raGroup.rotation.z = -0.6; // bent upward
+  raGroup.add(M(box(0.10, 0.24, 0.10), 0x1E3A5F).translateY(0.12));
+  raGroup.add(M(box(0.09, 0.09, 0.09), 0xF5D0A9).translateY(0.28));
+  g.add(raGroup);
+
+  // Head
+  const headY = torsoBtm + 0.42 + 0.19;
+  headGrp = new THREE.Group();
+  headGrp.position.set(ox + 0.11, headY, oz);
+
+  const headMesh = M(box(0.40, 0.40, 0.40), 0xF5D0A9);
+  headGrp.add(headMesh);
+
+  // Eyes
+  headGrp.add(M(box(0.07, 0.05, 0.03), 0xFFFFFF).translateX(-0.08).translateY(0.05).translateZ(0.21));
+  headGrp.add(M(box(0.07, 0.05, 0.03), 0xFFFFFF).translateX(0.08).translateY(0.05).translateZ(0.21));
+
+  // Smile
+  headGrp.add(M(box(0.14, 0.04, 0.03), 0x1E293B).translateY(-0.06).translateZ(0.21));
+
+  // Cap
+  const capY = 0.24;
+  headGrp.add(M(box(0.44, 0.10, 0.32), 0x1E293B).translateY(capY));
+  // Visor (teal brand)
+  headGrp.add(M(box(0.22, 0.04, 0.16), 0x0D9488).translateY(capY - 0.02).translateZ(0.20));
+  // Logo dot (orange TEQ)
+  headGrp.add(M(box(0.07, 0.05, 0.03), 0xD35400).translateY(capY + 0.04).translateZ(0.21));
+
+  g.add(headGrp);
+
+  // Mug + steam
+  mugGrp = new THREE.Group();
+  mugGrp.add(M(cyl(0.09, 0.18, 8), 0x78350F));
+  mugGrp.add(new THREE.Mesh(tor(0.075, 0.02), matF(0x78350F)).translateX(0.09));
+  mugGrp.position.set(ox + 0.38, shoulderY - 0.22, oz - 0.04);
+
+  // Steam boxes
+  for (let i = 0; i < 4; i++) {
+    const sb = M(box(0.03, 0.08, 0.03), 0xE2E8F0);
+    sb.material.transparent = true;
+    sb.material.opacity = 0.5;
+    sb.position.set(0, -0.06 + i * 0.10, 0);
+    sb.userData.baseY = -0.06;
+    sb.userData.phase = i * 0.7;
+    mugGrp.add(sb);
+    steamBoxes.push(sb);
+  }
+
+  coffeeGroup.add(mugGrp);
+  g.add(coffeeGroup);
+
+  g.visible = false;
+  return g;
+}
+
+// ──────── Animate ────────
+function animate(renderer, labelR, scene, camera, controls) {
+  const t = (performance.now() - startT) / 1000;
+
+  // ── Portal (3–15s+) ──
+  if (t >= 3) {
+    portalGroup.visible = true;
+    if (t < 4) {
+      const s = (t - 3);
+      portalGroup.scale.setScalar(s);
+    } else {
+      portalGroup.scale.setScalar(0.97 + 0.03 * Math.sin(t * 2.5));
+    }
+    portalGroup.material = portalGroup.children[0]?.material;
+    if (portalGroup.children[0]?.material?.emissiveIntensity !== undefined) {
+      portalGroup.children[0].material.emissiveIntensity = 0.3 + 0.3 * (Math.sin(t * 4) * 0.5 + 0.5);
+    }
+    portalGroup.rotation.y += 0.006;
+    portalGroup.rotation.x += 0.003;
+  }
+
+  // ── CNC Gantry motion (10s+) ──
+  if (t >= 10 && cncGantry) {
+    cncGantry.position.x = 3.0 + Math.sin(t * 0.6) * 0.4;
+    spindleGroup.position.x = cncGantry.position.x;
+    spindleGroup.position.z = -1.0 + Math.sin(t * 0.8) * 0.3;
+  }
+
+  // ── Particles & Toolpath ──
+  updateParticles(t);
+
+  // ── Toolpath reveal (8–10s) ──
+  if (t >= 8 && t < 10 && toolLine) {
+    toolLine.visible = true;
+    const frac = Math.min(1, (t - 8) / 2);
+    toolGeo.setDrawRange(0, Math.floor(frac * toolSegs * 2));
+  } else if (t >= 10 && toolLine) {
+    toolLine.visible = true;
+    toolGeo.setDrawRange(0, toolSegs * 2);
+  }
+
+  // ── Board visibility (8s+) ──
+  if (t >= 8 && cncBoard) {
+    cncBoard.visible = true;
+  }
+
+  // ── HUD values animate (10s+) ──
+  if (t >= 10) {
+    hudLabelsGroup.visible = true;
+    const elapsed = Math.max(0, Math.min(1, (t - 10) / 2));
+    hudDiv.innerHTML =
+      'FEED RATE:   ' + Math.round(1876 * elapsed) + ' mm/s<br>' +
+      'SPINDLE:     ' + Math.round(18000 * elapsed) + ' rpm<br>' +
+      'TOOL:        &nbsp;V-slot / Vibrate<br>' +
+      'CYCLE TIME:  ' + (14.2 * elapsed).toFixed(1) + ' s';
+  }
+
+  // ── Operator visibility (12s+) ──
+  if (t >= 12) {
+    operatorGroup.visible = true;
+
+    // Head nod
+    headGrp.rotation.z = 0.06 * Math.sin(t * 1.8);
+
+    // Mug rock
+    mugGrp.rotation.z = 0.2 * Math.sin(t * 2.2);
+
+    // Steam
+    for (const sb of steamBoxes) {
+      let py = sb.userData.baseY + ((t * 0.6 + sb.userData.phase) % 1.3) * 0.15;
+      sb.position.y = py;
+      sb.material.opacity = 0.5 * (1 - ((t * 0.6 + sb.userData.phase) % 1.3));
+    }
+  }
+
+  // ── "ENTROPY: REDUCED" flicker (10–12s) ──
+  if (t >= 10 && t < 12) {
+    entropyDiv.textContent = 'ENTROPY: REDUCED';
+  } else if (t >= 12) {
+    entropyDiv.textContent = 'ENTROPY: 94% ▰▰▰▰▰▰▰▰▰▰';
+  }
+
+  // ── Unlock controls at 15s ──
+  if (t >= 15 && !controls.enabled) {
+    controls.enabled = true;
+  }
+
+  renderer.render(scene, camera);
+  labelR.render(scene, camera);
+}
+
+function updateParticles(t) {
+  const portalPos = new THREE.Vector3(0, 0.42, -0.35);
+
+  for (let i = 0; i < N_PARTICLES; i++) {
+    const pd = particleData[i];
+    let x, y, z;
+    let cr = colors[i*3], cg = colors[i*3+1], cb = colors[i*3+2];
+
+    if (t < 3) {
+      // CHAOS: orbit around PC
+      pd.state = 'chaos';
+      const a = t * pd.chaosSpeed * pd.chaosAxisSign + pd.angle;
+      x = -3.0 + Math.cos(a) * pd.radius;
+      y = 0.55 + pd.py + Math.sin(a * 1.7) * 0.4;
+      z = 0.8 + Math.sin(a) * pd.radius * 0.8;
+      cr = 0.95; cg = 0.15; cb = 0.08;
+    } else if (t < 5 + pd.streamDelay) {
+      // STILL CHAOS with delayed departure
+      pd.state = 'chaos';
+      const a = t * pd.chaosSpeed * pd.chaosAxisSign + pd.angle;
+      x = -3.0 + Math.cos(a) * pd.radius;
+      y = 0.55 + pd.py + Math.sin(a * 1.7) * 0.4;
+      z = 0.8 + Math.sin(a) * pd.radius * 0.8;
+      cr = 0.95; cg = 0.15; cb = 0.08;
+    } else if (t < 7 + pd.transformDelay) {
+      // STREAMING: fly toward portal with spiral
+      pd.state = 'streaming';
+      if (t < 6.5 + pd.streamDelay) {
+        const lt = Math.min(1, (t - 5 - pd.streamDelay) / 1.5);
+        const a = t * 3.0 + i;
+        const spiralX = portalPos.x + Math.cos(a) * 0.7 * (1 - lt);
+        const spiralZ = portalPos.z + Math.sin(a) * 0.7 * (1 - lt);
+        x = pd.chaosPos.x + (spiralX - pd.chaosPos.x) * lt;
+        y = pd.chaosPos.y + (portalPos.y + 0.3 * (1 - lt) - pd.chaosPos.y) * lt;
+        z = pd.chaosPos.z + (spiralZ - pd.chaosPos.z) * lt;
+        cr = 0.95 - 0.6 * lt; cg = 0.15 + 0.6 * lt; cb = 0.08 + 0.5 * lt;
+      } else {
+        // AT PORTAL: green, waiting to emerge
+        x = portalPos.x; y = portalPos.y; z = portalPos.z;
+        cr = 0.15; cg = 0.9; cb = 0.3;
+      }
+    } else if (t < 9 + pd.transformDelay * 0.25) {
+      // TRANSFORM: lerp from portal to toolpath target
+      pd.state = 'transforming';
+      const emerge = Math.max(0, Math.min(1, (t - 7 - pd.transformDelay) / 1.8));
+      x = portalPos.x + (pd.targetPos.x - portalPos.x) * emerge;
+      y = portalPos.y + (pd.targetPos.y - portalPos.y) * emerge;
+      z = portalPos.z + (pd.targetPos.z - portalPos.z) * emerge;
+      cr = 0.12; cg = 0.6 + 0.35 * emerge; cb = 0.25 + 0.25 * emerge;
+    } else {
+      // ORDERED: at toolpath target
+      pd.state = 'ordered';
+      const tp = pd.targetPos;
+      x = tp.x + (Math.sin(t * 3 + i) * 0.008);
+      y = tp.y + (Math.cos(t * 3.5 + i) * 0.005);
+      z = tp.z + (Math.cos(t * 2.7 + i) * 0.008);
+      cr = 0.1 + Math.sin(i*0.5)*0.05; cg = 0.85 + Math.cos(i*0.7)*0.1; cb = 0.4 + Math.sin(i*0.9)*0.15;
+    }
+
+    positions[i*3]   = x;
+    positions[i*3+1] = y;
+    positions[i*3+2] = z;
+    colors[i*3]   = cr;
+    colors[i*3+1] = cg;
+    colors[i*3+2] = cb;
+  }
+
+  particleGeo.attributes.position.needsUpdate = true;
+  particleGeo.attributes.color.needsUpdate = true;
+}
+
+// ──────── Boot ────────
+init();
+</script>
+</body>
+</html>
