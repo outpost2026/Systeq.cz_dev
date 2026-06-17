@@ -480,7 +480,7 @@
     function createPC() {
       pcGroup = new THREE.Group();
       pcGroup.position.set(-2.4, GND, 1.2);
-      pcGroup.rotation.y = -Math.PI / 2; // Monitor faces plotter
+      pcGroup.rotation.y = Math.PI / 2; // Monitor faces toward plotter
 
       // Wooden desk
       const table = M(box(1.2, 0.04, 0.8), EGA.BROWN);
@@ -623,7 +623,7 @@
     // 3. 8-Bit CNC Operator (Red Cap, Ginger beard, holding mug, animatable)
     function createOperator() {
       operatorGroup = new THREE.Group();
-      operatorGroup.position.set(-1.2, GND + 0.38, 1.5); // Seated in front of monitor
+      operatorGroup.position.set(-1.2, GND + 0.38, 2.0); // Seated in front of monitor
 
       // Torso/Body (Blue work jacket)
       const body = M(box(0.38, 0.44, 0.26), EGA.BLUE);
@@ -846,7 +846,7 @@
 
     // Spawns chaotic colorful data chunks flowing from Monitor to Plotter
     function spawnChaosDataCube(t) {
-      const src = new THREE.Vector3(-2.155, DSK_Y + 0.34, 1.05); // Monitor coords (after rotation)
+      const src = new THREE.Vector3(-2.6, DSK_Y + 0.34, 1.3); // Monitor coords (after rotation)
       const tgt = new THREE.Vector3(-0.5 + plGantry.position.x, DSK_Y + 0.28, 0.8 + plSpindle.position.z); // Spindle tip
 
       const colors = [EGA.RED, EGA.MAGENTA, EGA.YELLOW, EGA.BROWN];
@@ -869,7 +869,7 @@
 
     // Spawns green ordered packets flowing during Order phase
     function spawnOrderedDataCube(t) {
-      const src = new THREE.Vector3(-2.155, DSK_Y + 0.34, 1.05);
+      const src = new THREE.Vector3(-2.6, DSK_Y + 0.34, 1.3);
       const tgt = new THREE.Vector3(portalGroup.position.x, portalGroup.position.y, portalGroup.position.z);
 
       const dc = M(box(0.09, 0.09, 0.09), EGA.LTGREEN);
@@ -1058,7 +1058,7 @@
 
       // Reset Operator and PlGantry positions
       if (operatorGroup) {
-        operatorGroup.position.set(-1.2, GND + 0.38, 1.5);
+        operatorGroup.position.set(-1.2, GND + 0.38, 2.0);
         operatorGroup.rotation.set(0, 0, 0);
       }
       if (opHead) opHead.rotation.set(0, 0, 0);
@@ -1360,6 +1360,7 @@
           // Bouncing/vibrating happily
           operatorGroup.position.y = GND + 0.38 + Math.abs(Math.sin(t * 8)) * 0.06;
           operatorGroup.position.x = -0.8 + Math.sin(t * 12) * 0.02;
+          operatorGroup.position.z = 1.8;
         }
 
         // Moving Plotter carriage back to work - printing perfect structured green segments
@@ -1434,6 +1435,7 @@
         if (operatorGroup) {
           operatorGroup.position.y = GND + 0.38;
           operatorGroup.position.x = -0.8;
+          operatorGroup.position.z = 2.0;
         }
 
         // Complete lock panels on wall grid
