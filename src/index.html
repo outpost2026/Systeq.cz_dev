@@ -120,6 +120,16 @@ header{
   transition:border-color .2s,color .2s,transform .15s;
 }
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.btn-3d{
+  background:rgba(13,148,136,.08);color:var(--accent);
+  border:1px solid var(--accent-border);padding:.62rem 1.4rem;
+  font-family:var(--font);font-size:.78rem;font-weight:500;letter-spacing:.1em;
+  cursor:pointer;border-radius:4px;text-decoration:none;display:inline-block;
+  box-shadow:0 0 12px rgba(13,148,136,.12),inset 0 1px 0 rgba(13,148,136,.15);
+  transition:background .2s,transform .15s,box-shadow .2s;
+}
+.btn-3d:hover{background:rgba(13,148,136,.14);box-shadow:0 0 18px rgba(13,148,136,.2),inset 0 1px 0 rgba(13,148,136,.2)}
+.btn-3d:active{transform:scale(.96);box-shadow:0 0 6px rgba(13,148,136,.08),inset 0 1px 0 rgba(13,148,136,.1)}
 
 /* ─── SECTION LABELS ─── */
 .sec-eye{font-size:.62rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.4rem}
@@ -447,7 +457,7 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
     </p>
     <div class="hero-ctas">
       <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" target="_blank" rel="noopener">Spustit demo</a>
-      <a href="demo/systeq_threejs_demo.html" class="btn-ghost">3D Vizualizace</a>
+      <a href="demo/systeq_threejs_demo.html" class="btn-3d">3D Vizualizace</a>
       <a href="#contact" class="btn-ghost">Kontakt</a>
     </div>
   </div>
@@ -476,7 +486,7 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
     </div>
     <div style="margin-top:2rem;text-align:center;display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;">
       <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" style="font-size:.85rem;padding:.75rem 2rem;" target="_blank" rel="noopener">Spustit demo rozhraní →</a>
-      <a href="demo/systeq_threejs_demo.html" class="btn-ghost" style="font-size:.85rem;padding:.75rem 2rem;">3D Vizualizace (Three.js) →</a>
+      <a href="demo/systeq_threejs_demo.html" class="btn-3d" style="font-size:.85rem;padding:.75rem 2rem;">3D Vizualizace (Three.js) →</a>
     </div>
   </div>
 </section>
