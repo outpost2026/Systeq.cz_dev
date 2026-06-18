@@ -306,6 +306,9 @@
       portalX: 0.0,
       portalY: 0.8,
       portalZ: -1.2,
+      // PC Desk position
+      pcX: -2.4,
+      pcZ: 1.2,
       // Wall position
       wallY: WALL_Y,
       // Colors (color strings, used by spawners)
@@ -486,7 +489,7 @@
 
     function createPC() {
       pcGroup = new THREE.Group();
-      pcGroup.position.set(-2.4, GND, 1.2);
+      pcGroup.position.set(params.pcX, GND, params.pcZ);
       pcGroup.rotation.y = Math.PI / 2;
 
       const table = M(box(1.2, 0.04, 0.8), EGA.BROWN);
@@ -1260,6 +1263,16 @@
       masterF.add(params, 'paused').name('Paused (Space)');
       masterF.add({ restart: triggerManualReset }, 'restart').name('↻ Restart');
       masterF.add(params, 'loopMode', ['none', 'full', 'phase']).name('Loop mode (L)');
+      masterF.add({ savePreset: () => {
+        localStorage.setItem('systeq-dev', JSON.stringify(gui.save()));
+      }}, 'savePreset').name('💾 Save');
+      masterF.add({ loadPreset: () => {
+        const raw = localStorage.getItem('systeq-dev');
+        if (raw) gui.load(JSON.parse(raw));
+      }}, 'loadPreset').name('📂 Load');
+      masterF.add({ exportJSON: () => {
+        navigator.clipboard.writeText(JSON.stringify(gui.save(), null, 2));
+      }}, 'exportJSON').name('📋 Export');
       masterF.add({ jumpTo: 'CHAOS' }, 'jumpTo', ['CHAOS', 'ACTIVATION', 'ORDER', 'IDLE']).name('Jump →').onChange(v => {
         triggerManualReset();
         const map = { CHAOS: 0, ACTIVATION: params.chaosEnd, ORDER: params.activationEnd, IDLE: params.orderEnd };
@@ -1301,6 +1314,8 @@
       posF.add(params, 'portalY', 0, 3, 0.05).name('Portal Y').onChange(v => { if (portalGroup) portalGroup.position.y = v; });
       posF.add(params, 'portalZ', -3, 0, 0.05).name('Portal Z').onChange(v => { if (portalGroup) portalGroup.position.z = v; });
       posF.add(params, 'wallY', 0, 2, 0.05).name('Wall Y').onChange(v => { if (wallGroup) wallGroup.position.y = v; });
+      posF.add(params, 'pcX', -5, 5, 0.05).name('PC Desk X').onChange(v => { if (pcGroup) pcGroup.position.x = v; });
+      posF.add(params, 'pcZ', -3, 5, 0.05).name('PC Desk Z').onChange(v => { if (pcGroup) pcGroup.position.z = v; });
 
       // Colors
       const colF = gui.addFolder('EGA Palette');
@@ -1356,6 +1371,12 @@
       camF.open();
       phaseF.open();
       spawnF.open();
+
+      // Auto-restore last preset from localStorage
+      const raw = localStorage.getItem('systeq-dev');
+      if (raw) {
+        try { gui.load(JSON.parse(raw)); } catch(e) {}
+      }
     }
 
     // ==== BOOTSTRAP ====================================================
