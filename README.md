@@ -1,9 +1,5 @@
 # SYSTEQ — Web Integration
 
-``` 
-SYS (teal #0d9488) + TEQ (orange #D35400) = CAM Automation Platform
-```
-
 Tento repozitář **není** standardní projekt s jasným zadáním a jedním produktem.
 Je to **živý výukový materiál**, technické portfolio a metodologický workshop
 jednoho vývojáře, který se rozhodl přejít z CNC výroby do světa B2B software
