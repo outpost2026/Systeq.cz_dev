@@ -1632,6 +1632,23 @@
     // ==== BOOTSTRAP ====================================================
     window.onload = init;
     window.triggerManualReset = triggerManualReset;
+    if (IS_DEV) {
+      window.__devSimTime = () => simTime;
+      window.__devSetSimTime = v => { simTime = v; lastFrameT = performance.now(); };
+      window.__devPhase = () => getPhase(simTime);
+      window.__devSpeed = { set: v => { params.speed = v; } };
+      window.__devPause = { set: v => { params.paused = v; } };
+      window.__devResetAnimPhases = () => {
+        opBreathPhase = 0; opBlinkTimer = 0; opBlinking = false;
+        opLookTarget.set(0, 0, 0); controls.autoRotate = false;
+      };
+      window.__devParts = () => ({
+        opBody, opHead, opLeftArm, opRightArm,
+        opLegL, opLegR, opFootL, opFootR,
+        opForearmL, opForearmR, opEyeL, opEyeR,
+        opSmileMesh,
+      });
+    }
   </script>
 </body>
 </html>
