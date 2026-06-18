@@ -1,0 +1,109 @@
+{
+  "controllers": {},
+  "folders": {
+    "Master": {
+      "controllers": {
+        "Speed ×": 1,
+        "Paused (Space)": false,
+        "Loop mode (L)": "none",
+        "Jump →": "ACTIVATION"
+      },
+      "folders": {}
+    },
+    "Camera": {
+      "controllers": {
+        "Distance": 5,
+        "Height": 1.5,
+        "Target Y": 0.9,
+        "Preset": "default"
+      },
+      "folders": {}
+    },
+    "Phase Timing (s)": {
+      "controllers": {
+        "CHAOS →": 7,
+        "ACTIVATION →": 10,
+        "ORDER →": 22
+      },
+      "folders": {}
+    },
+    "Object Positions": {
+      "controllers": {
+        "Operator X": -0.35,
+        "Operator Y": 0.3,
+        "Operator Z": 0.4,
+        "Plotter X": -0.0499999999999998,
+        "Plotter Y": 0.2,
+        "Plotter Z": -0.9,
+        "Portal X": 1.65,
+        "Portal Y": 1.9,
+        "Portal Z": -1.95,
+        "Wall Y": 0.55,
+        "PC Desk X": -3.35,
+        "PC Desk Z": 0.2
+      },
+      "folders": {}
+    },
+    "Object Dimensions": {
+      "controllers": {
+        "Wall": 1,
+        "PC Desk": 1.1,
+        "Operator": 1,
+        "Plotter": 1.25,
+        "Portal": 1
+      },
+      "folders": {}
+    },
+    "Object Visibility": {
+      "controllers": {
+        "Wall": true,
+        "PC Desk": true,
+        "Operator": true,
+        "Plotter": true,
+        "Portal": true,
+        "Panels": true
+      },
+      "folders": {}
+    },
+    "EGA Palette": {
+      "controllers": {
+        "Cube Red": "#aa0000",
+        "Cube Magenta": "#aa00aa",
+        "Cube Yellow": "#ffff55",
+        "Cube Brown": "#aa5500",
+        "Cube Order": "#55ff55",
+        "Panel Defect": "#aa0000",
+        "Panel OK": "#aa5500",
+        "Panel Healed": "#00aa00"
+      },
+      "folders": {}
+    },
+    "Spawn Rates": {
+      "controllers": {
+        "Data cubes": 0.245,
+        "Question mk": 0.04,
+        "Dollars": 0.02,
+        "Metrics": 0.015
+      },
+      "folders": {}
+    },
+    "Panels": {
+      "controllers": {
+        "Launch speed": 0.02,
+        "Grid step": 0.008,
+        "Force all mounted": false
+      },
+      "folders": {}
+    },
+    "Live Diagnostics": {
+      "controllers": {
+        "Phase": "ORDER",
+        "Time (s)": 11.740800000011914,
+        "Panels": 8,
+        "Data cubes": 38,
+        "? marks": 0
+      },
+      "folders": {}
+    }
+  }
+}

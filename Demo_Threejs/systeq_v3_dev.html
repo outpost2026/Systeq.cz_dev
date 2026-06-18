@@ -1331,6 +1331,55 @@
         startT = performance.now() - simTime * 1000;
         lastFrameT = performance.now();
       });
+      masterF.add({ exportProd: async () => {
+        try {
+          const src = await fetch(window.location.href).then(r => r.text());
+          const p = params;
+          const hex = n => JSON.stringify(n);
+          const newParams =
+`    const params = {
+      speed: ${p.speed},
+      camDist: ${p.camDist}, camHeight: ${p.camHeight}, camTargetY: ${p.camTargetY},
+      chaosEnd: ${p.chaosEnd}, activationEnd: ${p.activationEnd}, orderEnd: ${p.orderEnd},
+      opX: ${p.opX}, opY: ${p.opY}, opZ: ${p.opZ},
+      plotterX: ${p.plotterX}, plotterY: ${p.plotterY}, plotterZ: ${p.plotterZ},
+      portalX: ${p.portalX}, portalY: ${p.portalY}, portalZ: ${p.portalZ},
+      pcX: ${p.pcX}, pcZ: ${p.pcZ},
+      wallY: ${p.wallY},
+      colCubeChaos: ${JSON.stringify(p.colCubeChaos)},
+      colCubeOrder: ${hex(p.colCubeOrder)},
+      colPanelDefect: ${hex(p.colPanelDefect)},
+      colPanelOk: ${hex(p.colPanelOk)},
+      colPanelHealed: ${hex(p.colPanelHealed)},
+      cubeRate: ${p.cubeRate}, qmRate: ${p.qmRate}, dollarRate: ${p.dollarRate}, metricRate: ${p.metricRate},
+      panelLaunchSpeed: ${p.panelLaunchSpeed}, panelGridStep: ${p.panelGridStep},
+      forceMounted: false, paused: false, frozenSimTime: 0, loopMode: 'none',
+      wallScale: ${p.wallScale}, pcScale: ${p.pcScale}, opScale: ${p.opScale},
+      plotterScale: ${p.plotterScale}, portalScale: ${p.portalScale},
+      showWall: true, showPC: true, showOperator: true,
+      showPlotter: true, showPortal: true, showPanels: true,
+    };`;
+
+          let prod = src
+            .replace(/const params = \{[\s\S]*?\n    \};/, newParams)
+            .replace(/\nimport GUI from 'lil-gui';/, '')
+            .replace(/\n    const IS_DEV = .*?;/, '')
+            .replace(/\n[\t ]+if \(IS_DEV\) buildDevGUI\(\);?/, '')
+            .replace(/    function devToast[\s\S]*?\n    }\n/, '')
+            .replace(/    function buildDevGUI\(\) \{[\s\S]*?\n    }\n/, '')
+            .replace(/<div id="dev-toast"><\/div>\n/, '')
+            .replace(/<div id="dev-banner">.*?<\/div>\n/, '')
+            .replace(/    #dev-toast[\s\S]*?show \{ opacity: 1; }\n/, '');
+
+          const blob = new Blob([prod], {type: 'text/html'});
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'systeq_v3_prod.html';
+          a.click();
+          URL.revokeObjectURL(a.href);
+          devToast('🎬 Downloaded: systeq_v3_prod.html');
+        } catch(e) { devToast('⚠️ Export failed: ' + e.message); }
+      }}, 'exportProd').name('🎬 Export Prod');
       masterF.open();
 
       // Camera
