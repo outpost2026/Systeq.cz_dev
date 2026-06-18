@@ -349,6 +349,13 @@
       opScale: 1.0,
       plotterScale: 1.0,
       portalScale: 1.0,
+      // Visibility toggles
+      showWall: true,
+      showPC: true,
+      showOperator: true,
+      showPlotter: true,
+      showPortal: true,
+      showPanels: true,
     };
 
     // Derived phase thresholds (always reflect params)
@@ -898,6 +905,7 @@
         mounted: false,
         gridProgress: 0
       };
+      panel.visible = params.showPanels;
       scene.add(panel); panels.push(panel);
     }
 
@@ -1368,6 +1376,16 @@
       dimF.add(params, 'plotterScale', 0.25, 2.0, 0.05).name('Plotter').onChange(v => { if (plotterGroup) plotterGroup.scale.set(v, v, v); });
       dimF.add(params, 'portalScale', 0.25, 2.0, 0.05).name('Portal').onChange(v => { if (portalGroup) portalGroup.scale.set(v, v, v); });
       dimF.open();
+
+      // Object Visibility
+      const visF = gui.addFolder('Object Visibility');
+      visF.add(params, 'showWall').name('Wall').onChange(v => { if (wallGroup) wallGroup.visible = v; });
+      visF.add(params, 'showPC').name('PC Desk').onChange(v => { if (pcGroup) pcGroup.visible = v; });
+      visF.add(params, 'showOperator').name('Operator').onChange(v => { if (operatorGroup) operatorGroup.visible = v; });
+      visF.add(params, 'showPlotter').name('Plotter').onChange(v => { if (plotterGroup) plotterGroup.visible = v; });
+      visF.add(params, 'showPortal').name('Portal').onChange(v => { if (portalGroup) portalGroup.visible = v; });
+      visF.add(params, 'showPanels').name('Panels').onChange(v => { panels.forEach(p => p.visible = v); });
+      visF.open();
 
       // Colors
       const colF = gui.addFolder('EGA Palette');
