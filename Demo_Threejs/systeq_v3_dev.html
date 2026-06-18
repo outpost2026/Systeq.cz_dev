@@ -178,6 +178,16 @@
       z-index: 1000;
     }
 
+    /* Dev toast notification */
+    #dev-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #000; color: #55ff55; border: 2px solid #55ff55;
+      padding: 8px 16px; font-family: 'Press Start 2P', monospace; font-size: 9px;
+      z-index: 10001; opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    #dev-toast.show { opacity: 1; }
+
     /* Dev banner */
     #dev-banner {
       position: fixed;
@@ -194,6 +204,7 @@
   </style>
 </head>
 <body>
+  <div id="dev-toast"></div>
   <div id="dev-banner">🛠 DEV BUILD — http://...?dev</div>
   <div id="crt"></div>
   <div id="flash-overlay"></div>
@@ -331,7 +342,13 @@
       paused: false,
       frozenSimTime: 0,
       // Loop mode: 'none', 'full' (whole demo), 'phase' (current phase)
-      loopMode: 'none'
+      loopMode: 'none',
+      // Object scales (uniform)
+      wallScale: 1.0,
+      pcScale: 1.0,
+      opScale: 1.0,
+      plotterScale: 1.0,
+      portalScale: 1.0,
     };
 
     // Derived phase thresholds (always reflect params)
@@ -483,6 +500,7 @@
           wallGroup.add(slotFrame);
         }
       }
+      wallGroup.scale.set(params.wallScale, params.wallScale, 1);
       scene.add(wallGroup);
     }
     function colIdx(r, c) { return r * 4 + c; }
@@ -549,6 +567,7 @@
       const keys = M(box(0.36, 0.01, 0.1), EGA.DKGRAY);
       keys.position.set(0.1, DSK_Y + 0.065, 0.32);
       pcGroup.add(keys);
+      pcGroup.scale.set(params.pcScale, params.pcScale, params.pcScale);
       scene.add(pcGroup);
     }
 
@@ -667,6 +686,7 @@
       forearmR.rotation.y = -0.3;
       opRightArm.add(forearmR);
       operatorGroup.add(opRightArm);
+      operatorGroup.scale.set(params.opScale, params.opScale, params.opScale);
       scene.add(operatorGroup);
     }
 
@@ -723,6 +743,7 @@
 
       plGantry.add(plSpindle);
       plotterGroup.add(plGantry);
+      plotterGroup.scale.set(params.plotterScale, params.plotterScale, params.plotterScale);
       scene.add(plotterGroup);
     }
 
@@ -751,6 +772,7 @@
       portalGroup.add(portalShockwave);
       energeticFilamentsGroup = new THREE.Group();
       scene.add(energeticFilamentsGroup);
+      portalGroup.scale.set(params.portalScale, params.portalScale, params.portalScale);
       scene.add(portalGroup);
     }
 
@@ -1254,6 +1276,14 @@
     }
 
     // ==== DEV GUI ======================================================
+    function devToast(msg) {
+      const el = document.getElementById('dev-toast');
+      if (!el) return;
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2000);
+    }
+
     function buildDevGUI() {
       const gui = new GUI({ title: '🛠 SYSTEQ DEV', width: 320 });
 
@@ -1265,13 +1295,26 @@
       masterF.add(params, 'loopMode', ['none', 'full', 'phase']).name('Loop mode (L)');
       masterF.add({ savePreset: () => {
         localStorage.setItem('systeq-dev', JSON.stringify(gui.save()));
+        devToast('✅ Preset saved');
       }}, 'savePreset').name('💾 Save');
       masterF.add({ loadPreset: () => {
         const raw = localStorage.getItem('systeq-dev');
-        if (raw) gui.load(JSON.parse(raw));
+        if (raw) { gui.load(JSON.parse(raw)); devToast('📂 Preset loaded'); }
+        else devToast('⚠️ No saved preset');
       }}, 'loadPreset').name('📂 Load');
       masterF.add({ exportJSON: () => {
-        navigator.clipboard.writeText(JSON.stringify(gui.save(), null, 2));
+        const json = JSON.stringify(gui.save(), null, 2);
+        navigator.clipboard.writeText(json).then(() => {
+          devToast('📋 JSON copied to clipboard');
+        }).catch(() => {
+          const blob = new Blob([json], {type: 'application/json'});
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'systeq-dev-preset.json';
+          a.click();
+          URL.revokeObjectURL(a.href);
+          devToast('📁 Downloaded: systeq-dev-preset.json');
+        });
       }}, 'exportJSON').name('📋 Export');
       masterF.add({ jumpTo: 'CHAOS' }, 'jumpTo', ['CHAOS', 'ACTIVATION', 'ORDER', 'IDLE']).name('Jump →').onChange(v => {
         triggerManualReset();
@@ -1316,6 +1359,15 @@
       posF.add(params, 'wallY', 0, 2, 0.05).name('Wall Y').onChange(v => { if (wallGroup) wallGroup.position.y = v; });
       posF.add(params, 'pcX', -5, 5, 0.05).name('PC Desk X').onChange(v => { if (pcGroup) pcGroup.position.x = v; });
       posF.add(params, 'pcZ', -3, 5, 0.05).name('PC Desk Z').onChange(v => { if (pcGroup) pcGroup.position.z = v; });
+
+      // Object Dimensions
+      const dimF = gui.addFolder('Object Dimensions');
+      dimF.add(params, 'wallScale', 0.25, 2.0, 0.05).name('Wall').onChange(v => { if (wallGroup) wallGroup.scale.set(v, v, 1); });
+      dimF.add(params, 'pcScale', 0.25, 2.0, 0.05).name('PC Desk').onChange(v => { if (pcGroup) pcGroup.scale.set(v, v, v); });
+      dimF.add(params, 'opScale', 0.25, 2.0, 0.05).name('Operator').onChange(v => { if (operatorGroup) operatorGroup.scale.set(v, v, v); });
+      dimF.add(params, 'plotterScale', 0.25, 2.0, 0.05).name('Plotter').onChange(v => { if (plotterGroup) plotterGroup.scale.set(v, v, v); });
+      dimF.add(params, 'portalScale', 0.25, 2.0, 0.05).name('Portal').onChange(v => { if (portalGroup) portalGroup.scale.set(v, v, v); });
+      dimF.open();
 
       // Colors
       const colF = gui.addFolder('EGA Palette');
