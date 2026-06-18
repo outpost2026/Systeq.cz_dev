@@ -6,7 +6,7 @@
         "Speed ×": 1,
         "Paused (Space)": false,
         "Loop mode (L)": "none",
-        "Jump →": "ACTIVATION"
+        "Jump →": "ORDER"
       },
       "folders": {}
     },
@@ -29,34 +29,34 @@
     },
     "Object Positions": {
       "controllers": {
-        "Operator X": -0.35,
+        "Operator X": -2.05,
         "Operator Y": 0.3,
-        "Operator Z": 0.4,
-        "Plotter X": -0.0499999999999998,
+        "Operator Z": 0,
+        "Plotter X": 0.8,
         "Plotter Y": 0.2,
-        "Plotter Z": -0.9,
+        "Plotter Z": -0.85,
         "Portal X": 1.65,
         "Portal Y": 1.9,
         "Portal Z": -1.95,
         "Wall Y": 0.55,
-        "PC Desk X": -3.35,
-        "PC Desk Z": 0.2
+        "PC Desk X": -2.85,
+        "PC Desk Z": -0.8
       },
       "folders": {}
     },
     "Object Dimensions": {
       "controllers": {
         "Wall": 1,
-        "PC Desk": 1.1,
-        "Operator": 1,
+        "PC Desk": 1.15,
+        "Operator": 0.9,
         "Plotter": 1.25,
-        "Portal": 1
+        "Portal": 0.7
       },
       "folders": {}
     },
     "Object Visibility": {
       "controllers": {
-        "Wall": true,
+        "Wall": false,
         "PC Desk": true,
         "Operator": true,
         "Plotter": true,
@@ -80,8 +80,8 @@
     },
     "Spawn Rates": {
       "controllers": {
-        "Data cubes": 0.245,
-        "Question mk": 0.04,
+        "Data cubes": 0.06,
+        "Question mk": 0.08,
         "Dollars": 0.02,
         "Metrics": 0.015
       },
@@ -97,10 +97,10 @@
     },
     "Live Diagnostics": {
       "controllers": {
-        "Phase": "ORDER",
-        "Time (s)": 11.740800000011914,
+        "Phase": "IDLE",
+        "Time (s)": 32.511900000005966,
         "Panels": 8,
-        "Data cubes": 38,
+        "Data cubes": 0,
         "? marks": 0
       },
       "folders": {}
