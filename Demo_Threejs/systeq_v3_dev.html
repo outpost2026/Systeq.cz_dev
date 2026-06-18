@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SYSTEQ // B2B VCF Parser & CNC Defragmenter [DEV]</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #000;
+      overflow: hidden;
+      font-family: 'Press Start 2P', monospace;
+      color: #aaaaaa;
+      user-select: none;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* CRT Scanline and Flicker Overlay */
+    #crt {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+      background:
+        radial-gradient(circle, transparent 60%, rgba(0,0,0,0.4) 100%),
+        repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 2px, transparent 4px);
+      animation: crt-flicker 0.2s infinite;
+    }
+    @keyframes crt-flicker {
+      0% { opacity: 0.985; }
+      50% { opacity: 1.0; }
+      100% { opacity: 0.985; }
+    }
+
+    .css-label {
+      font-family: 'Press Start 2P', monospace;
+      white-space: nowrap;
+      text-shadow: 2px 2px 0px #000;
+      pointer-events: none;
+      font-size: 16px;
+      transition: color 0.3s, transform 0.2s;
+    }
+
+    #hud-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 12px;
+      z-index: 10;
+    }
+    .dos-panel {
+      background: rgba(0, 0, 170, 0.75);
+      border: 4px double #55ffff;
+      box-shadow: 4px 4px 0px #000000;
+      pointer-events: auto;
+    }
+    .top-bar {
+      width: calc(100% - 340px);
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      font-size: 9px;
+      color: #ffffff;
+      background: #0000aa;
+    }
+    .top-bar span { text-shadow: 2px 2px 0px #000; }
+    #live-clock { color: #ffff55; }
+
+    .right-sidebar {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      bottom: 50px;
+      width: 310px;
+      padding: 14px 12px;
+      display: flex;
+      flex-direction: column;
+      font-size: 8px;
+      color: #aaaaaa;
+      overflow-y: auto;
+    }
+    .dos-title {
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 12px;
+      font-size: 10px;
+      text-shadow: 1px 1px 0px #000;
+    }
+    .cluster-header {
+      color: #55ffff;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .cluster-map {
+      background: #000000;
+      border: 2px solid #aaaaaa;
+      padding: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.3;
+      letter-spacing: 2px;
+      word-break: break-all;
+      color: #ff5555;
+      margin-bottom: 12px;
+    }
+    .dos-divider {
+      color: #55ffff;
+      text-align: center;
+      margin: 8px 0;
+      letter-spacing: -1px;
+    }
+    .metrics-list p, .perf-metrics p {
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .perf-metrics p { margin-bottom: 5px; }
+    .metrics-label { color: #ffffff; }
+    .metrics-value { font-weight: bold; }
+    .legend-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: 8px 0;
+      font-size: 7px;
+    }
+    .legend-item { display: flex; align-items: center; }
+    .legend-box { margin-right: 6px; font-size: 11px; }
+    .bottom-keys {
+      width: 100%;
+      height: 28px;
+      background: #000000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+      border: 2px solid #aaaaaa;
+    }
+    .key-btn {
+      flex: 1;
+      text-align: center;
+      font-size: 8px;
+      color: #000000;
+      background: #00aaaa;
+      margin: 0 3px;
+      padding: 4px 0;
+      cursor: pointer;
+      border: 1px solid #ffffff;
+    }
+    .key-btn:hover { background: #55ffff; }
+    .key-num {
+      color: #ffffff;
+      background: #000000;
+      padding: 0 4px;
+      margin-right: 4px;
+      font-weight: bold;
+    }
+    #flash-overlay {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* Dev banner */
+    #dev-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: #ff5555;
+      color: #000;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      padding: 4px 8px;
+      z-index: 10000;
+      border: 2px solid #ffff55;
+    }
+  </style>
+</head>
+<body>
+  <div id="dev-banner">🛠 DEV BUILD — http://...?dev</div>
+  <div id="crt"></div>
+  <div id="flash-overlay"></div>
+
+  <div id="hud-container">
+    <div class="dos-panel top-bar">
+      <span>╔════ SYSTEQ CAM-DEFRAG V3.3 ═══════════════════════════════════════════╗</span>
+      <span id="live-clock">00:00:00</span>
+    </div>
+
+    <div class="dos-panel right-sidebar">
+      <div class="dos-title">╔ SPEED DISK REDUCTION ╗</div>
+      <div class="cluster-header">Cluster Map (VCF Sectors):</div>
+      <div class="cluster-map" id="cluster-map">
+        ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+      </div>
+      <div class="legend-grid">
+        <div class="legend-item"><span class="legend-box" style="color: #ff5555;">▓</span><span>Chaotic</span></div>
+        <div class="legend-item"><span class="legend-box" style="color: #ff55ff;">▒</span><span>Bad Sector</span></div>
+        <div class="legend-item"><span class="legend-box" style="color: #55ff55;">█</span><span>Parsed OK</span></div>
+        <div class="legend-item"><span class="legend-box" style="color: #555555;">░</span><span>Empty</span></div>
+      </div>
+      <div class="dos-divider">╟───────────────────────────╢</div>
+      <div class="metrics-list">
+        <div class="cluster-header">Defrag Diagnostics:</div>
+        <p><span class="metrics-label">ENTROPY:</span>
+          <span class="metrics-value" id="hud-entropy" style="color: #ff5555;">94.2%</span></p>
+        <p><span class="metrics-label">PROGRESS:</span>
+          <span class="metrics-value" id="hud-progress" style="color: #ffff55;">[░░░░░░░░░░] 0%</span></p>
+        <p><span class="metrics-label">STATUS:</span>
+          <span class="metrics-value" id="hud-status" style="color: #ff5555;">UNSTRUCTURED_DATA</span></p>
+      </div>
+      <div class="dos-divider">╟─── B2B CAM CONVERSION ────╢</div>
+      <div class="perf-metrics">
+        <p><span class="metrics-label">PROCESS YIELD:</span>
+          <span class="metrics-value" id="hud-yield" style="color: #ff5555;">34.8%</span></p>
+        <p><span class="metrics-label">PROCESS TIME:</span>
+          <span class="metrics-value" id="hud-time">0.00s</span></p>
+        <p><span class="metrics-label">EST. SAVED:</span>
+          <span class="metrics-value" id="hud-savings" style="color: #55ff55;">0 CZK</span></p>
+      </div>
+    </div>
+
+    <div class="bottom-keys">
+      <div class="key-btn"><span class="key-num">F1</span>Help</div>
+      <div class="key-btn" onclick="triggerManualReset()"><span class="key-num">F2</span>Restart</div>
+      <div class="key-btn"><span class="key-num">F3</span>Setup</div>
+      <div class="key-btn"><span class="key-num">F4</span>VCF_Parse</div>
+      <div class="key-btn"><span class="key-num">F5</span>G-Code</div>
+      <div class="key-btn"><span class="key-num">F9</span>Metrics</div>
+      <div class="key-btn" onclick="window.close()"><span class="key-num">F10</span>Quit</div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+      "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.21/+esm"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+    import GUI from 'lil-gui';
+
+    const IS_DEV = window.location.search.includes('dev');
+
+    // ==== CONSTANTS & EGA-16 PALETTE ===================================
+    const GND = -0.55;
+    const DSK_Y = 0.33;
+    const WALL_Z = -2.5;
+    const WALL_W = 5.5;
+    const WALL_H = 3.2;
+    const WALL_Y = 0.55;
+
+    const EGA = {
+      BLACK: 0x000000, BLUE: 0x0000AA, GREEN: 0x00AA00, CYAN: 0x00AAAA,
+      RED: 0xAA0000, MAGENTA: 0xAA00AA, BROWN: 0xAA5500, LTGRAY: 0xAAAAAA,
+      DKGRAY: 0x555555, LTBLUE: 0x5555FF, LTGREEN: 0x55FF55, LTCYAN: 0x55FFFF,
+      LTRED: 0xFF5555, LTMAGENTA: 0xFF55FF, YELLOW: 0xFFFF55, WHITE: 0xFFFFFF
+    };
+
+    // ==== DEV PARAMS (tweakable via lil-gui when ?dev) =================
+    const hex = c => '#' + c.toString(16).padStart(6, '0');
+    const params = {
+      // Master
+      speed: 1.0,
+      // Camera
+      camDist: 7.0,
+      camHeight: 1.4,
+      camTargetY: 0.3,
+      // Phase timing (seconds)
+      chaosEnd: 7.0,
+      activationEnd: 10.0,
+      orderEnd: 22.0,
+      // Operator position
+      opX: -1.2,
+      opZ: 2.0,
+      opY: 0.38,
+      // Plotter position
+      plotterX: -0.5,
+      plotterY: 0.15,
+      plotterZ: 0.8,
+      // Portal position
+      portalX: 0.0,
+      portalY: 0.8,
+      portalZ: -1.2,
+      // Wall position
+      wallY: WALL_Y,
+      // Colors (color strings, used by spawners)
+      colCubeChaos: [EGA.RED, EGA.MAGENTA, EGA.YELLOW, EGA.BROWN],
+      colCubeOrder: EGA.LTGREEN,
+      colPanelDefect: EGA.RED,
+      colPanelOk: EGA.BROWN,
+      colPanelHealed: EGA.GREEN,
+      // Spawn rates (probability per frame)
+      cubeRate: 0.08,
+      qmRate: 0.04,
+      dollarRate: 0.02,
+      metricRate: 0.015,
+      // Panel mechanics
+      panelLaunchSpeed: 0.02,
+      panelGridStep: 0.008,
+      // Toggle: force all panels mounted
+      forceMounted: false,
+      // Master pause
+      paused: false
+    };
+
+    // Derived phase thresholds (always reflect params)
+    const flashStart = () => params.chaosEnd + 0.5;
+    const flashEnd   = () => params.chaosEnd + 0.8;
+    const shockwaveStart = () => params.chaosEnd + 0.5;
+    const shockwaveDur   = 2.0;
+    const filamentStart  = () => params.chaosEnd + 0.6;
+    const filamentEnd    = () => params.chaosEnd + 2.5;
+
+    // ==== HELPERS ======================================================
+    const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+    const cyl = (r, h, s) => new THREE.CylinderGeometry(r, r, h, s || 8);
+    const tor = (R, r, rs, ts) => new THREE.TorusGeometry(R, r, rs || 8, ts || 16);
+    const mF = c => new THREE.MeshStandardMaterial({ color: c, flatShading: true, roughness: 0.85 });
+    const M = (g, c) => new THREE.Mesh(g, mF(c));
+
+    // ==== STATE VARIABLES ==============================================
+    let scene, camera, renderer, cssRenderer, controls;
+    let startT = performance.now();
+    let simTime = 0;
+    let lastFrameT = performance.now();
+    let lastSecond = -1;
+
+    let wallGroup, pcGroup, operatorGroup, plotterGroup, portalGroup;
+    let pcMonitorScreenMesh, monitorCanvas, monitorCtx;
+    let plGantry, plSpindle, plLaserLight;
+    let opHead, opLeftArm, opRightArm, opSmileMesh, opLegL, opLegR;
+    let portalTorus1, portalTorus2, portalVortex, portalShockwave;
+    let energeticFilamentsGroup;
+
+    let dataCubes = [];
+    let questionMarks = [];
+    let panels = [];
+    let goldenDollars = [];
+    let floatingTexts = [];
+
+    let clusterSectorColors = [];
+    const CLUSTER_COUNT = 64;
+
+    function makeCssLabel(txt, color) {
+      const div = document.createElement('div');
+      div.className = 'css-label';
+      div.style.color = color || '#ff5555';
+      div.textContent = txt;
+      return new CSS2DObject(div);
+    }
+
+    // ==== INITIALIZATION ===============================================
+    function init() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(EGA.BLACK);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 40);
+      camera.position.set(0, params.camHeight, params.camDist);
+
+      renderer = new THREE.WebGLRenderer({ antialias: false });
+      renderer.setPixelRatio(1);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      cssRenderer = new CSS2DRenderer();
+      cssRenderer.setSize(window.innerWidth, window.innerHeight);
+      cssRenderer.domElement.style.position = 'absolute';
+      cssRenderer.domElement.style.top = '0px';
+      cssRenderer.domElement.style.pointerEvents = 'none';
+      document.body.appendChild(cssRenderer.domElement);
+
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, params.camTargetY, 1.2);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.enablePan = false;
+      controls.autoRotate = false;
+      controls.autoRotateSpeed = 0.15;
+
+      const ambientLight = new THREE.AmbientLight(EGA.DKGRAY, 1.8);
+      scene.add(ambientLight);
+      const mainDirLight = new THREE.DirectionalLight(EGA.LTGRAY, 2.0);
+      mainDirLight.position.set(3, 8, 4);
+      scene.add(mainDirLight);
+      const fillDirLight = new THREE.DirectionalLight(EGA.LTGRAY, 0.8);
+      fillDirLight.position.set(-4, 6, -2);
+      scene.add(fillDirLight);
+      const yellowPointLight = new THREE.PointLight(EGA.YELLOW, 2.0, 8);
+      yellowPointLight.position.set(0, 1.0, 1.0);
+      scene.add(yellowPointLight);
+
+      const floor = M(box(12, 0.02, 6), EGA.BLACK);
+      floor.position.y = GND - 0.01;
+      scene.add(floor);
+      const gridHelper = new THREE.GridHelper(12, 24, EGA.DKGRAY, EGA.BLACK);
+      gridHelper.position.y = GND;
+      scene.add(gridHelper);
+
+      for (let i = 0; i < CLUSTER_COUNT; i++) {
+        clusterSectorColors.push(Math.random() < 0.3 ? 'red' : 'darkgray');
+      }
+
+      createWall();
+      createPC();
+      createOperator();
+      createPlotter();
+      createPortal();
+
+      window.addEventListener('resize', onWindowResize);
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'r' || e.key === 'R') triggerManualReset();
+        if (e.key === ' ' || e.key === 'p' || e.key === 'P') params.paused = !params.paused;
+      });
+
+      if (IS_DEV) buildDevGUI();
+
+      startT = performance.now();
+      simTime = 0;
+      lastFrameT = performance.now();
+      animate();
+    }
+
+    // ==== 3D GEOMETRY GENERATORS =======================================
+    function createWall() {
+      wallGroup = new THREE.Group();
+      wallGroup.position.set(0, params.wallY, WALL_Z);
+      const outerFrame = M(box(WALL_W + 0.4, WALL_H + 0.4, 0.15), EGA.LTGRAY);
+      wallGroup.add(outerFrame);
+      const innerBezel = M(box(WALL_W + 0.1, WALL_H + 0.1, 0.2), EGA.DKGRAY);
+      wallGroup.add(innerBezel);
+      const plate = M(box(WALL_W, WALL_H, 0.18), EGA.BLACK);
+      plate.position.z = 0.02;
+      wallGroup.add(plate);
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; colIdx(r, c) < 12; c++) {
+          const slotFrame = M(box(1.0, 0.6, 0.02), EGA.DKGRAY);
+          slotFrame.position.set(c * 1.25 - 1.87, r * 0.95 - 0.7, 0.14);
+          wallGroup.add(slotFrame);
+        }
+      }
+      scene.add(wallGroup);
+    }
+    function colIdx(r, c) { return r * 4 + c; }
+
+    function createPC() {
+      pcGroup = new THREE.Group();
+      pcGroup.position.set(-2.4, GND, 1.2);
+      pcGroup.rotation.y = Math.PI / 2;
+
+      const table = M(box(1.2, 0.04, 0.8), EGA.BROWN);
+      table.position.y = DSK_Y + 0.02;
+      pcGroup.add(table);
+      for (let x of [-0.5, 0.5]) {
+        for (let z of [-0.3, 0.3]) {
+          const leg = M(cyl(0.04, DSK_Y + 0.02, 6), EGA.DKGRAY);
+          leg.position.set(x, (DSK_Y + 0.02) / 2, z);
+          pcGroup.add(leg);
+        }
+      }
+      const tower = M(box(0.20, 0.44, 0.38), EGA.DKGRAY);
+      tower.position.set(-0.40, DSK_Y + 0.24, 0.0);
+      pcGroup.add(tower);
+      const towerFront = M(box(0.22, 0.40, 0.02), EGA.BLACK);
+      towerFront.position.set(-0.40, DSK_Y + 0.24, 0.19);
+      pcGroup.add(towerFront);
+      const floppy = M(box(0.14, 0.02, 0.04), EGA.LTGRAY);
+      floppy.position.set(-0.40, DSK_Y + 0.38, 0.195);
+      pcGroup.add(floppy);
+      const floppy2 = M(box(0.14, 0.02, 0.04), EGA.LTGRAY);
+      floppy2.position.set(-0.40, DSK_Y + 0.34, 0.195);
+      pcGroup.add(floppy2);
+      const powerLed = M(box(0.03, 0.03, 0.03), EGA.LTGREEN);
+      powerLed.position.set(-0.40, DSK_Y + 0.12, 0.196);
+      pcGroup.add(powerLed);
+      const ventGrille = M(box(0.02, 0.20, 0.18), EGA.BLACK);
+      ventGrille.position.set(-0.30, DSK_Y + 0.24, 0.0);
+      pcGroup.add(ventGrille);
+      const monStand = M(box(0.18, 0.1, 0.18), EGA.LTGRAY);
+      monStand.position.set(0.15, DSK_Y + 0.09, 0.0);
+      pcGroup.add(monStand);
+      const monHousing = M(box(0.56, 0.46, 0.44), EGA.LTGRAY);
+      monHousing.position.set(0.15, DSK_Y + 0.34, 0.0);
+      pcGroup.add(monHousing);
+      const monBezel = M(box(0.48, 0.38, 0.04), EGA.DKGRAY);
+      monBezel.position.set(0.15, DSK_Y + 0.34, 0.22);
+      pcGroup.add(monBezel);
+
+      monitorCanvas = document.createElement('canvas');
+      monitorCanvas.width = 128;
+      monitorCanvas.height = 96;
+      monitorCtx = monitorCanvas.getContext('2d');
+      drawPCDosScreen('CHAOS');
+      const monitorTex = new THREE.CanvasTexture(monitorCanvas);
+      monitorTex.minFilter = THREE.NearestFilter;
+      monitorTex.magFilter = THREE.NearestFilter;
+      const screenMat = new THREE.MeshBasicMaterial({ map: monitorTex });
+      pcMonitorScreenMesh = new THREE.Mesh(box(0.42, 0.32, 0.01), screenMat);
+      pcMonitorScreenMesh.position.set(0.15, DSK_Y + 0.34, 0.245);
+      pcGroup.add(pcMonitorScreenMesh);
+
+      const keyboard = M(box(0.4, 0.02, 0.14), EGA.LTGRAY);
+      keyboard.position.set(0.1, DSK_Y + 0.05, 0.32);
+      pcGroup.add(keyboard);
+      const keys = M(box(0.36, 0.01, 0.1), EGA.DKGRAY);
+      keys.position.set(0.1, DSK_Y + 0.065, 0.32);
+      pcGroup.add(keys);
+      scene.add(pcGroup);
+    }
+
+    function drawPCDosScreen(phase) {
+      const ctx = monitorCtx;
+      ctx.fillStyle = '#0000aa';
+      ctx.fillRect(0, 0, 128, 96);
+      ctx.strokeStyle = '#55ffff';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(3, 3, 122, 90);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '6px "Press Start 2P", monospace';
+      if (phase === 'CHAOS') {
+        ctx.fillStyle = '#ff5555';
+        ctx.fillText('! ENTROPY ERR !', 12, 18);
+        ctx.fillStyle = '#ff55ff';
+        ctx.fillText('vcf_stream: CRASH', 8, 32);
+        ctx.fillStyle = '#aaaaaa';
+        ctx.fillText('HEX  F3 B6 8A 00', 10, 52);
+        ctx.fillText('BIN  1101 0110', 10, 64);
+        ctx.fillStyle = '#ff5555';
+        ctx.fillText('NO HEADER FOUND', 12, 82);
+      } else if (phase === 'ACTIVATION') {
+        ctx.fillStyle = '#ffff55';
+        ctx.fillText('* PARSING... *', 12, 18);
+        ctx.fillStyle = '#55ffff';
+        ctx.fillText('REDUCING NOISE', 10, 40);
+        ctx.fillText('STABILIZING CNC', 10, 56);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('B2B KEY DETECTED', 10, 78);
+      } else {
+        ctx.fillStyle = '#55ff55';
+        ctx.fillText('SYSTEM READY', 18, 18);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('CAM DATA OK', 12, 38);
+        ctx.fillStyle = '#ffff55';
+        ctx.fillText('EGA PARSED v3.3', 8, 56);
+        ctx.fillStyle = '#55ff55';
+        ctx.fillText('ENTROPY: 6.1%', 14, 78);
+      }
+    }
+    function updatePCMonitorTexture() {
+      if (pcMonitorScreenMesh && pcMonitorScreenMesh.material.map) {
+        pcMonitorScreenMesh.material.map.needsUpdate = true;
+      }
+    }
+
+    function createOperator() {
+      operatorGroup = new THREE.Group();
+      operatorGroup.position.set(params.opX, GND + params.opY, params.opZ);
+
+      const body = M(box(0.38, 0.44, 0.26), EGA.BLUE);
+      body.position.y = 0.18;
+      operatorGroup.add(body);
+      const shortsL = M(box(0.14, 0.10, 0.16), EGA.BLACK);
+      shortsL.position.set(-0.10, 0.04, 0.0);
+      operatorGroup.add(shortsL);
+      const shortsR = M(box(0.14, 0.10, 0.16), EGA.BLACK);
+      shortsR.position.set(0.10, 0.04, 0.0);
+      operatorGroup.add(shortsR);
+      opLegL = M(cyl(0.06, 0.30, 8), EGA.DKGRAY);
+      opLegL.position.set(-0.10, -0.16, 0.0);
+      operatorGroup.add(opLegL);
+      opLegR = M(cyl(0.06, 0.30, 8), EGA.DKGRAY);
+      opLegR.position.set(0.10, -0.16, 0.0);
+      operatorGroup.add(opLegR);
+
+      opHead = new THREE.Group();
+      opHead.position.set(0, 0.52, 0.0);
+      const face = M(box(0.28, 0.28, 0.28), 0xffcc99);
+      opHead.add(face);
+      const capCap = M(box(0.3, 0.08, 0.3), EGA.RED);
+      capCap.position.y = 0.16;
+      opHead.add(capCap);
+      const capVisor = M(box(0.3, 0.03, 0.14), EGA.RED);
+      capVisor.position.set(0, 0.14, 0.18);
+      opHead.add(capVisor);
+      const beard = M(box(0.3, 0.16, 0.12), EGA.BROWN);
+      beard.position.set(0, -0.12, 0.1);
+      opHead.add(beard);
+      const eyeL = M(box(0.04, 0.04, 0.02), EGA.BLACK);
+      eyeL.position.set(-0.06, 0.05, 0.145);
+      opHead.add(eyeL);
+      const eyeR = M(box(0.04, 0.04, 0.02), EGA.BLACK);
+      eyeR.position.set(0.06, 0.05, 0.145);
+      opHead.add(eyeR);
+      opSmileMesh = M(box(0.12, 0.03, 0.02), EGA.LTRED);
+      opSmileMesh.position.set(0, -0.06, 0.146);
+      opHead.add(opSmileMesh);
+      operatorGroup.add(opHead);
+
+      opLeftArm = new THREE.Group();
+      opLeftArm.position.set(-0.24, 0.3, 0.0);
+      const shoulderL = M(box(0.12, 0.24, 0.12), EGA.BLUE);
+      opLeftArm.add(shoulderL);
+      const forearmL = M(box(0.1, 0.22, 0.1), 0xffcc99);
+      forearmL.position.set(0, -0.18, 0.08);
+      forearmL.rotation.x = -1.1;
+      opLeftArm.add(forearmL);
+      const mug = M(cyl(0.06, 0.14, 6), EGA.RED);
+      mug.position.set(0, -0.22, 0.2);
+      mug.rotation.x = 0.4;
+      opLeftArm.add(mug);
+      const mugHandle = M(tor(0.05, 0.015, 6, 12), EGA.RED);
+      mugHandle.position.set(-0.06, -0.22, 0.2);
+      opLeftArm.add(mugHandle);
+      operatorGroup.add(opLeftArm);
+
+      opRightArm = new THREE.Group();
+      opRightArm.position.set(0.24, 0.3, 0.0);
+      const shoulderR = M(box(0.12, 0.24, 0.12), EGA.BLUE);
+      opRightArm.add(shoulderR);
+      const forearmR = M(box(0.1, 0.24, 0.1), 0xffcc99);
+      forearmR.position.set(0, -0.18, 0.12);
+      forearmR.rotation.x = -1.3;
+      forearmR.rotation.y = -0.3;
+      opRightArm.add(forearmR);
+      operatorGroup.add(opRightArm);
+      scene.add(operatorGroup);
+    }
+
+    function createPlotter() {
+      plotterGroup = new THREE.Group();
+      plotterGroup.position.set(params.plotterX, GND + params.plotterY, params.plotterZ);
+
+      const bed = M(box(2.2, 0.06, 1.4), EGA.DKGRAY);
+      bed.position.y = DSK_Y + 0.03;
+      plotterGroup.add(bed);
+      const bedBorder = M(box(2.24, 0.08, 1.44), EGA.LTGRAY);
+      bedBorder.position.y = DSK_Y + 0.02;
+      plotterGroup.add(bedBorder);
+      for (let x of [-0.9, 0.9]) {
+        for (let z of [-0.5, 0.5]) {
+          const leg = M(box(0.08, DSK_Y + 0.05, 0.08), EGA.BLUE);
+          leg.position.set(x, (DSK_Y + 0.05) / 2, z);
+          plotterGroup.add(leg);
+        }
+      }
+      const rail1 = M(cyl(0.02, 2.1, 4), EGA.WHITE);
+      rail1.rotation.z = Math.PI / 2;
+      rail1.position.set(0, DSK_Y + 0.09, -0.62);
+      plotterGroup.add(rail1);
+      const rail2 = M(cyl(0.02, 2.1, 4), EGA.WHITE);
+      rail2.rotation.z = Math.PI / 2;
+      rail2.position.set(0, DSK_Y + 0.09, 0.62);
+      plotterGroup.add(rail2);
+
+      plGantry = new THREE.Group();
+      plGantry.position.set(0, DSK_Y + 0.12, 0);
+      const bridgeBeam = M(box(0.12, 0.14, 1.42), EGA.LTGRAY);
+      plGantry.add(bridgeBeam);
+      const endCapL = M(box(0.16, 0.22, 0.12), EGA.BLUE);
+      endCapL.position.z = -0.62;
+      plGantry.add(endCapL);
+      const endCapR = M(box(0.16, 0.22, 0.12), EGA.BLUE);
+      endCapR.position.z = 0.62;
+      plGantry.add(endCapR);
+
+      plSpindle = new THREE.Group();
+      plSpindle.position.set(0, 0.1, 0);
+      const spindleBox = M(box(0.18, 0.18, 0.18), EGA.BROWN);
+      plSpindle.add(spindleBox);
+      const drillBit = M(cyl(0.025, 0.22, 6), EGA.WHITE);
+      drillBit.position.y = -0.16;
+      plSpindle.add(drillBit);
+      plLaserLight = new THREE.PointLight(EGA.YELLOW, 0, 1.5);
+      plLaserLight.position.set(0, -0.27, 0);
+      plSpindle.add(plLaserLight);
+      const plLaserIndicator = M(box(0.03, 0.03, 0.03), EGA.YELLOW);
+      plLaserIndicator.position.set(0, -0.24, 0);
+      plSpindle.add(plLaserIndicator);
+
+      plGantry.add(plSpindle);
+      plotterGroup.add(plGantry);
+      scene.add(plotterGroup);
+    }
+
+    function createPortal() {
+      portalGroup = new THREE.Group();
+      portalGroup.position.set(params.portalX, params.portalY, params.portalZ);
+      portalTorus1 = new THREE.Mesh(tor(0.52, 0.04, 8, 24), mF(EGA.CYAN));
+      portalGroup.add(portalTorus1);
+      portalTorus2 = new THREE.Mesh(tor(0.40, 0.03, 8, 20), mF(EGA.LTCYAN));
+      portalTorus2.rotation.x = Math.PI / 4;
+      portalGroup.add(portalTorus2);
+      portalVortex = new THREE.Group();
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const lineRay = M(box(0.015, 0.48, 0.015), EGA.LTBLUE);
+        lineRay.position.set(Math.cos(angle) * 0.22, Math.sin(angle) * 0.22, 0);
+        lineRay.rotation.z = angle + Math.PI / 2;
+        portalVortex.add(lineRay);
+      }
+      portalGroup.add(portalVortex);
+      const shGeom = new THREE.SphereGeometry(0.1, 16, 16);
+      const shMat = new THREE.MeshBasicMaterial({
+        color: EGA.WHITE, transparent: true, opacity: 0, side: THREE.DoubleSide
+      });
+      portalShockwave = new THREE.Mesh(shGeom, shMat);
+      portalGroup.add(portalShockwave);
+      energeticFilamentsGroup = new THREE.Group();
+      scene.add(energeticFilamentsGroup);
+      scene.add(portalGroup);
+    }
+
+    // ==== SPAWNERS =====================================================
+    function spawnChaosDataCube(t) {
+      const src = new THREE.Vector3(-2.6, DSK_Y + 0.34, 1.3);
+      const tgt = new THREE.Vector3(params.plotterX + plGantry.position.x, DSK_Y + 0.28, params.plotterZ + plSpindle.position.z);
+      const colors = params.colCubeChaos;
+      const selectedColor = colors[Math.floor(Math.random() * colors.length)];
+      const dc = M(box(0.10, 0.10, 0.10), selectedColor);
+      dc.position.copy(src);
+      dc.userData = {
+        progress: 0, speed: 0.005 + Math.random() * 0.004,
+        src: src.clone(), tgt: tgt.clone(),
+        wiggleOffset: Math.random() * 100,
+        mode: 'chaos'
+      };
+      scene.add(dc); dataCubes.push(dc);
+    }
+    function spawnOrderedDataCube(t) {
+      const src = new THREE.Vector3(-2.6, DSK_Y + 0.34, 1.3);
+      const tgt = new THREE.Vector3(portalGroup.position.x, portalGroup.position.y, portalGroup.position.z);
+      const dc = M(box(0.09, 0.09, 0.09), params.colCubeOrder);
+      dc.position.copy(src);
+      dc.userData = {
+        progress: 0, speed: 0.01,
+        src: src.clone(), tgt: tgt.clone(),
+        wiggleOffset: Math.random() * 50,
+        mode: 'order'
+      };
+      scene.add(dc); dataCubes.push(dc);
+    }
+    function spawnQuestionMark() {
+      const plX = params.plotterX + plGantry.position.x;
+      const plZ = params.plotterZ + plSpindle.position.z;
+      const qLabel = makeCssLabel('?', '#ff5555');
+      qLabel.position.set(plX + (Math.random()-0.5)*0.2, DSK_Y + 0.3, plZ + (Math.random()-0.5)*0.2);
+      qLabel.userData = {
+        velY: 0.008 + Math.random() * 0.004,
+        velX: (Math.random() - 0.5) * 0.006,
+        rotZ: (Math.random() - 0.5) * 0.4,
+        scale: 1.0, age: 0
+      };
+      scene.add(qLabel); questionMarks.push(qLabel);
+    }
+    function spawnGoldenDollar() {
+      const dGroup = new THREE.Group();
+      dGroup.position.copy(portalGroup.position);
+      const baseCol = M(cyl(0.03, 0.56, 4), EGA.YELLOW);
+      dGroup.add(baseCol);
+      const loopTop = M(tor(0.14, 0.036, 5, 10), EGA.YELLOW);
+      loopTop.position.set(0, 0.10, 0);
+      dGroup.add(loopTop);
+      const loopBtm = M(tor(0.14, 0.036, 5, 10), EGA.YELLOW);
+      loopBtm.position.set(0, -0.10, 0);
+      dGroup.add(loopBtm);
+      dGroup.userData = {
+        velY: 0.005 + Math.random() * 0.004,
+        velX: (Math.random() - 0.5) * 0.02,
+        velZ: (Math.random() - 0.5) * 0.01,
+        rotY: (Math.random() - 0.5) * 0.05,
+        age: 0
+      };
+      scene.add(dGroup); goldenDollars.push(dGroup);
+    }
+    const ORDERED_METRICS = [
+      "ČAS ZPRACOVÁNÍ", "MARŽE", "ERP SAVINGS", "DOLLAR YIELD",
+      "NEDOTAŽENÁ KŘIVKA", "AGREGOVANÁ ZAKÁZKA", "G-CODE COMPILATION"
+    ];
+    let metricWordIndex = 0;
+    function spawnFloatingMetricWord() {
+      const txt = ORDERED_METRICS[metricWordIndex % ORDERED_METRICS.length];
+      metricWordIndex++;
+      const fLabel = makeCssLabel(txt, '#55ff55');
+      fLabel.position.copy(portalGroup.position);
+      fLabel.userData = {
+        velY: 0.004 + Math.random() * 0.003,
+        velX: (Math.random() - 0.5) * 0.006,
+        age: 0
+      };
+      scene.add(fLabel); floatingTexts.push(fLabel);
+    }
+
+    function spawnPanelOnPlotter(isDefective) {
+      const panel = new THREE.Group();
+      panel.position.set(params.plotterX, DSK_Y + 0.18, params.plotterZ);
+      const baseMatCol = isDefective ? params.colPanelDefect : params.colPanelOk;
+      const basePlate = M(box(0.9, 0.12, 0.55), baseMatCol);
+      panel.add(basePlate);
+      const innerPlate = M(box(0.8, 0.14, 0.45), isDefective ? EGA.LTRED : EGA.DKGRAY);
+      innerPlate.position.y = 0.01;
+      panel.add(innerPlate);
+      let warnFrame = null, warnLbl = null;
+      if (isDefective) {
+        warnFrame = M(box(1.0, 0.16, 0.65), EGA.RED);
+        warnFrame.material.wireframe = true;
+        panel.add(warnFrame);
+        warnLbl = makeCssLabel("! BAD DATA !", '#ff5555');
+        warnLbl.position.set(0, 0.24, 0);
+        panel.add(warnLbl);
+      }
+      const slotIndex = panels.length;
+      if (slotIndex >= 12) return;
+      const r = Math.floor(slotIndex / 4);
+      const c = slotIndex % 4;
+      const tgtX = c * 1.25 - 1.87;
+      const tgtY = r * 0.95 - 0.7 + params.wallY;
+      const tgtZ = WALL_Z - 0.08;
+      panel.userData = {
+        isDefective, isHealed: false, slotIndex,
+        startPos: panel.position.clone(),
+        targetPos: new THREE.Vector3(tgtX, tgtY, tgtZ),
+        launchProgress: 0,
+        launchSpeed: params.panelLaunchSpeed,
+        warnFrame, warnLabel: warnLbl,
+        chaosOffsetPos: new THREE.Vector3(
+          tgtX + (Math.random() - 0.5) * 0.36,
+          tgtY + (Math.random() - 0.5) * 0.28,
+          tgtZ + 0.05
+        ),
+        chaosOffsetRotZ: (Math.random() - 0.5) * 0.35,
+        rotationTargetX: -Math.PI / 2,
+        mounted: false,
+        gridProgress: 0
+      };
+      scene.add(panel); panels.push(panel);
+    }
+
+    function easeOutBack(x) {
+      const c1 = 1.70158, c3 = c1 + 1;
+      return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2);
+    }
+
+    // ==== RESET ========================================================
+    function triggerManualReset() {
+      dataCubes.forEach(dc => scene.remove(dc)); dataCubes = [];
+      questionMarks.forEach(qm => scene.remove(qm)); questionMarks = [];
+      panels.forEach(p => scene.remove(p)); panels = [];
+      goldenDollars.forEach(gd => scene.remove(gd)); goldenDollars = [];
+      floatingTexts.forEach(ft => scene.remove(ft)); floatingTexts = [];
+      energeticFilamentsGroup.clear();
+      if (operatorGroup) {
+        operatorGroup.position.set(params.opX, GND + params.opY, params.opZ);
+        operatorGroup.rotation.set(0, 0, 0);
+      }
+      if (opHead) opHead.rotation.set(0, 0, 0);
+      if (opSmileMesh) opSmileMesh.visible = false;
+      if (plLaserLight) plLaserLight.intensity = 0;
+      for (let i = 0; i < CLUSTER_COUNT; i++) {
+        clusterSectorColors[i] = Math.random() < 0.35 ? 'red' : 'darkgray';
+      }
+      startT = performance.now();
+      simTime = 0;
+      lastFrameT = performance.now();
+      drawPCDosScreen('CHAOS');
+      updatePCMonitorTexture();
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      cssRenderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // ==== PHASE / ANIMATION ============================================
+    function getPhase(t) {
+      if (t < params.chaosEnd) return 'CHAOS';
+      if (t < params.activationEnd) return 'ACTIVATION';
+      if (t < params.orderEnd) return 'ORDER';
+      return 'IDLE';
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = performance.now();
+      const realDt = (now - lastFrameT) / 1000;
+      lastFrameT = now;
+      if (!params.paused) simTime += realDt * params.speed;
+      const t = simTime;
+      const phase = getPhase(t);
+
+      // 1. Live HUD clock
+      const date = new Date();
+      document.getElementById('live-clock').textContent = date.toTimeString().split(' ')[0];
+
+      // 2. Phase metrics
+      let entropyVal = 94.2, progressPercent = 0;
+      let statusStr = "CHAOTIC STREAM", statusColor = "#ff5555";
+      let yieldVal = "34.8%", savedVal = "0 CZK";
+
+      if (phase === 'CHAOS') {
+        entropyVal = 94.2 + Math.sin(t * 12) * 1.5;
+        progressPercent = Math.min(25, Math.floor(t * 3.5));
+        statusStr = "UNSTRUCTURED_DATA"; statusColor = "#ff5555";
+        yieldVal = "34.8%"; savedVal = "0 CZK";
+      } else if (phase === 'ACTIVATION') {
+        const aT = t - params.chaosEnd;
+        entropyVal = 94.2 - aT * 15;
+        progressPercent = 25 + Math.floor(aT * 12);
+        statusStr = "DECODING_VCF..."; statusColor = "#ffff55";
+        yieldVal = "76.4%"; savedVal = "18 500 CZK";
+      } else if (phase === 'ORDER') {
+        const orderT = t - params.activationEnd;
+        const ratio = orderT / Math.max(0.1, params.orderEnd - params.activationEnd);
+        entropyVal = 64.2 - ratio * 58.1;
+        progressPercent = 45 + Math.floor(ratio * 55);
+        statusStr = "DETERMINISTIC_GCODE"; statusColor = "#55ff55";
+        yieldVal = (34.8 + ratio * 64.2).toFixed(1) + "%";
+        savedVal = Math.floor(ratio * 137260) + " CZK";
+      } else {
+        entropyVal = 6.1; progressPercent = 100;
+        statusStr = "PARSED ENGINE V3 - IDLE"; statusColor = "#55ff55";
+        yieldVal = "99.0%"; savedVal = "137 260 CZK";
+      }
+      document.getElementById('hud-entropy').textContent = entropyVal.toFixed(1) + "%";
+      document.getElementById('hud-entropy').style.color = (entropyVal > 40) ? '#ff5555' : '#55ff55';
+      document.getElementById('hud-time').textContent = t.toFixed(2) + "s";
+      document.getElementById('hud-status').textContent = statusStr;
+      document.getElementById('hud-status').style.color = statusColor;
+      document.getElementById('hud-yield').textContent = yieldVal;
+      document.getElementById('hud-yield').style.color = (phase === 'CHAOS') ? '#ff5555' : '#55ff55';
+      document.getElementById('hud-savings').textContent = savedVal;
+      const barFilled = Math.min(10, Math.floor(progressPercent / 10));
+      const barStr = "[" + "█".repeat(barFilled) + "░".repeat(10 - barFilled) + "] " + progressPercent + "%";
+      document.getElementById('hud-progress').textContent = barStr;
+
+      // 3. Cluster map
+      const currentSecFloor = Math.floor(t * 3);
+      if (currentSecFloor !== lastSecond) {
+        lastSecond = currentSecFloor;
+        if (phase === 'CHAOS') {
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            if (Math.random() < 0.15) {
+              clusterSectorColors[i] = Math.random() < 0.4 ? 'red' : 'magenta';
+            }
+          }
+        } else if (phase === 'ACTIVATION') {
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            clusterSectorColors[i] = Math.random() < 0.5 ? 'cyan' : 'magenta';
+          }
+        } else if (phase === 'ORDER') {
+          const orderRatio = (t - params.activationEnd) / Math.max(0.1, params.orderEnd - params.activationEnd);
+          const thresholdIndex = Math.floor(orderRatio * CLUSTER_COUNT);
+          for (let i = 0; i < CLUSTER_COUNT; i++) {
+            if (i < thresholdIndex) {
+              clusterSectorColors[i] = 'green';
+            } else if (Math.random() < 0.2) {
+              clusterSectorColors[i] = Math.random() < 0.3 ? 'red' : 'magenta';
+            }
+          }
+        } else {
+          for (let i = 0; i < CLUSTER_COUNT; i++) clusterSectorColors[i] = 'green';
+        }
+        let clusterHtml = "";
+        for (let i = 0; i < CLUSTER_COUNT; i++) {
+          let char = "░", color = "#555555";
+          if (clusterSectorColors[i] === 'red') { char = "▓"; color = "#ff5555"; }
+          else if (clusterSectorColors[i] === 'magenta') { char = "▒"; color = "#ff55ff"; }
+          else if (clusterSectorColors[i] === 'cyan') { char = "█"; color = "#55ffff"; }
+          else if (clusterSectorColors[i] === 'green') { char = "█"; color = "#55ff55"; }
+          clusterHtml += `<span style="color: ${color};">${char}</span>`;
+          if ((i + 1) % 16 === 0) clusterHtml += "<br>";
+        }
+        document.getElementById('cluster-map').innerHTML = clusterHtml;
+      }
+
+      // 4. PHASE HANDLERS
+      if (phase === 'CHAOS') {
+        if (plGantry) plGantry.position.x = Math.sin(t * 3) * 0.4;
+        if (plSpindle) plSpindle.position.z = Math.cos(t * 2) * 0.4;
+        if (plLaserLight) plLaserLight.intensity = 1.0 + Math.sin(t * 30) * 0.5;
+        if (Math.random() < params.cubeRate) spawnChaosDataCube(t);
+        if (Math.random() < params.qmRate) spawnQuestionMark();
+        const spawnSec = Math.floor(t);
+        if (spawnSec > panels.length && panels.length < 12) {
+          const isThird = (panels.length + 1) % 3 === 0;
+          spawnPanelOnPlotter(isThird);
+        }
+        if (opHead) {
+          opHead.rotation.x = 0.28;
+          opHead.rotation.y = 0.1 * Math.sin(t * 2);
+        }
+        if (opLeftArm) opLeftArm.position.y = 0.3 + Math.sin(t * 3) * 0.015;
+        if (opSmileMesh) opSmileMesh.visible = false;
+        document.getElementById('flash-overlay').style.opacity = 0;
+      }
+      else if (phase === 'ACTIVATION') {
+        if (t >= flashStart() && t < flashEnd()) {
+          const flashAmt = 1.0 - (t - flashStart()) / (flashEnd() - flashStart());
+          document.getElementById('flash-overlay').style.opacity = flashAmt;
+          scene.background.setHex(EGA.WHITE);
+          drawPCDosScreen('ACTIVATION');
+          updatePCMonitorTexture();
+        } else {
+          document.getElementById('flash-overlay').style.opacity = 0;
+          scene.background.setHex(EGA.BLACK);
+        }
+        if (t >= shockwaveStart()) {
+          portalShockwave.visible = true;
+          const ratio = (t - shockwaveStart()) / shockwaveDur;
+          portalShockwave.scale.setScalar(0.1 + ratio * 48);
+          portalShockwave.material.opacity = Math.max(0, 1.0 - ratio * 1.2);
+        }
+        if (plLaserLight) plLaserLight.intensity = 0;
+        if (plGantry) plGantry.position.x += (0 - plGantry.position.x) * 0.08;
+        if (plSpindle) plSpindle.position.z += (0 - plSpindle.position.z) * 0.08;
+        if (opHead) {
+          opHead.rotation.x = -0.15;
+          opHead.rotation.y = 0;
+        }
+        if (opLeftArm) {
+          opLeftArm.rotation.x = -0.5;
+          opLeftArm.position.x = -0.22;
+        }
+        energeticFilamentsGroup.clear();
+        if (t >= filamentStart() && t < filamentEnd()) {
+          panels.forEach((p, idx) => {
+            const start = portalGroup.position;
+            const end = p.position;
+            const distance = start.distanceTo(end);
+            const filGeo = box(0.015, 0.015, distance);
+            const filMesh = M(filGeo, EGA.LTCYAN);
+            filMesh.position.copy(start).add(end).multiplyScalar(0.5);
+            filMesh.lookAt(end);
+            filMesh.scale.x = 1.0 + Math.sin(t * 40 + idx) * 0.4;
+            energeticFilamentsGroup.add(filMesh);
+          });
+        }
+      }
+      else if (phase === 'ORDER') {
+        portalShockwave.visible = false;
+        energeticFilamentsGroup.clear();
+        if (Math.random() < params.cubeRate * 1.5) spawnOrderedDataCube(t);
+        if (Math.random() < params.dollarRate) spawnGoldenDollar();
+        if (Math.random() < params.metricRate) spawnFloatingMetricWord();
+        if (currentSecFloor % 24 === 0) {
+          drawPCDosScreen('ORDER');
+          updatePCMonitorTexture();
+        }
+        if (opHead) {
+          opHead.rotation.x = -0.05 + Math.sin(t * 15) * 0.03;
+          opHead.rotation.y = 0.2 * Math.cos(t * 4);
+        }
+        if (opSmileMesh) opSmileMesh.visible = true;
+        if (operatorGroup) {
+          operatorGroup.position.y = GND + params.opY + Math.abs(Math.sin(t * 8)) * 0.06;
+          operatorGroup.position.x = params.opX + 0.4 + Math.sin(t * 12) * 0.02;
+          operatorGroup.position.z = params.opZ - 0.2;
+        }
+        if (plGantry) plGantry.position.x = Math.sin(t * 1.5) * 0.35;
+        if (plSpindle) plSpindle.position.z = Math.cos(t * 1.5) * 0.35;
+        if (plLaserLight) {
+          plLaserLight.color.setHex(EGA.LTGREEN);
+          plLaserLight.intensity = 1.2;
+        }
+        const orderSec = Math.floor((t - params.activationEnd) / 1.5);
+        if (orderSec > panels.length - 7 && panels.length < 12) {
+          spawnPanelOnPlotter(false);
+          const lastP = panels[panels.length - 1];
+          lastP.userData.chaosOffsetPos.copy(lastP.userData.targetPos);
+          lastP.userData.chaosOffsetRotZ = 0;
+        }
+        panels.forEach((p) => {
+          if (!p.userData.mounted) {
+            p.userData.gridProgress += params.panelGridStep;
+            if (p.userData.gridProgress >= 1.0) {
+              p.userData.gridProgress = 1.0;
+              p.userData.mounted = true;
+            }
+            const easeVal = easeOutBack(p.userData.gridProgress);
+            p.position.lerpVectors(p.userData.chaosOffsetPos, p.userData.targetPos, easeVal);
+            p.rotation.z = THREE.MathUtils.lerp(p.userData.chaosOffsetRotZ, 0, easeVal);
+            p.rotation.x = THREE.MathUtils.lerp(p.userData.rotationTargetX, p.userData.rotationTargetX, easeVal);
+            if (p.userData.isDefective) {
+              const redPart = p.children[0];
+              const greenPart = p.children[1];
+              const colRatio = p.userData.gridProgress;
+              redPart.material.color.lerpColors(new THREE.Color(params.colPanelDefect), new THREE.Color(params.colPanelHealed), colRatio);
+              greenPart.material.color.lerpColors(new THREE.Color(EGA.LTRED), new THREE.Color(EGA.LTGREEN), colRatio);
+              if (colRatio > 0.4) {
+                if (p.userData.warnFrame) p.userData.warnFrame.visible = false;
+                if (p.userData.warnLabel) p.userData.warnLabel.visible = false;
+              }
+            }
+          }
+        });
+      }
+      else {
+        if (plLaserLight) plLaserLight.intensity = 0.2;
+        if (plGantry) plGantry.position.x += (0 - plGantry.position.x) * 0.04;
+        if (plSpindle) plSpindle.position.z += (0 - plSpindle.position.z) * 0.04;
+        controls.autoRotate = true;
+        if (opHead) {
+          opHead.rotation.x = -0.06;
+          opHead.rotation.y = 0.18;
+          opHead.rotation.z = Math.sin(t * 1.5) * 0.015;
+        }
+        if (operatorGroup) {
+          operatorGroup.position.y = GND + params.opY;
+          operatorGroup.position.x = params.opX + 0.4;
+          operatorGroup.position.z = params.opZ;
+        }
+        panels.forEach(p => {
+          p.position.copy(p.userData.targetPos);
+          p.rotation.set(p.userData.rotationTargetX || -Math.PI / 2, 0, 0);
+          if (p.userData.isDefective) {
+            if (p.userData.warnFrame) p.userData.warnFrame.visible = false;
+            if (p.userData.warnLabel) p.userData.warnLabel.visible = false;
+          }
+        });
+      }
+
+      // 5. GENERAL ANIMATIONS
+      if (portalTorus1) { portalTorus1.rotation.z += 0.01; portalTorus1.rotation.y += 0.006; }
+      if (portalTorus2) { portalTorus2.rotation.z -= 0.015; portalTorus2.rotation.x += 0.008; }
+      if (portalVortex) portalVortex.rotation.z += 0.035;
+
+      for (let i = dataCubes.length - 1; i >= 0; i--) {
+        const dc = dataCubes[i];
+        dc.userData.progress += dc.userData.speed;
+        if (dc.userData.progress >= 1.0) {
+          scene.remove(dc); dataCubes.splice(i, 1);
+        } else {
+          const basePos = new THREE.Vector3().lerpVectors(dc.userData.src, dc.userData.tgt, dc.userData.progress);
+          const wiggleAmp = (phase === 'CHAOS') ? 0.16 : 0.03;
+          dc.position.x = basePos.x;
+          dc.position.y = basePos.y + Math.sin(dc.userData.progress * 16 + dc.userData.wiggleOffset) * wiggleAmp;
+          dc.position.z = basePos.z + Math.cos(dc.userData.progress * 12 + dc.userData.wiggleOffset) * wiggleAmp;
+          if (phase === 'ORDER' || phase === 'IDLE') dc.material.color.setHex(params.colCubeOrder);
+        }
+      }
+
+      panels.forEach(p => {
+        if (p.userData.launchProgress < 1.0 && !p.userData.mounted) {
+          p.userData.launchProgress += p.userData.launchSpeed;
+          if (p.userData.launchProgress >= 1.0) p.userData.launchProgress = 1.0;
+          p.position.lerpVectors(p.userData.startPos, p.userData.chaosOffsetPos, p.userData.launchProgress);
+          p.rotation.z = THREE.MathUtils.lerp(0, p.userData.chaosOffsetRotZ, p.userData.launchProgress);
+          p.rotation.x = THREE.MathUtils.lerp(0, p.userData.rotationTargetX, p.userData.launchProgress);
+        }
+      });
+
+      for (let i = questionMarks.length - 1; i >= 0; i--) {
+        const qm = questionMarks[i];
+        qm.userData.age += 0.016;
+        if (qm.userData.age > 1.2 || phase === 'ORDER' || phase === 'IDLE') {
+          scene.remove(qm); questionMarks.splice(i, 1);
+        } else {
+          qm.position.y += qm.userData.velY;
+          qm.position.x += qm.userData.velX;
+          const progress = qm.userData.age / 1.2;
+          qm.element.style.transform = `scale(${1.0 - progress})`;
+          qm.element.style.opacity = 1.0 - progress;
+        }
+      }
+      for (let i = goldenDollars.length - 1; i >= 0; i--) {
+        const gd = goldenDollars[i];
+        gd.userData.age += 0.016;
+        if (gd.userData.age > 2.0) { scene.remove(gd); goldenDollars.splice(i, 1); }
+        else {
+          gd.position.y += gd.userData.velY;
+          gd.position.x += gd.userData.velX;
+          gd.position.z += gd.userData.velZ;
+          gd.rotation.y += gd.userData.rotY;
+          const rem = 2.0 - gd.userData.age;
+          if (rem < 0.5) gd.scale.setScalar(rem / 0.5);
+        }
+      }
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.userData.age += 0.016;
+        if (ft.userData.age > 2.2) { scene.remove(ft); floatingTexts.splice(i, 1); }
+        else {
+          ft.position.y += ft.userData.velY;
+          ft.position.x += ft.userData.velX;
+          const progress = ft.userData.age / 2.2;
+          ft.element.style.transform = `scale(${1.0 - progress})`;
+          ft.element.style.opacity = 1.0 - progress;
+        }
+      }
+
+      // 6. Force mounted (dev debug)
+      if (params.forceMounted) {
+        panels.forEach(p => { p.userData.gridProgress = 1; p.userData.mounted = true; });
+      }
+
+      controls.update();
+      renderer.render(scene, camera);
+      cssRenderer.render(scene, camera);
+    }
+
+    // ==== DEV GUI ======================================================
+    function buildDevGUI() {
+      const gui = new GUI({ title: '🛠 SYSTEQ DEV', width: 320 });
+
+      // Master
+      const masterF = gui.addFolder('Master');
+      masterF.add(params, 'speed', 0.1, 3.0, 0.05).name('Speed ×');
+      masterF.add(params, 'paused').name('Paused (Space)');
+      masterF.add({ restart: triggerManualReset }, 'restart').name('↻ Restart');
+      masterF.add({ jumpTo: 'CHAOS' }, 'jumpTo', ['CHAOS', 'ACTIVATION', 'ORDER', 'IDLE']).name('Jump →').onChange(v => {
+        const map = { CHAOS: 0, ACTIVATION: params.chaosEnd, ORDER: params.activationEnd, IDLE: params.orderEnd };
+        simTime = map[v];
+        startT = performance.now() - simTime * 1000;
+        lastFrameT = performance.now();
+      });
+      masterF.open();
+
+      // Camera
+      const camF = gui.addFolder('Camera');
+      camF.add(params, 'camDist', 3, 20, 0.1).name('Distance').onChange(v => { camera.position.z = v; });
+      camF.add(params, 'camHeight', 0.3, 6, 0.1).name('Height').onChange(v => { camera.position.y = v; });
+      camF.add(params, 'camTargetY', -1, 2, 0.05).name('Target Y').onChange(v => { controls.target.y = v; });
+      camF.add({ preset: 'default' }, 'preset', ['default', 'top-down', 'close-up', 'side']).name('Preset').onChange(v => {
+        if (v === 'default')    { camera.position.set(0, 1.4, 7); controls.target.set(0, 0.3, 1.2); }
+        if (v === 'top-down')   { camera.position.set(0, 6, 0.5); controls.target.set(0, 0.5, 0); }
+        if (v === 'close-up')   { camera.position.set(-1.5, 1.2, 3.5); controls.target.set(-1.2, 0.7, 1.2); }
+        if (v === 'side')       { camera.position.set(5, 1.0, 0); controls.target.set(0, 0.5, 0); }
+        params.camDist = camera.position.z; params.camHeight = camera.position.y; params.camTargetY = controls.target.y;
+        camF.controllersRecursive().forEach(c => c.updateDisplay());
+      });
+
+      // Phase timing
+      const phaseF = gui.addFolder('Phase Timing (s)');
+      phaseF.add(params, 'chaosEnd', 1, 30, 0.5).name('CHAOS →');
+      phaseF.add(params, 'activationEnd', 2, 30, 0.5).name('ACTIVATION →');
+      phaseF.add(params, 'orderEnd', 5, 60, 0.5).name('ORDER →');
+
+      // Object positions
+      const posF = gui.addFolder('Object Positions');
+      posF.add(params, 'opX', -3, 1, 0.05).name('Operator X').onChange(v => { if (operatorGroup) operatorGroup.position.x = v; });
+      posF.add(params, 'opY', 0, 1, 0.05).name('Operator Y').onChange(v => { if (operatorGroup) operatorGroup.position.y = GND + v; });
+      posF.add(params, 'opZ', 0, 5, 0.05).name('Operator Z').onChange(v => { if (operatorGroup) operatorGroup.position.z = v; });
+      posF.add(params, 'plotterX', -3, 3, 0.05).name('Plotter X').onChange(v => { if (plotterGroup) plotterGroup.position.x = v; });
+      posF.add(params, 'plotterY', -0.5, 1, 0.05).name('Plotter Y').onChange(v => { if (plotterGroup) plotterGroup.position.y = GND + v; });
+      posF.add(params, 'plotterZ', -2, 3, 0.05).name('Plotter Z').onChange(v => { if (plotterGroup) plotterGroup.position.z = v; });
+      posF.add(params, 'portalX', -3, 3, 0.05).name('Portal X').onChange(v => { if (portalGroup) portalGroup.position.x = v; });
+      posF.add(params, 'portalY', 0, 3, 0.05).name('Portal Y').onChange(v => { if (portalGroup) portalGroup.position.y = v; });
+      posF.add(params, 'portalZ', -3, 0, 0.05).name('Portal Z').onChange(v => { if (portalGroup) portalGroup.position.z = v; });
+      posF.add(params, 'wallY', 0, 2, 0.05).name('Wall Y').onChange(v => { if (wallGroup) wallGroup.position.y = v; });
+
+      // Colors
+      const colF = gui.addFolder('EGA Palette');
+      const colorProxy = {
+        colCubeChaosR: 0xAA0000, colCubeChaosG: 0xAA00AA, colCubeChaosY: 0xFFFF55, colCubeChaosB: 0xAA5500,
+        colCubeOrder: '#' + EGA.LTGREEN.toString(16).padStart(6, '0'),
+        colPanelDefect: '#' + EGA.RED.toString(16).padStart(6, '0'),
+        colPanelOk: '#' + EGA.BROWN.toString(16).padStart(6, '0'),
+        colPanelHealed: '#' + EGA.GREEN.toString(16).padStart(6, '0')
+      };
+      colF.addColor(colorProxy, 'colCubeChaosR').name('Cube Red').onChange(v => params.colCubeChaos[0] = v);
+      colF.addColor(colorProxy, 'colCubeChaosG').name('Cube Magenta').onChange(v => params.colCubeChaos[1] = v);
+      colF.addColor(colorProxy, 'colCubeChaosY').name('Cube Yellow').onChange(v => params.colCubeChaos[2] = v);
+      colF.addColor(colorProxy, 'colCubeChaosB').name('Cube Brown').onChange(v => params.colCubeChaos[3] = v);
+      colF.addColor(colorProxy, 'colCubeOrder').name('Cube Order').onChange(v => params.colCubeOrder = parseInt(v.slice(1), 16));
+      colF.addColor(colorProxy, 'colPanelDefect').name('Panel Defect').onChange(v => params.colPanelDefect = parseInt(v.slice(1), 16));
+      colF.addColor(colorProxy, 'colPanelOk').name('Panel OK').onChange(v => params.colPanelOk = parseInt(v.slice(1), 16));
+      colF.addColor(colorProxy, 'colPanelHealed').name('Panel Healed').onChange(v => params.colPanelHealed = parseInt(v.slice(1), 16));
+
+      // Spawn rates
+      const spawnF = gui.addFolder('Spawn Rates');
+      spawnF.add(params, 'cubeRate', 0, 0.5, 0.005).name('Data cubes');
+      spawnF.add(params, 'qmRate', 0, 0.2, 0.005).name('Question mk');
+      spawnF.add(params, 'dollarRate', 0, 0.1, 0.005).name('Dollars');
+      spawnF.add(params, 'metricRate', 0, 0.1, 0.005).name('Metrics');
+
+      // Panel debug
+      const panelF = gui.addFolder('Panels');
+      panelF.add(params, 'panelLaunchSpeed', 0.005, 0.1, 0.005).name('Launch speed');
+      panelF.add(params, 'panelGridStep', 0.001, 0.05, 0.001).name('Grid step');
+      panelF.add(params, 'forceMounted').name('Force all mounted');
+
+      // Diagnostic readout
+      const diagF = gui.addFolder('Live Diagnostics');
+      const diag = {
+        phase: '—', t: 0, panels: 0, cubes: 0, qm: 0
+      };
+      const phaseC = diagF.add(diag, 'phase').name('Phase').listen();
+      const tC = diagF.add(diag, 't').name('Time (s)').listen().decimals(2);
+      const pC = diagF.add(diag, 'panels').name('Panels').listen();
+      const cC = diagF.add(diag, 'cubes').name('Data cubes').listen();
+      const qC = diagF.add(diag, 'qm').name('? marks').listen();
+      setInterval(() => {
+        diag.phase = getPhase(simTime);
+        diag.t = simTime;
+        diag.panels = panels.length;
+        diag.cubes = dataCubes.length;
+        diag.qm = questionMarks.length;
+        phaseC.updateDisplay(); tC.updateDisplay(); pC.updateDisplay(); cC.updateDisplay(); qC.updateDisplay();
+      }, 200);
+
+      // Open key folders
+      camF.open();
+      phaseF.open();
+      spawnF.open();
+    }
+
+    // ==== BOOTSTRAP ====================================================
+    window.onload = init;
+    window.triggerManualReset = triggerManualReset;
+  </script>
+</body>
+</html>
