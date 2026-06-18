@@ -32,6 +32,148 @@ The scene must include: a wall with 12 panels, a PC with an animated CRT monitor
 
 ## Discoveries
 
+- The original spec (`TECH_SPEC_SCENE_V3.1_REFACTOR.md`) was 1257 lines; a trimmed "lite" version and a narrative prompt `V3.3_PROMPT.md` were created earlier.
+- The skeleton in the prompt had `WALL_Z = 3.0` which, combined with camera at `(0,1.4,7)` and target `(0,0.3,1.2)`, placed the wall **in front of all other objects**. This blocked the view completely during the animation start.
+- **Fixed by changing `WALL_Z` from `3.0` to `-2.5`**. Now the wall sits behind everything (depth order: camera → plotter/PC/operator at z≈0.8–1.4 → portal at z=-1.2 → wall at z=-2.5).
+- The `spawnPanelOnPlotter` function creates the 3D panel group (base plate + inner bevel) and stores `chaosOffsetPos` (scattered near target) and `targetPos` (exact grid position). In chaos the panel lerps from `startPos` → `chaosOffsetPos`; in order it lerps `chaosOffsetPos` → `targetPos` using `easeOutBack`.
+- The `triggerManualReset` function in the current code creates a small helper function `qmLbl(q)` inside the `forEach` which would cause the first call to fail because `qmLbl` isn't hoisted as expected – the code uses `dataCubes.forEach(dc=>scene.remove(dc))` (works) but then `questionMarks.forEach(qm=>scene.remove(qmLbl(qm)))` / `goldenDollars.forEach(gd=>scene.remove(dcGeo(gd)))` uses locally‑scoped inner functions that may break in strict module mode. **This reset function needs to be rewritten** (simply use `scene.remove(qm)` directly).
+- The `orderSec > panels.length - 7` condition in ORDER spawn logic assumes ≈7 panels exist by t=10; may need adjustment if timing is tweaked.
+- **EGA palette** is correctly defined and used for all materials. Scene lights are EGA.DKGRAY (ambient), EGA.LTGRAY (directional), EGA.YELLOW (point light on plotter).
+- The portal shockwave uses a `SphereGeometry` whose opacity is animated, and filaments are `BoxGeometry` segments aligned with `lookAt`.
+- **lil-gui** provides native `gui.save()` / `gui.load()` which return JSON-compatible objects — used for localStorage persistence
+- **Three.js `scene.toJSON()`** is NOT suitable — serializes entire scene graph (geometries, materials, buffers), too heavy and doesn't capture abstract `params` object
+- **`e.preventDefault()`** is essential for key handlers (space, R, P, L) to prevent browser scrolling and OrbitControls interference
+- **Panel objects** are stored as an array (`panels[]`), not a parent group — require special handling for visibility (iterate array)
+- **`lastFrameT`** must be handled carefully during pause — updating every frame prevents time jumps when unpausing
+- **Scale for the wall** uses `(v, v, 1)` (no Z scaling) because the wall is a backdrop orthogonal to the Z axis
+- **Export Prod regex order matters** — `buildDevGUI` must be stripped FIRST to prevent the Export Prod button's literal string patterns (e.g., `.replace(/function devToast.../)`) from causing false positive regex matches that consume too much of the file
+
+---
+
+## Accomplished
+
+✅ Read the original V3.1 spec, created the V3.2 lite version, and the V3.3 narrative prompt.  
+✅ Analysed the existing `systeq_v3.html` (330 lines, simple version without DOS HUD or detailed wall).  
+✅ Wrote a **complete V3 ** HTML (≈ 30 KB, single‑file) with:
+  - Full 3D scene: wall (4×3 slot grid + ornamental bezels), PC (desk, CRT canvas monitor with live‑state drawing), operator (block head with beard/cap/mug, animatable arms), plotter (rails, gantry, spindle, laser point light), dual‑torus portal (two rings + vortex + shockwave + energetic filaments).
+  - DOS Norton‑Commander HUD overlaid with CSS: top bar, right sidebar (cluster map, legend, diagnostics, metrics), bottom F‑key bar. The cluster map updates every third of a second.
+  - 4‑phase timeline engine with correct transitions.
+  - Panel spawning (up to 12) with launch animation and ease‑out‑back defrag rearrangement.
+  - Data cubes (chaotic red → ordered green) flowing between PC and plotter/portal.
+  - Floating `?` labels (CHAOS) and golden `$` symbols + CSS metric words (ORDER).
+  - Manual reset stub (`triggerManualReset` attached to F2 and keyboard `R`).
+✅ **Fixed critical wall‑in‑front bug**: `WALL_Z = 3.0` → `WALL_Z = -2.5`.
+
+### Dev Panel (lil-gui) — 6 commits on `feature/design_logo`
+
+| Commit | Description |
+|--------|-------------|
+| `793575b` | Initial dev build with lil-gui panel: params, camera, positions, colors, spawn rates, phase jump, live diagnostics |
+| `4362da2` | Fix: pause/resume with `e.preventDefault()`, phase looping (`loopMode`), frozenSimTime, key handlers separated for space/P/R/L, Jump calls `triggerManualReset()` first |
+| `cc2e986` | Add: save/load/export to localStorage + clipboard, PC Desk position (`pcX`, `pcZ`) in params and GUI |
+| `226dfce` | Add: object dimensions scale controls (`wallScale`, `pcScale`, `opScale`, `plotterScale`, `portalScale`), CSS toast notifications |
+| `0607c4b` | Add: visibility toggles (`showWall`, `showPC`, `showOperator`, `showPlotter`, `showPortal`, `showPanels`) for all object layers |
+| `842d711` | Add: **Export Prod** button — fetches current source, inlines current params, strips all dev code, downloads clean HTML |
+| `cc14ba3` | Fix: reorder Export Prod regex — strip `buildDevGUI` first to avoid false matches in literal string patterns |
+
+✅ Dev panel features:
+- **Master folder**: Speed, Pause (Space), Loop mode (L), Restart (↻), Jump → phase selector, Save/Load (localStorage), Export (clipboard JSON), Export (JSON file download), **Export Prod** (strips dev code → clean HTML)
+- **Camera folder**: Distance, Height, Target Y, Presets (default/top-down/close-up/side)
+- **Phase Timing folder**: CHAOS→, ACTIVATION→, ORDER→ end times
+- **Object Positions folder**: Operator X/Y/Z, Plotter X/Y/Z, Portal X/Y/Z, Wall Y, PC Desk X/Z
+- **Object Dimensions folder**: Wall, PC Desk, Operator, Plotter, Portal scales
+- **Object Visibility folder**: Toggle each object layer individually
+- **EGA Palette folder**: All 8 color parameters (cube chaos, cube order, panel defect/ok/healed)
+- **Spawn Rates folder**: Data cubes, Question marks, Dollars, Metrics
+- **Panels folder**: Launch speed, Grid step, Force all mounted
+- **Live Diagnostics folder**: Phase, Time, Panels, Data cubes, ? marks counts (auto-updating)
+
+✅ **Export Prod** (🎬 button in Master folder):
+1. Fetches current HTML via `fetch(window.location.href)`
+2. Replaces `params` block with current GUI values (preserving all scales, visibilities, colors, positions)
+3. Strips `buildDevGUI` function FIRST (removes all Export Prod code, preventing false regex matches)
+4. Strips remaining dev code: `import GUI`, `IS_DEV`, `if (IS_DEV)`, `devToast`, dev HTML/CSS elements
+5. Downloads `systeq_v3_prod.html` — verified via offline Python simulation: 100% of dev code stripped, params correctly inlined
+
+---
+
+## Known issues (production scene)
+
+⚠️ **Reset function broken** — `triggerManualReset` uses locally‑defined helper functions inside `forEach` that will throw a ReferenceError in module scripts (the functions `qmLbl` and `dcGeo` are defined with function declarations inside `forEach` callbacks, but they are not hoisted into the outer scope). Must be rewritten to simply call `scene.remove(qm)` etc. without helper wrappers.
+
+**Still needs attention:**
+- Activation phase white flash lasts only 300ms (t=7.5–7.8); spec wants ≈1s burst
+- Operator right-arm rotation not animated in ORDER/IDLE
+- Cluster-map initial state is all ░; should start chaotic red/magenta per legend
+- F‑key buttons not wired to actions
+- Camera auto-rotate in IDLE needs `controls.enabled = true` to work
+- Question‑mark → symbol replacement not implemented; spec wants CSS symbols to replace `?` objects
+- HUD sidebar layout breaks on ultrawide monitors
+
+---
+
+## Current state
+
+- **Production source of truth**: `Demo_Threejs/systeq_v3.html` (1574 lines, no dev code)
+- **Dev version**: `Demo_Threejs/systeq_v3_dev.html` (1506+ lines, activated by `?dev` URL param)
+- **Dev server**: `python -m http.server 8080` then open `http://localhost:8080/Demo_Threejs/systeq_v3_dev.html?dev`
+- **Batch file**: `Demo_Threejs/systeq_v3.1_dev.bat` — starts server + opens Chrome with `?dev`
+- **Branch**: `feature/design_logo` — 7 commits ahead of `origin/feature/design_logo`, push currently times out in bash tool
+
+## Next planned steps
+
+1. **Test Export Prod in browser** — run local server, click 🎬 Export Prod button, verify the downloaded HTML has no dev code
+2. **Push to remote** — `git push origin feature/design_logo`
+3. **Promote to production** — rename `systeq_v3_prod.html` → `systeq_v3.html` when iteration is complete
+4. **Iteration 1 (Parser Core V4)** — replace torus portal with icosahedron + raycasting + screen shake
+
+---
+
+## Relevant files / directories
+
+| Path | Description |
+|------|-------------|
+| `Demo_Threejs/systeq_v3.html` | **Production source of truth** — 1574 lines, no dev code |
+| `Demo_Threejs/systeq_v3_dev.html` | **Dev version with lil-gui** — all params/controls/visibility/scales + Export Prod |
+| `Demo_Threejs/systeq_v3.1_dev.bat` | Batch file: start server + open Chrome with `?dev` |
+| `Demo_Threejs/systeq_v3_dev.json` | Example saved GUI preset (localStorage export) |
+| `Demo_Threejs/systeq_v3.html_alpha01.png` | Screenshot of initial alpha build |
+| `Demo_Threejs/systeq_v3.html_alpha02.png` | Screenshot of second alpha build |
+| `Demo_Threejs/handoff_threejs_demo.txt` | Handoff documentation |
+| `Demo_Threejs/prompt_systeq_v5.txt` | V5 prompt / project specification |
+| `src/index.html` | Main website landing page with demo links |
+| `src/demo/` | Production demo directory (contains old demo versions) |
+| `docs/design/TECH_SPEC_SCENE_V3.1_REFACTOR.md` | Full spec (1257 lines) |
+| `docs/design/TECH_SPEC_SCENE_V3.2_LITE.md` | Minimal code-only spec |
+| `src/demo/TECH_SPEC_SCENE_V3.3_PROMPT.md` | Narrative prompt used as blueprint |
+
+---
+
+## Instructions
+
+- Produce a **complete monolithic HTML** with no external dependencies beyond Three.js CDN (`three@0.160.0` from unpkg).
+- Use `importmap` for Three.js and its add‑ons (`OrbitControls`, `CSS2DRenderer`).
+- Renderer must use `antialias: false`, `pixelRatio: 1`, flat‑shaded materials throughout.
+- All colors must come from the `EGA` constant object ( 16 EGA colours ).
+- CRT overlay is an absolutely positioned `div` with `repeating-linear-gradient` (rgba(0,0,0,0.12) 1px, transparent 2px, transparent 4px) and a radial vignette; plus a `#flash-overlay` for the activation whiteout.
+- The 2D HUD is laid out as an MS‑DOS / Norton Commander dashboard:
+  - Top bar with title and live clock.
+  - Right sidebar with a **cluster‑map** (64 ASCII sectors that animate from chaotic red/magenta to parsed green), diagnostic rows (ENTROPY, PROGRESS, STATUS), B2B conversion metrics (YIELD, TIME, SAVINGS).
+  - Bottom key bar with F‑key buttons (F1–F10).
+- Operator is a low‑poly block figure: blue torso, red cap with visor, BROWN beard, small black pixel eyes, left arm holding a red cylinder mug, right arm resting. An emissive red smile block (`opSmileMesh`) is hidden in CHAOS/ACTIVATION and shown in ORDER/IDLE.
+- The wall must be **behind** all other scene objects (not between camera and the scene). Currently `WALL_Z = -2.5` and this must be preserved.
+- Four animation phases (timeline in seconds):
+  - **CHAOS (t < 7)**: panels spawn on plotter and fly to scattered chaotic positions near the wall; red/brown defective panels have wireframe warning boxes; question‑mark CSS labels float up; data cubes (red/magenta/yellow) flow from PC monitor to plotter spindle; operator slouches; laser flickers.
+  - **ACTIVATION (7 ≤ t < 10)**: white‑screen flash at t≈7.5; shockwave expands from portal; energetic filament lines connect portal to each panel; operator sits up; PC monitor changes to "PARSING…" text; plotter carriage returns to centre.
+  - **ORDER / DEFRAG (10 ≤ t < 22)**: panels snap to exact grid positions with `ease-out-back` interpolation; defective panels heal (colour lerp from RED→GREEN, wireframes hidden); golden 3D dollar signs and CSS metric labels float up from portal; green ordered data cubes flow PC→portal; operator bounces happily; smile block visible; cluster‑map progressively turns green sector‑by‑sector.
+  - **IDLE (t ≥ 22)**: scene settles; camera auto‑rotate activates; HUD shows "PARSED ENGINE V3 – IDLE" with 6.1% residual entropy.
+- Manual reset via F2 button or keyboard `R` key – must clear all arrays, remove meshes, re‑seed cluster map, redraw PC screen.
+- The whole file must stay **< 100 KB**; no comments inside `<script>` tags.
+
+---
+
+## Discoveries
+
 - The original spec (`TECH_SPEC_SCENE_V3.1_REFACTOR.md`) was 1257 lines; a trimmed “lite” version and a narrative prompt `V3.3_PROMPT.md` were created earlier.
 - The skeleton in the prompt had `WALL_Z = 3.0` which, combined with camera at `(0,1.4,7)` and target `(0,0.3,1.2)`, placed the wall **in front of all other objects**. This blocked the view completely during the animation start.
 - **Fixed by changing `WALL_Z` from `3.0` to `-2.5`**. Now the wall sits behind everything (depth order: camera → plotter/PC/operator at z≈0.8–1.4 → portal at z=-1.2 → wall at z=-2.5).
