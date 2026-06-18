@@ -1362,11 +1362,13 @@
 
           let prod = src
             .replace(/const params = \{[\s\S]*?\n    \};/, newParams)
-            .replace(/\nimport GUI from 'lil-gui';/, '')
+            // Strip buildDevGUI FIRST so its Export Prod code doesn't
+            // cause false regex matches for patterns below
+            .replace(/    function buildDevGUI\(\) \{[\s\S]*?\n    }\n/, '')
+            .replace(/\n    import GUI from 'lil-gui';/, '')
             .replace(/\n    const IS_DEV = .*?;/, '')
             .replace(/\n[\t ]+if \(IS_DEV\) buildDevGUI\(\);?/, '')
             .replace(/    function devToast[\s\S]*?\n    }\n/, '')
-            .replace(/    function buildDevGUI\(\) \{[\s\S]*?\n    }\n/, '')
             .replace(/<div id="dev-toast"><\/div>\n/, '')
             .replace(/<div id="dev-banner">.*?<\/div>\n/, '')
             .replace(/    #dev-toast[\s\S]*?show \{ opacity: 1; }\n/, '');
