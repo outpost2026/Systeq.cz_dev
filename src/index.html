@@ -132,6 +132,31 @@ header{
 .btn-3d:hover{background:rgba(211,84,0,.14);box-shadow:0 0 22px rgba(211,84,0,.24),inset 0 1px 0 rgba(211,84,0,.22)}
 .btn-3d:active{transform:scale(.92);box-shadow:0 0 6px rgba(211,84,0,.08),inset 0 1px 0 rgba(211,84,0,.1)}
 
+/* ─── HERO LAYOUT (text + 3D preview) ─── */
+.hero-layout{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center}
+.hero-text{min-width:0}
+.hero-preview{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--border-mid);background:var(--bg-card);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+.hero-preview img{width:100%;height:100%;object-fit:cover;display:block;image-rendering:pixelated}
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);transition:background .25s;cursor:pointer}
+.play-overlay:hover{background:rgba(0,0,0,.3)}
+.play-overlay svg{width:56px;height:56px;color:#fff;filter:drop-shadow(0 0 12px rgba(211,84,0,.6));transition:transform .2s}
+.play-overlay:hover svg{transform:scale(1.12)}
+.preview-label{position:absolute;bottom:.5rem;left:.75rem;font-size:.6rem;color:rgba(255,255,255,.5);letter-spacing:.12em}
+
+/* ─── CV CARD IN HERO ─── */
+.hero-cv{margin-top:1.5rem;padding:1rem 1.25rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.hero-cv-info{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.hero-cv-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:.85rem;flex-shrink:0}
+.hero-cv-name{font-size:.8rem;font-weight:600;letter-spacing:.06em}
+.hero-cv-title{font-size:.68rem;color:var(--text-muted);line-height:1.5}
+.hero-cv-btn{background:transparent;border:1px solid var(--border-strong);border-radius:4px;padding:.5rem 1.1rem;font-family:var(--font);font-size:.72rem;cursor:pointer;color:var(--text-primary);text-decoration:none;letter-spacing:.08em;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0}
+.hero-cv-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+@media(max-width:768px){
+  .hero-layout{grid-template-columns:1fr}
+  .hero-preview{aspect-ratio:16/9}
+  .hero-cv{padding:.85rem 1rem}
+}
+
 /* ─── SECTION LABELS ─── */
 .sec-eye{font-size:.62rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.4rem}
 .sec-title{font-size:1.1rem;font-weight:500;letter-spacing:.02em}
@@ -451,16 +476,40 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero">
   <div class="container">
-    <div class="eyebrow">B2B CAM AUTOMATION PLATFORM</div>
-    <h1>CAM <em>Automation</em><br>Platform</h1>
-    <p class="hero-sub">
-      Deterministický parser proprietárních CNC formátů.<br>
-      VCF → DXF → strukturovaná JSON data pro ERP integraci.
-    </p>
-    <div class="hero-ctas">
-      <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" target="_blank" rel="noopener">Spustit demo</a>
-      <a href="demo/systeq_v3.html" class="btn-3d">3D Vizualizace</a>
-      <a href="#contact" class="btn-ghost">Kontakt</a>
+    <div class="hero-layout">
+      <div class="hero-text">
+        <div class="eyebrow">B2B CAM AUTOMATION PLATFORM</div>
+        <h1>CAM <em>Automation</em><br>Platform</h1>
+        <p class="hero-sub">
+          Deterministický parser proprietárních CNC formátů.<br>
+          VCF → DXF → strukturovaná JSON data pro ERP integraci.
+        </p>
+        <div class="hero-ctas">
+          <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" target="_blank" rel="noopener">Spustit demo</a>
+          <a href="demo/systeq_v3.html" class="btn-3d">3D Vizualizace</a>
+          <a href="#contact" class="btn-ghost">Kontakt</a>
+        </div>
+      </div>
+      <a class="hero-preview" href="demo/systeq_v3.html" target="_blank" rel="noopener" aria-label="Spustit 3D vizualizaci">
+        <img src="../Demo_Threejs/tests/golden/idle.png" alt="SYSTEQ 3D vizualizace" loading="lazy" onerror="this.style.display='none'">
+        <div class="play-overlay">
+          <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+        </div>
+        <div class="preview-label">3D Vizualizace · engine v3</div>
+      </a>
+    </div>
+    <div class="hero-cv">
+      <div class="hero-cv-info">
+        <div class="hero-cv-avatar">OS</div>
+        <div>
+          <div class="hero-cv-name">Ondřej Soušek</div>
+          <div class="hero-cv-title">Systémový integrátor · CNC → Cloud · 14 let praxe</div>
+        </div>
+      </div>
+      <a class="hero-cv-btn" href="../docs/cv/Sousek_CV_portfolio.pdf" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Stáhnout CV (PDF)
+      </a>
     </div>
   </div>
 </section>

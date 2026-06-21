@@ -336,6 +336,10 @@
       // Panel mechanics
       panelLaunchSpeed: 0.02,
       panelGridStep: 0.008,
+      // Panel offset (relative to wall slots)
+      panelOffsetX: 0.0,
+      panelOffsetY: 0.0,
+      panelOffsetZ: 0.0,
       // Toggle: force all panels mounted
       forceMounted: false,
       // Master pause
@@ -908,9 +912,9 @@
       if (slotIndex >= 12) return;
       const r = Math.floor(slotIndex / 4);
       const c = slotIndex % 4;
-      const tgtX = c * 1.25 - 1.87;
-      const tgtY = r * 0.95 - 0.7 + params.wallY;
-      const tgtZ = WALL_Z - 0.08;
+      const tgtX = c * 1.25 - 1.87 + params.panelOffsetX;
+      const tgtY = r * 0.95 - 0.7 + params.wallY + params.panelOffsetY;
+      const tgtZ = WALL_Z + 0.14 + params.panelOffsetZ;
       panel.userData = {
         isDefective, isHealed: false, slotIndex,
         startPos: panel.position.clone(),
@@ -930,6 +934,23 @@
       };
       panel.visible = params.showPanels;
       scene.add(panel); panels.push(panel);
+    }
+
+    function updatePanelTargets() {
+      panels.forEach((p, idx) => {
+        if (idx >= 12) return;
+        const r = Math.floor(idx / 4);
+        const c = idx % 4;
+        const tgtX = c * 1.25 - 1.87 + params.panelOffsetX;
+        const tgtY = r * 0.95 - 0.7 + params.wallY + params.panelOffsetY;
+        const tgtZ = WALL_Z + 0.14 + params.panelOffsetZ;
+        p.userData.targetPos.set(tgtX, tgtY, tgtZ);
+        p.userData.chaosOffsetPos.set(
+          tgtX + (idx * 0.1),
+          tgtY + (idx * 0.08),
+          tgtZ + 0.05
+        );
+      });
     }
 
     function easeOutBack(x) {
@@ -1482,6 +1503,7 @@
       colPanelHealed: ${hex(p.colPanelHealed)},
       cubeRate: ${p.cubeRate}, qmRate: ${p.qmRate}, dollarRate: ${p.dollarRate}, metricRate: ${p.metricRate},
       panelLaunchSpeed: ${p.panelLaunchSpeed}, panelGridStep: ${p.panelGridStep},
+      panelOffsetX: ${p.panelOffsetX}, panelOffsetY: ${p.panelOffsetY}, panelOffsetZ: ${p.panelOffsetZ},
       forceMounted: false, paused: false, frozenSimTime: 0, loopMode: 'none',
       wallScale: ${p.wallScale}, pcScale: ${p.pcScale}, opScale: ${p.opScale},
       plotterScale: ${p.plotterScale}, portalScale: ${p.portalScale},
@@ -1602,6 +1624,9 @@
       const panelF = gui.addFolder('Panels');
       panelF.add(params, 'panelLaunchSpeed', 0.005, 0.1, 0.005).name('Launch speed');
       panelF.add(params, 'panelGridStep', 0.001, 0.05, 0.001).name('Grid step');
+      panelF.add(params, 'panelOffsetX', -1, 1, 0.02).name('Offset X').onChange(() => updatePanelTargets());
+      panelF.add(params, 'panelOffsetY', -1, 1, 0.02).name('Offset Y').onChange(() => updatePanelTargets());
+      panelF.add(params, 'panelOffsetZ', -1, 1, 0.02).name('Offset Z').onChange(() => updatePanelTargets());
       panelF.add(params, 'forceMounted').name('Force all mounted');
 
       // Diagnostic readout
