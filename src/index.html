@@ -131,6 +131,16 @@ header{
 }
 .btn-3d:hover{background:rgba(211,84,0,.14);box-shadow:0 0 22px rgba(211,84,0,.24),inset 0 1px 0 rgba(211,84,0,.22)}
 .btn-3d:active{transform:scale(.92);box-shadow:0 0 6px rgba(211,84,0,.08),inset 0 1px 0 rgba(211,84,0,.1)}
+.btn-audio{
+  background:rgba(88,28,135,.08);color:#c084fc;
+  border:1px solid rgba(88,28,135,.32);padding:.62rem 1.4rem;
+  font-family:var(--font);font-size:.78rem;font-weight:600;letter-spacing:.1em;
+  cursor:pointer;border-radius:4px;text-decoration:none;display:inline-block;
+  box-shadow:0 0 14px rgba(88,28,135,.14),inset 0 1px 0 rgba(88,28,135,.18);
+  transition:background .2s,transform .12s,box-shadow .2s;
+}
+.btn-audio:hover{background:rgba(88,28,135,.14);box-shadow:0 0 22px rgba(88,28,135,.24),inset 0 1px 0 rgba(88,28,135,.22)}
+.btn-audio:active{transform:scale(.92);box-shadow:0 0 6px rgba(88,28,135,.08),inset 0 1px 0 rgba(88,28,135,.1)}
 
 /* ─── HERO LAYOUT (text + 3D preview) ─── */
 .hero-layout{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center}
@@ -161,6 +171,23 @@ header{
 .sec-eye{font-size:.62rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.4rem}
 .sec-title{font-size:1.1rem;font-weight:500;letter-spacing:.02em}
 .sec-head{margin-bottom:2.25rem}
+
+/* ─── AUDIO SECTION ─── */
+.audio-section{padding:3rem 0 2rem;border-bottom:1px solid var(--border-subtle)}
+.audio-card{display:flex;align-items:center;gap:1.25rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;padding:1.25rem 1.5rem;transition:border-color .25s,background .25s}
+.audio-card:hover{border-color:rgba(88,28,135,.2);background:var(--bg-card-hover)}
+.audio-icon{width:40px;height:40px;border-radius:50%;background:rgba(88,28,135,.12);border:1px solid rgba(88,28,135,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#c084fc}
+.audio-body{flex:1;min-width:0}
+.audio-title{font-size:.82rem;font-weight:600;letter-spacing:.06em;margin-bottom:.15rem}
+.audio-desc{font-size:.72rem;color:var(--text-muted);font-weight:300;line-height:1.55}
+.audio-desc a{color:var(--text-muted);text-decoration:underline 1px dotted var(--text-dim);text-underline-offset:3px;transition:color .2s}
+.audio-desc a:hover{color:var(--accent)}
+.audio-controls{margin-top:.55rem}
+.audio-controls audio{width:100%;height:36px;border-radius:4px}
+.audio-controls audio::-webkit-media-controls-panel{background:var(--bg-inset);border-radius:4px}
+.audio-controls audio::-webkit-media-controls-current-time-display,
+.audio-controls audio::-webkit-media-controls-time-remaining-display{color:var(--text-muted);font-family:var(--font);font-size:.68rem}
+@media(max-width:600px){.audio-card{flex-wrap:wrap;gap:.85rem}.audio-icon{width:32px;height:32px}}
 
 /* ─── DEMO SECTION ─── */
 .demo-section{padding:4rem 0;border-bottom:1px solid var(--border-subtle)}
@@ -486,7 +513,7 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         </p>
         <div class="hero-ctas">
           <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" target="_blank" rel="noopener">Spustit demo</a>
-          <a href="demo/systeq_v3.html" class="btn-3d">3D Vizualizace</a>
+          <a href="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" class="btn-audio" target="_blank" rel="noopener">Audio: Komprese reality</a>
           <a href="#contact" class="btn-ghost">Kontakt</a>
         </div>
       </div>
@@ -495,7 +522,7 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         <div class="play-overlay">
           <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
         </div>
-        <div class="preview-label">3D Vizualizace · engine v3</div>
+        <div class="preview-label">3D interaktivní scéna · Three.js v3</div>
       </a>
     </div>
     <div class="hero-cv">
@@ -510,6 +537,32 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Stáhnout CV (PDF)
       </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ AUDIO ═══════════ -->
+<section class="audio-section">
+  <div class="container">
+    <div class="sec-head" style="margin-bottom:1.25rem">
+      <div class="sec-eye">// audio · komprese reality</div>
+      <div class="sec-title">Myšlenkové ukotvení</div>
+    </div>
+    <div class="audio-card">
+      <div class="audio-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      </div>
+      <div class="audio-body">
+        <div class="audio-title">Jak komprese reality spojuje mozek a CNC</div>
+        <div class="audio-desc">
+          Audio esej propojující deterministický parser VCF, Mikolovův kompresní realismus a teorii mozku jako geometrického procesoru. 16 MB · MP3 · <a href="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" target="_blank" rel="noopener">stáhnout MP3</a>
+        </div>
+        <div class="audio-controls">
+          <audio controls preload="none">
+            <source src="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" type="audio/mpeg">
+          </audio>
+        </div>
+      </div>
     </div>
   </div>
 </section>
