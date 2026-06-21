@@ -380,6 +380,8 @@ header{
 .lab-card:hover{border-color:rgba(192,132,252,.25);background:var(--bg-card-hover)}
 .lab-card-accent{width:3px;background:linear-gradient(180deg,#c084fc,#7c3aed);flex-shrink:0}
 .lab-card-accent.accent-manifest{background:linear-gradient(180deg,#7c3aed,#c084fc)}
+.lab-rag-card{grid-column:1/-1}
+.accent-rag{background:linear-gradient(180deg,#0d9488,#c084fc)}
 .lab-card-body{flex:1;padding:1.35rem 1.5rem;display:flex;flex-direction:column;gap:.55rem;min-width:0}
 .lab-card-label{font-size:.6rem;letter-spacing:.18em;color:rgba(192,132,252,.7);margin-bottom:.15rem}
 .lab-card-title{font-size:.88rem;font-weight:600;letter-spacing:.03em}
@@ -671,6 +673,22 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         </div>
         <div class="lab-card-media">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.3)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+      </div>
+      <div class="lab-card lab-rag-card">
+        <div class="lab-card-accent accent-rag"></div>
+        <div class="lab-card-body">
+          <div class="lab-card-label">// knowledge engine</div>
+          <div class="lab-card-title">SYSTEQ Knowledge Base</div>
+          <div class="lab-card-desc">Interaktivní RAG postavený nad kompletní dokumentací projektu — od binární struktury VCF segmentů po filozofický rámec kompresního realismu. Výsledek syntézy 11 produkčních zdrojů do jednoho konverzačního rozhraní.</div>
+          <a class="lab-card-btn" href="https://notebooklm.google.com/notebook/9085f5e4-0183-465e-8527-c61f3f91500c/preview" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Otevřít Knowledge Base
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="lab-card-media">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.3)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
         </div>
       </div>
     </div>
