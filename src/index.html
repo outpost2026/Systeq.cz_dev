@@ -103,7 +103,7 @@ header{
   letter-spacing:-.01em;line-height:1.1;margin-bottom:1.4rem;
 }
 .hero h1 em{color:var(--accent);font-style:normal}
-.hero-sub{font-size:.88rem;color:var(--text-muted);max-width:540px;line-height:1.75;margin-bottom:1.2rem;font-weight:300}
+.hero-sub{font-size:1.1rem;color:#94a3b8;max-width:540px;line-height:1.75;margin-bottom:1.2rem;font-weight:300}
 .hero-value{font-size:.82rem;color:var(--text-primary);max-width:560px;line-height:1.7;margin-bottom:1.8rem;font-weight:400;border-left:2px solid var(--accent);padding-left:1rem}
 .hero-value strong{color:var(--accent);font-weight:500}
 .hero-ctas{display:flex;gap:1.05rem;flex-wrap:wrap}
@@ -138,6 +138,7 @@ header{
 /* ─── SECTION LABELS ─── */
 .sec-eye{font-size:.62rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.4rem}
 .sec-title{font-size:1.1rem;font-weight:500;letter-spacing:.02em}
+.about-section .sec-title{font-size:1.65rem}
 .sec-head{margin-bottom:2.25rem}
 
 /* ─── DEMO SECTION ─── */
@@ -349,14 +350,14 @@ header{
 .profile-full-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
 .cv-btn{
   display:inline-flex;align-items:center;gap:.45rem;background:transparent;
-  border:1px solid var(--border-strong);border-radius:4px;padding:.5rem 1.1rem;
-  font-family:var(--font);font-size:.72rem;cursor:pointer;color:var(--text-primary);
+  border:1px solid rgba(211,84,0,.4);border-radius:4px;padding:.5rem 1.1rem;
+  font-family:var(--font);font-size:.72rem;cursor:pointer;color:#D35400;
   text-decoration:none;letter-spacing:.08em;transition:border-color .2s,color .2s,background .2s;
   flex-shrink:0;white-space:nowrap;
 }
-.cv-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
-.profile-title{font-size:.75rem;color:var(--accent);letter-spacing:.1em;margin-bottom:.75rem}
-.profile-desc{font-size:.78rem;color:var(--text-muted);line-height:1.75;font-weight:300}
+.cv-btn:hover{border-color:#D35400;color:#D35400;background:rgba(211,84,0,.08)}
+.profile-title{font-size:1.125rem;color:var(--accent);letter-spacing:.1em;margin-bottom:1rem}
+.profile-desc{font-size:1.17rem;color:var(--text-muted);line-height:1.75;font-weight:300}
 .profile-meta{margin-top:1.2rem;display:flex;flex-direction:column;gap:.5rem}
 .pm-row{display:flex;align-items:flex-start;gap:.65rem}
 .pm-icon{width:14px;height:14px;color:var(--accent);flex-shrink:0;margin-top:2px}
@@ -382,7 +383,7 @@ header{
 }
 .use-card:hover{border-color:var(--accent-border);background:var(--bg-card-hover);transform:translateY(-2px)}
 .use-card-label{font-size:.84rem;letter-spacing:.12em;color:var(--accent);margin-bottom:.1rem}
-.use-card-title{font-size:.88rem;font-weight:600;letter-spacing:.02em}
+.use-card-title{font-size:1.14rem;font-weight:600;letter-spacing:.02em}
 .use-card-signal{font-size:.7rem;color:var(--text-muted);font-weight:300;line-height:1.65;padding:.5rem .65rem;background:var(--bg-inset);border-left:2px solid rgba(13,148,136,.3);border-radius:2px;margin-top:.15rem}
 .use-card-signal strong{color:var(--text-primary);font-weight:500}
 .use-card-dopad{font-size:.7rem;color:var(--text-muted);font-weight:300;line-height:1.65;margin-top:.2rem}
@@ -404,7 +405,7 @@ header{
 .accent-rag{background:linear-gradient(180deg,#0d9488,#c084fc)}
 .lab-card-body{flex:1;padding:1.35rem 1.5rem;display:flex;flex-direction:column;gap:.55rem;min-width:0}
 .lab-card-label{font-size:.6rem;letter-spacing:.18em;color:rgba(192,132,252,.7);margin-bottom:.15rem}
-.lab-card-title{font-size:.88rem;font-weight:600;letter-spacing:.03em}
+.lab-card-title{font-size:1.23rem;font-weight:600;letter-spacing:.03em}
 .lab-card-desc{font-size:.72rem;color:var(--text-muted);font-weight:300;line-height:1.65}
 .lab-card-player{margin-top:.35rem}
 .lab-card-player audio::-webkit-media-controls-panel{background:var(--bg-inset);border-radius:4px}
@@ -576,7 +577,6 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
       <div class="lab-card lab-audio-card">
         <div class="lab-card-accent"></div>
         <div class="lab-card-body">
-          <div class="lab-card-label">// audio esej</div>
           <div class="lab-card-title">Jak komprese reality spojuje mozek a CNC</div>
           <div class="lab-card-desc">Audio esej propojující deterministický parser VCF s teorií mozku jako geometrického procesoru. Vzniklo na základě manifestu níže.</div>
           <div class="lab-card-player">
@@ -592,7 +592,6 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
       <div class="lab-card lab-manifest-card">
         <div class="lab-card-accent accent-manifest"></div>
         <div class="lab-card-body">
-          <div class="lab-card-label">// manifest · v2.1</div>
           <div class="lab-card-title">Mozek jako geometrické GPU</div>
           <div class="lab-card-desc">Teoretická esej — základní rámec kompresního realismu pro SYSTEQ projekt. Bilingual CZ/EN. 54 KB.</div>
           <a class="lab-card-btn" href="https://github.com/outpost2026/Kazuistiky-LLM-sprint/blob/main/brain_geometric_processor_summary_v2.1.md" target="_blank" rel="noopener">
@@ -608,12 +607,11 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
       <div class="lab-card lab-rag-card">
         <div class="lab-card-accent accent-rag"></div>
         <div class="lab-card-body">
-          <div class="lab-card-label">// knowledge engine</div>
-          <div class="lab-card-title">SYSTEQ Knowledge Base</div>
-          <div class="lab-card-desc">Interaktivní RAG postavený nad kompletní dokumentací projektu — od binární struktury VCF segmentů po filozofický rámec kompresního realismu. Výsledek syntézy 11 produkčních zdrojů do jednoho konverzačního rozhraní.</div>
+          <div class="lab-card-title">Chatbot SYSTEQ</div>
+          <div class="lab-card-desc">Interaktivní Chatbot postavený nad kompletní dokumentací projektu — od binární struktury VCF segmentů po filozofický rámec kompresního realismu. RAG data do jednoho konverzačního rozhraní.</div>
           <a class="lab-card-btn" href="https://notebooklm.google.com/notebook/9085f5e4-0183-465e-8527-c61f3f91500c/preview" target="_blank" rel="noopener">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            Otevřít Knowledge Base
+            Otevřít Chatbot Systeq
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>
