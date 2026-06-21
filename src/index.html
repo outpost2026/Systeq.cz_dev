@@ -103,7 +103,9 @@ header{
   letter-spacing:-.01em;line-height:1.1;margin-bottom:1.4rem;
 }
 .hero h1 em{color:var(--accent);font-style:normal}
-.hero-sub{font-size:.88rem;color:var(--text-muted);max-width:540px;line-height:1.75;margin-bottom:2.2rem;font-weight:300}
+.hero-sub{font-size:.88rem;color:var(--text-muted);max-width:540px;line-height:1.75;margin-bottom:1.2rem;font-weight:300}
+.hero-value{font-size:.82rem;color:var(--text-primary);max-width:560px;line-height:1.7;margin-bottom:1.8rem;font-weight:400;border-left:2px solid var(--accent);padding-left:1rem}
+.hero-value strong{color:var(--accent);font-weight:500}
 .hero-ctas{display:flex;gap:1.05rem;flex-wrap:wrap}
 .hero-ctas .btn-pri,.hero-ctas .btn-ghost{padding:.93rem 2.1rem;font-size:1.05rem}
 .btn-pri{
@@ -370,6 +372,24 @@ header{
 .tl-text{font-size:.75rem;color:var(--text-muted);line-height:1.6}
 .tl-text strong{color:var(--text-primary);font-weight:500}
 
+/* ─── USE-CASE SECTION ─── */
+.use-section{padding:4rem 0;border-bottom:1px solid var(--border-subtle);background:var(--bg-panel)}
+.use-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2.25rem}
+.use-card{
+  background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;
+  padding:1.5rem;display:flex;flex-direction:column;gap:.65rem;
+  transition:border-color .25s,background .25s,transform .2s;position:relative;overflow:hidden;
+}
+.use-card:hover{border-color:var(--accent-border);background:var(--bg-card-hover);transform:translateY(-2px)}
+.use-card-label{font-size:.6rem;letter-spacing:.18em;color:var(--accent);margin-bottom:.1rem}
+.use-card-title{font-size:.88rem;font-weight:600;letter-spacing:.02em}
+.use-card-signal{font-size:.7rem;color:var(--text-muted);font-weight:300;line-height:1.65;padding:.5rem .65rem;background:var(--bg-inset);border-left:2px solid rgba(13,148,136,.3);border-radius:2px;margin-top:.15rem}
+.use-card-signal strong{color:var(--text-primary);font-weight:500}
+.use-card-dopad{font-size:.7rem;color:var(--text-muted);font-weight:300;line-height:1.65;margin-top:.2rem}
+.use-card-dopad strong{color:var(--green);font-weight:500}
+.use-footer{grid-column:1/-1;text-align:center;font-size:.72rem;color:var(--text-dim);letter-spacing:.06em;padding-top:.75rem;border-top:1px solid var(--border-subtle);margin-top:.25rem}
+.use-footer strong{color:var(--accent);font-weight:500}
+
 /* ─── LAB SECTION ─── */
 .lab-section{padding:4rem 0;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle)}
 .lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
@@ -437,7 +457,8 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
   .hero{padding:2.75rem 0 2.5rem}
   .hero h1{font-size:1.75rem}
   .hide-m{display:none}
-  .demo-section,.stack-section,.branches-section,.metrics-section,.lab-section,.about-section,.contact-section{padding:2.75rem 0}
+  .use-grid{grid-template-columns:1fr}
+  .demo-section,.stack-section,.branches-section,.metrics-section,.use-section,.lab-section,.about-section,.contact-section{padding:2.75rem 0}
   .contact-grid{grid-template-columns:1fr;gap:2rem}
 }
 
@@ -489,6 +510,10 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
           Deterministický parser proprietárních CNC formátů.<br>
           VCF → DXF → strukturovaná JSON data pro ERP integraci.
         </p>
+        <p class="hero-value">
+          <strong>Vaše know-how v každém řezu. Bezchybně a automaticky.</strong><br>
+          SYSTEQ promění VCF &amp; DXF výkresy v dokonalé výrobní instrukce za 60 vteřin. Náš systém digitalizuje zkušenosti vašich nejlepších operátorů, automaticky opravuje chyby v datech a zastaví zmetky dříve, než se pohne nůž.
+        </p>
         <div class="hero-ctas">
           <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" target="_blank" rel="noopener">Spustit demo</a>
           <a href="#lab" class="btn-ghost">Lab</a>
@@ -502,6 +527,43 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         </div>
         <div class="preview-label">3D interaktivní scéna · Three.js v3</div>
       </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ USE-CASE · B2B VALUE ═══════════ -->
+<section class="use-section" id="use-cases">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eye">// use-cases</div>
+      <div class="sec-title">Co SYSTEQ řeší ve výrobě</div>
+    </div>
+    <div class="use-grid">
+      <div class="use-card">
+        <div class="use-card-label">// stop zmetkům</div>
+        <div class="use-card-title">Zmetek v zisk</div>
+        <div class="use-card-signal"><strong>Signál:</strong> Ontologická báze SYSTEQ v reálném čase skenuje geometrii a detekuje fatální chyby: neuzavřené smyčky, rizika vakuové fixace u malých dílů nebo špatné pořadí řezu.</div>
+        <div class="use-card-dopad"><strong>Dopad:</strong> Jediná zachráněná zakázka, která by se jinak kvůli chybě v datech uvolnila z vakuového stolu a zničila, zaplatí roční licenci systému.</div>
+      </div>
+      <div class="use-card">
+        <div class="use-card-label">// konec závislosti</div>
+        <div class="use-card-title">Bus-factor zero</div>
+        <div class="use-card-signal"><strong>Signál:</strong> Pětivrstvá automatizace kodifikuje tacitní znalosti vašeho hlavního technologa do srozumitelných pravidel. Systém sám ví, že kružnice pod 4 mm se řežou vibračním nožem a obvody až nakonec.</div>
+        <div class="use-card-dopad"><strong>Dopad:</strong> Přípravu výroby zvládne i méně zkušený pracovník. Vaše výroba už nestojí a nepadá s nemocenskou jednoho klíčového člověka.</div>
+      </div>
+      <div class="use-card">
+        <div class="use-card-label">// cenotvorba</div>
+        <div class="use-card-title">Přesnost ±2 %</div>
+        <div class="use-card-signal"><strong>Signál:</strong> Namísto hrubých odhadů využíváme prediktivní model trajektorií. Systém počítá s reálnou dynamikou portálu plotru a fyzikou měkkých materiálů.</div>
+        <div class="use-card-dopad"><strong>Dopad:</strong> Budete přesně vědět, kolik vás zakázka stojí, ještě než ji potvrdíte zákazníkovi. Konec dohadů o skutečném strojním času.</div>
+      </div>
+      <div class="use-card">
+        <div class="use-card-label">// vizuální audit</div>
+        <div class="use-card-title">Okamžitá kontrola</div>
+        <div class="use-card-signal"><strong>Signál:</strong> Dashboard SYSTEQ vykresluje 2D overlay přímo přes váš model. Purpurová pro chybějící hrany, červená pro kritické mezery. Operátor vidí problém dříve, než otevře CAM.</div>
+        <div class="use-card-dopad"><strong>Dopad:</strong> Čas na přípravu VCF &amp; DXF souboru klesá z 30 minut na pouhou 1 minutu. Získáváte čistá data a absolutní kontrolu nad procesem bez „černých skříněk“.</div>
+      </div>
+      <div class="use-footer">Neslibujeme „magickou AI“, ale <strong>deterministický strojový audit</strong>.</div>
     </div>
   </div>
 </section>
