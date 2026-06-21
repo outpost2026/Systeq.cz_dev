@@ -395,6 +395,20 @@ header{
 /* ─── ABOUT / PORTFOLIO ─── */
 .about-section{padding:4rem 0;border-bottom:1px solid var(--border-subtle)}
 .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2.25rem}
+.about-media{display:flex;gap:1.25rem;margin-top:2.25rem;padding-top:1.5rem;border-top:1px solid var(--border-subtle);align-items:stretch}
+.am-audio{display:flex;gap:.85rem;flex:1;min-width:0;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;padding:1rem 1.25rem;transition:border-color .25s,background .25s}
+.am-audio:hover{border-color:rgba(88,28,135,.2);background:var(--bg-card-hover)}
+.am-icon{width:34px;height:34px;border-radius:50%;background:rgba(88,28,135,.12);border:1px solid rgba(88,28,135,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#c084fc}
+.am-body{flex:1;min-width:0}
+.am-title{font-size:.78rem;font-weight:600;letter-spacing:.05em;margin-bottom:.1rem}
+.am-desc{font-size:.68rem;color:var(--text-muted);font-weight:300;margin-bottom:.45rem}
+.am-ctrl audio::-webkit-media-controls-panel{background:var(--bg-inset);border-radius:4px}
+.am-ctrl audio::-webkit-media-controls-current-time-display,
+.am-ctrl audio::-webkit-media-controls-time-remaining-display{color:var(--text-muted);font-family:var(--font);font-size:.65rem}
+.am-links{display:flex;flex-direction:column;gap:.55rem;flex-shrink:0}
+.am-btn{display:inline-flex;align-items:center;gap:.45rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;padding:.7rem 1.15rem;font-family:var(--font);font-size:.72rem;color:var(--text-muted);text-decoration:none;letter-spacing:.06em;transition:border-color .2s,color .2s,background .2s;white-space:nowrap}
+.am-btn:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
+@media(max-width:740px){.about-media{flex-direction:column}.am-links{flex-direction:row;flex-wrap:wrap}}
 @media(max-width:680px){.about-grid{grid-template-columns:1fr}}
 .profile-block{}
 .profile-name{font-size:1rem;font-weight:700;letter-spacing:.08em;margin-bottom:.25rem}
@@ -513,7 +527,6 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         </p>
         <div class="hero-ctas">
           <a href="https://vcf-parser-demo-537446704644.europe-west1.run.app/" class="btn-pri" target="_blank" rel="noopener">Spustit demo</a>
-          <a href="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" class="btn-audio" target="_blank" rel="noopener">Audio: Komprese reality</a>
           <a href="#contact" class="btn-ghost">Kontakt</a>
         </div>
       </div>
@@ -525,47 +538,10 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
         <div class="preview-label">3D interaktivní scéna · Three.js v3</div>
       </a>
     </div>
-    <div class="hero-cv">
-      <div class="hero-cv-info">
-        <div class="hero-cv-avatar">OS</div>
-        <div>
-          <div class="hero-cv-name">Ondřej Soušek</div>
-          <div class="hero-cv-title">Systémový integrátor · CNC → Cloud · 14 let praxe</div>
-        </div>
-      </div>
-      <a class="hero-cv-btn" href="../docs/cv/Sousek_CV_portfolio.pdf" target="_blank" rel="noopener">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Stáhnout CV (PDF)
-      </a>
-    </div>
   </div>
 </section>
 
-<!-- ═══════════ AUDIO ═══════════ -->
-<section class="audio-section">
-  <div class="container">
-    <div class="sec-head" style="margin-bottom:1.25rem">
-      <div class="sec-eye">// audio · komprese reality</div>
-      <div class="sec-title">Myšlenkové ukotvení</div>
-    </div>
-    <div class="audio-card">
-      <div class="audio-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-      </div>
-      <div class="audio-body">
-        <div class="audio-title">Jak komprese reality spojuje mozek a CNC</div>
-        <div class="audio-desc">
-          Audio esej propojující deterministický parser VCF, Mikolovův kompresní realismus a teorii mozku jako geometrického procesoru. 16 MB · MP3 · <a href="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" target="_blank" rel="noopener">stáhnout MP3</a>
-        </div>
-        <div class="audio-controls">
-          <audio controls preload="none">
-            <source src="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" type="audio/mpeg">
-          </audio>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 <!-- ═══════════ DEMO CTA ═══════════ -->
 <section class="demo-section" id="demo">
@@ -792,6 +768,34 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ─── ABOUT MEDIA FOOTER ─── -->
+    <div class="about-media">
+      <div class="am-audio">
+        <div class="am-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
+        <div class="am-body">
+          <div class="am-title">Jak komprese reality spojuje mozek a CNC</div>
+          <div class="am-desc">Audio esej · 16 MB · MP3</div>
+          <div class="am-ctrl">
+            <audio controls preload="none" style="width:100%;height:32px;border-radius:4px">
+              <source src="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" type="audio/mpeg">
+            </audio>
+          </div>
+        </div>
+      </div>
+      <div class="am-links">
+        <a class="am-btn" href="../docs/cv/Sousek_CV_portfolio.pdf" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Stáhnout CV (PDF)
+        </a>
+        <a class="am-btn" href="../docs/brain_geometric_processor_summary_v2.1.md" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          Přečíst manifest (v2.1)
+        </a>
       </div>
     </div>
   </div>
