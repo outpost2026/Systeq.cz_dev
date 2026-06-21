@@ -1,0 +1,81 @@
+Analýza vašeho webu ukazuje klasický syndrom skvěle fungujícího inženýrského projektu: **informační hustota je obrovská, ale informační entropie (chaos) roste s každým novým řádkem.**
+
+Pojďme na to aplikovat vaši vlastní filozofii – **kompresní realismus**. Cílem je zredukovat komplexitu webu na jeho nejjednodušší, deterministickou a bleskově scannovatelnou strukturu, aby se nové klenoty (jako je právě ta audio esej nebo cloudové pipelines) neztrácely v balastu.
+
+---
+
+## 1. Architektonický problém: Monolitický "Flat-file"
+
+V současnosti je web dlouhá, sekvenční nudle (Single Page Landing), kde vedle sebe leží:
+
+1. Vysoce sofistikované B2B SaaS nástroje (`vcut-parser`, `CNC_2_LLM`).
+2. Hardcore enterprise metriky (RPA integrace, 0% geometrických chyb, Odoo ERP).
+3. Osobní portfolio, CV a off-grid hobby (LiFePO4, soláry, scrapery Bazoše).
+4. Filozofická audio esej / Manifest.
+
+Pro firemního CTO nebo integrátora ERP je tento mix matoucí. Musíme zavést **třívrstvý koncept (Modulární architekturu)**.
+
+---
+
+## 2. Návrh nového layoutu (Strukturní dekomprese)
+
+Místo jedné nekonečné stránky rozdělte web na jasně definované, čisté sekce pomocí horní fixní navigace nebo jasně oddělených sekčních bloků s kontrastním gridem.
+
+### Sekce A: THE ENGINE (B2B SaaS Core)
+
+* **Hero sekce:** Zachovat (v20 engine, Spustit demo).
+* **Interaktivní zóna:** Live-demo parseru (VCF / DXF dropzone).
+* **Core Stack & API:** Výkonnostní parametry (33+ parsováno, 100% RPA) a čisté API endpointy (`POST/api/v1/parse-vcf`).
+* *Cíl:* CTO okamžitě vidí produkt, zkusí demo, zkopíruje endpoint a odchází spokojen.
+
+### Sekce B: THE LAB (Thought Leadership & Filozofie)
+
+Sem patří věci, které momentálně zapadají, ale tvoří váš obrovský unikátní brand. Vytvořte pro ně dedikovaný box s tmavším, "studiovým" podbarvením.
+
+* **Audio esej:** Umístěte ji sem jako prémiový prvek. Místo standardního malého přehrávače jí dejte prostor s tou novou vygenerovanou minimalistickou miniaturou mozku.
+* **Manifest kompresního realismu:** Odkaz ke stažení / přečtení hned vedle audia.
+* *Cíl:* Ukázat, jak nad automatizací přemýšlíte. Zde se z programátora stáváte architektem vizí.
+
+### Sekce C: THE OPERATOR (Profil & Kompetence)
+
+* Zpřehledněte tabulku vybraných projektů. **Oddělte zrno od plev:** Enterprise nástroje (`vcut-parser`, `cad2llm`) musí mít vizuální prioritu.
+* DIY projekty (Off-grid Outpost, scrapery) dejte pod samostatný podnadpis např. *„DIY & Telemetry R&D“*. Pro CTO je to důkaz vaší kutilské geniality, ale nesmí to svítit hned vedle korporátního GCP stacku.
+
+---
+
+## 3. Grafický design & UI (Cyberpunk-Engineering Minimalismus)
+
+Vzhledem k tomu, že kód běží čistě a serverless, design by měl odrážet totéž – žádný vizuální dluh.
+
+* **Grid a linie:** Použijte přísný technický grid (thin lines, vzhled CAD výkresu nebo IDE prostředí). Texty zarovnané do bloků, které evokují čistě strukturovaný JSON.
+* **Barevná paleta (Monochrom + Akcent):**
+* *Pozadí:* Hluboká břidlicová šeď až matná černá (dark mode).
+* *Typografie:* Čistý bezpatkový font (např. Inter) v kombinaci s Monospace fontem pro technické detaily a kód (např. JetBrains Mono).
+* *Akcent (Gradient z audia):* Použijte zářivou kybernetickou modrou/azurovou pro CNC elementy a teplou oranžovou/zlatou pro sekci "Lab" (mozek, intuice, manifest). To vytvoří podvědomou navigaci oka.
+
+
+* **Vizuální hierarchie skill-barů:** Ty procentuální indikátory (Docker 90%, LLM 88%) na stránce 5/7 očistěte. Místo tlustých barevných pruhů použijte jemné linky nebo jen čisté číselné hodnoty s popisem. Méně grafického šumu = rychlejší scan webu.
+
+---
+
+## 4. Jak zachránit novou audio esej před zapadnutím
+
+Aktuálně je audio přilepené na konci profilu autora před kontaktem, což působí jako dodatek.
+
+**Řešení:** Vytvořte na hlavní stránce (hned pod live demem nebo pod produktovými moduly) tzv. **"Feature Card" (Zvýrazněnou kartu)**:
+
+```
++-----------------------------------------------------------------------+
+|  [Ikona/Miniatura Mozku s uzlovou sítí]                              |
+|  POSLECHNĚTE SI: Jak komprese reality spojuje mozek a CNC             |
+|  AI audio esej o hlubokých zákonitostech zpracování informací.        |
+|  [ Přehrát esej ]                               [ Přečíst Manifest ]  |
++-----------------------------------------------------------------------+
+
+```
+
+Tím dáte novému obsahu váhu, kterou si zaslouží, a organicky propojíte teorii (mozek) s vaší praxí (CNC parser).
+
+---
+
+Chcete zachovat stávající formát jedné dlouhé, precizně strukturované stránky (Landing Page) s tím, že pouze vizuálně a strukturně oddělíme "B2B produkt" od "Filozofického Labu", nebo dáváte přednost rozdělení webu na více samostatných podstránek?

@@ -105,7 +105,7 @@ header{
 .hero h1 em{color:var(--accent);font-style:normal}
 .hero-sub{font-size:.88rem;color:var(--text-muted);max-width:540px;line-height:1.75;margin-bottom:2.2rem;font-weight:300}
 .hero-ctas{display:flex;gap:1.05rem;flex-wrap:wrap}
-.hero-ctas .btn-pri,.hero-ctas .btn-3d,.hero-ctas .btn-ghost{padding:.93rem 2.1rem;font-size:1.05rem}
+.hero-ctas .btn-pri,.hero-ctas .btn-ghost{padding:.93rem 2.1rem;font-size:1.05rem}
 .btn-pri{
   background:var(--accent);color:#fff;border:none;padding:.62rem 1.4rem;
   font-family:var(--font);font-size:.78rem;font-weight:500;letter-spacing:.1em;
@@ -121,26 +121,6 @@ header{
   transition:border-color .2s,color .2s,transform .15s;
 }
 .btn-ghost:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
-.btn-3d{
-  background:rgba(211,84,0,.08);color:#D35400;
-  border:1px solid rgba(211,84,0,.32);padding:.62rem 1.4rem;
-  font-family:var(--font);font-size:.78rem;font-weight:600;letter-spacing:.1em;
-  cursor:pointer;border-radius:4px;text-decoration:none;display:inline-block;
-  box-shadow:0 0 14px rgba(211,84,0,.14),inset 0 1px 0 rgba(211,84,0,.18);
-  transition:background .2s,transform .12s,box-shadow .2s;
-}
-.btn-3d:hover{background:rgba(211,84,0,.14);box-shadow:0 0 22px rgba(211,84,0,.24),inset 0 1px 0 rgba(211,84,0,.22)}
-.btn-3d:active{transform:scale(.92);box-shadow:0 0 6px rgba(211,84,0,.08),inset 0 1px 0 rgba(211,84,0,.1)}
-.btn-audio{
-  background:rgba(88,28,135,.08);color:#c084fc;
-  border:1px solid rgba(88,28,135,.32);padding:.62rem 1.4rem;
-  font-family:var(--font);font-size:.78rem;font-weight:600;letter-spacing:.1em;
-  cursor:pointer;border-radius:4px;text-decoration:none;display:inline-block;
-  box-shadow:0 0 14px rgba(88,28,135,.14),inset 0 1px 0 rgba(88,28,135,.18);
-  transition:background .2s,transform .12s,box-shadow .2s;
-}
-.btn-audio:hover{background:rgba(88,28,135,.14);box-shadow:0 0 22px rgba(88,28,135,.24),inset 0 1px 0 rgba(88,28,135,.22)}
-.btn-audio:active{transform:scale(.92);box-shadow:0 0 6px rgba(88,28,135,.08),inset 0 1px 0 rgba(88,28,135,.1)}
 
 /* ─── HERO LAYOUT (text + 3D preview) ─── */
 .hero-layout{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center}
@@ -153,41 +133,10 @@ header{
 .play-overlay:hover svg{transform:scale(1.12)}
 .preview-label{position:absolute;bottom:.5rem;left:.75rem;font-size:.6rem;color:rgba(255,255,255,.5);letter-spacing:.12em}
 
-/* ─── CV CARD IN HERO ─── */
-.hero-cv{margin-top:1.5rem;padding:1rem 1.25rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-.hero-cv-info{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
-.hero-cv-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:.85rem;flex-shrink:0}
-.hero-cv-name{font-size:.8rem;font-weight:600;letter-spacing:.06em}
-.hero-cv-title{font-size:.68rem;color:var(--text-muted);line-height:1.5}
-.hero-cv-btn{background:transparent;border:1px solid var(--border-strong);border-radius:4px;padding:.5rem 1.1rem;font-family:var(--font);font-size:.72rem;cursor:pointer;color:var(--text-primary);text-decoration:none;letter-spacing:.08em;transition:border-color .2s,color .2s,background .2s;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0}
-.hero-cv-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
-@media(max-width:768px){
-  .hero-layout{grid-template-columns:1fr}
-  .hero-preview{aspect-ratio:16/9}
-  .hero-cv{padding:.85rem 1rem}
-}
-
 /* ─── SECTION LABELS ─── */
 .sec-eye{font-size:.62rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.4rem}
 .sec-title{font-size:1.1rem;font-weight:500;letter-spacing:.02em}
 .sec-head{margin-bottom:2.25rem}
-
-/* ─── AUDIO SECTION ─── */
-.audio-section{padding:3rem 0 2rem;border-bottom:1px solid var(--border-subtle)}
-.audio-card{display:flex;align-items:center;gap:1.25rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;padding:1.25rem 1.5rem;transition:border-color .25s,background .25s}
-.audio-card:hover{border-color:rgba(88,28,135,.2);background:var(--bg-card-hover)}
-.audio-icon{width:40px;height:40px;border-radius:50%;background:rgba(88,28,135,.12);border:1px solid rgba(88,28,135,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#c084fc}
-.audio-body{flex:1;min-width:0}
-.audio-title{font-size:.82rem;font-weight:600;letter-spacing:.06em;margin-bottom:.15rem}
-.audio-desc{font-size:.72rem;color:var(--text-muted);font-weight:300;line-height:1.55}
-.audio-desc a{color:var(--text-muted);text-decoration:underline 1px dotted var(--text-dim);text-underline-offset:3px;transition:color .2s}
-.audio-desc a:hover{color:var(--accent)}
-.audio-controls{margin-top:.55rem}
-.audio-controls audio{width:100%;height:36px;border-radius:4px}
-.audio-controls audio::-webkit-media-controls-panel{background:var(--bg-inset);border-radius:4px}
-.audio-controls audio::-webkit-media-controls-current-time-display,
-.audio-controls audio::-webkit-media-controls-time-remaining-display{color:var(--text-muted);font-family:var(--font);font-size:.68rem}
-@media(max-width:600px){.audio-card{flex-wrap:wrap;gap:.85rem}.audio-icon{width:32px;height:32px}}
 
 /* ─── DEMO SECTION ─── */
 .demo-section{padding:4rem 0;border-bottom:1px solid var(--border-subtle)}
@@ -392,54 +341,66 @@ header{
 .m-label{font-size:.7rem;color:var(--text-muted);font-weight:300;letter-spacing:.05em;line-height:1.5}
 .m-note{font-size:.62rem;color:var(--text-dim);margin-top:.2rem}
 
-/* ─── ABOUT / PORTFOLIO ─── */
+/* ─── ABOUT / OPERÁTOR ─── */
 .about-section{padding:4rem 0;border-bottom:1px solid var(--border-subtle)}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;margin-top:2.25rem}
-.about-media{display:flex;gap:1.25rem;margin-top:2.25rem;padding-top:1.5rem;border-top:1px solid var(--border-subtle);align-items:stretch}
-.am-audio{display:flex;gap:.85rem;flex:1;min-width:0;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;padding:1rem 1.25rem;transition:border-color .25s,background .25s}
-.am-audio:hover{border-color:rgba(88,28,135,.2);background:var(--bg-card-hover)}
-.am-icon{width:34px;height:34px;border-radius:50%;background:rgba(88,28,135,.12);border:1px solid rgba(88,28,135,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#c084fc}
-.am-body{flex:1;min-width:0}
-.am-title{font-size:.78rem;font-weight:600;letter-spacing:.05em;margin-bottom:.1rem}
-.am-desc{font-size:.68rem;color:var(--text-muted);font-weight:300;margin-bottom:.45rem}
-.am-ctrl audio::-webkit-media-controls-panel{background:var(--bg-inset);border-radius:4px}
-.am-ctrl audio::-webkit-media-controls-current-time-display,
-.am-ctrl audio::-webkit-media-controls-time-remaining-display{color:var(--text-muted);font-family:var(--font);font-size:.65rem}
-.am-links{display:flex;flex-direction:column;gap:.55rem;flex-shrink:0}
-.am-btn{display:inline-flex;align-items:center;gap:.45rem;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;padding:.7rem 1.15rem;font-family:var(--font);font-size:.72rem;color:var(--text-muted);text-decoration:none;letter-spacing:.06em;transition:border-color .2s,color .2s,background .2s;white-space:nowrap}
-.am-btn:hover{border-color:var(--accent-border);color:var(--accent);background:var(--accent-dim)}
-@media(max-width:740px){.about-media{flex-direction:column}.am-links{flex-direction:row;flex-wrap:wrap}}
-@media(max-width:680px){.about-grid{grid-template-columns:1fr}}
-.profile-block{}
-.profile-name{font-size:1rem;font-weight:700;letter-spacing:.08em;margin-bottom:.25rem}
-.profile-title{font-size:.75rem;color:var(--accent);letter-spacing:.1em;margin-bottom:1rem}
+.profile-full{margin-top:1.5rem}
+.profile-full-top{display:flex;align-items:flex-start;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+.cv-btn{
+  display:inline-flex;align-items:center;gap:.45rem;background:transparent;
+  border:1px solid var(--border-strong);border-radius:4px;padding:.5rem 1.1rem;
+  font-family:var(--font);font-size:.72rem;cursor:pointer;color:var(--text-primary);
+  text-decoration:none;letter-spacing:.08em;transition:border-color .2s,color .2s,background .2s;
+  flex-shrink:0;white-space:nowrap;
+}
+.cv-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.profile-title{font-size:.75rem;color:var(--accent);letter-spacing:.1em;margin-bottom:.75rem}
 .profile-desc{font-size:.78rem;color:var(--text-muted);line-height:1.75;font-weight:300}
 .profile-meta{margin-top:1.2rem;display:flex;flex-direction:column;gap:.5rem}
 .pm-row{display:flex;align-items:flex-start;gap:.65rem}
 .pm-icon{width:14px;height:14px;color:var(--accent);flex-shrink:0;margin-top:2px}
 .pm-text{font-size:.72rem;color:var(--text-muted)}
 .pm-text strong{color:var(--text-primary);font-weight:500}
-
-.skills-block{}
-.skills-block h4{font-size:.62rem;letter-spacing:.18em;color:var(--text-dim);margin-bottom:.9rem}
-.skill-rows{}
-.skill-row{margin-bottom:.85rem}
-.skill-top{display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:.3rem}
-.skill-name{color:var(--text-muted)}
-.skill-pct{color:var(--text-dim);font-size:.65rem}
-.skill-bar{height:4px;background:rgba(255,255,255,.05);border-radius:1px}
-.skill-fill{height:100%;border-radius:1px;background:var(--accent)}
-.skill-fill.dim{background:var(--text-dim)}
-
-.timeline{margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border-subtle)}
+.timeline-split{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border-subtle)}
+.ts-col{}
 .tl-label{font-size:.62rem;letter-spacing:.18em;color:var(--text-dim);margin-bottom:.9rem}
 .tl-item{display:flex;gap:.8rem;padding-bottom:1rem;position:relative}
 .tl-item:last-child{padding-bottom:0}
 .tl-dot{width:8px;height:8px;border-radius:50%;border:1px solid var(--accent);margin-top:.35rem;flex-shrink:0;background:var(--accent-dim)}
-.tl-content{}
 .tl-date{font-size:.65rem;color:var(--text-dim);margin-bottom:.15rem;letter-spacing:.06em}
 .tl-text{font-size:.75rem;color:var(--text-muted);line-height:1.6}
 .tl-text strong{color:var(--text-primary);font-weight:500}
+
+/* ─── LAB SECTION ─── */
+.lab-section{padding:4rem 0;background:var(--bg-panel);border-bottom:1px solid var(--border-subtle)}
+.lab-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.lab-card{
+  display:flex;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;
+  overflow:hidden;transition:border-color .25s,background .25s;position:relative;
+}
+.lab-card:hover{border-color:rgba(192,132,252,.25);background:var(--bg-card-hover)}
+.lab-card-accent{width:3px;background:linear-gradient(180deg,#c084fc,#7c3aed);flex-shrink:0}
+.lab-card-accent.accent-manifest{background:linear-gradient(180deg,#7c3aed,#c084fc)}
+.lab-card-body{flex:1;padding:1.35rem 1.5rem;display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.lab-card-label{font-size:.6rem;letter-spacing:.18em;color:rgba(192,132,252,.7);margin-bottom:.15rem}
+.lab-card-title{font-size:.88rem;font-weight:600;letter-spacing:.03em}
+.lab-card-desc{font-size:.72rem;color:var(--text-muted);font-weight:300;line-height:1.65}
+.lab-card-player{margin-top:.35rem}
+.lab-card-player audio::-webkit-media-controls-panel{background:var(--bg-inset);border-radius:4px}
+.lab-card-player audio::-webkit-media-controls-current-time-display,
+.lab-card-player audio::-webkit-media-controls-time-remaining-display{color:var(--text-muted);font-family:var(--font);font-size:.65rem}
+.lab-card-media{display:flex;align-items:center;justify-content:center;padding:1rem;flex-shrink:0}
+.lab-card-btn{
+  display:inline-flex;align-items:center;gap:.4rem;background:rgba(192,132,252,.08);
+  border:1px solid rgba(192,132,252,.25);border-radius:4px;padding:.5rem 1.1rem;
+  font-family:var(--font);font-size:.72rem;color:#c084fc;text-decoration:none;
+  letter-spacing:.06em;transition:background .2s,border-color .2s;width:fit-content;
+}
+.lab-card-btn:hover{background:rgba(192,132,252,.15);border-color:rgba(192,132,252,.4)}
+@media(max-width:768px){
+  .lab-grid{grid-template-columns:1fr}
+  .timeline-split{grid-template-columns:1fr;gap:1.5rem}
+}
+@media(max-width:600px){.lab-card{flex-direction:column}.lab-card-media{display:none}}
 
 /* ─── CONTACT ─── */
 .contact-section{padding:4rem 0;border-bottom:1px solid var(--border-subtle);font-size:1.3rem}
@@ -474,8 +435,8 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
   .hero{padding:2.75rem 0 2.5rem}
   .hero h1{font-size:1.75rem}
   .hide-m{display:none}
-  .demo-section,.stack-section,.branches-section,.metrics-section,.about-section,.contact-section{padding:2.75rem 0}
-  .about-grid,.contact-grid{grid-template-columns:1fr;gap:2rem}
+  .demo-section,.stack-section,.branches-section,.metrics-section,.lab-section,.about-section,.contact-section{padding:2.75rem 0}
+  .contact-grid{grid-template-columns:1fr;gap:2rem}
 }
 
 /* scrollbar */
@@ -672,130 +633,134 @@ footer{border-top:1px solid var(--border-subtle);padding:1.35rem 0}
   </div>
 </section>
 
-<!-- ═══════════ ABOUT ═══════════ -->
-<section class="about-section" id="about">
+<!-- ═══════════ LAB · MYŠLENKOVÉ UKOTVENÍ ═══════════ -->
+<section class="lab-section" id="lab">
   <div class="container">
     <div class="sec-head">
-      <div class="sec-eye">// autor · profil</div>
-      <div class="sec-title">Autor</div>
+      <div class="sec-eye">// myšlenkové ukotvení</div>
+      <div class="sec-title">Lab</div>
     </div>
-    <div class="about-grid">
-      <div class="profile-block">
-        <div class="profile-name">Ondřej Soušek</div>
-        <div class="profile-title">OSVČ · Systémový integrátor · Praha 8 – Dolní Chabry</div>
-        <div class="profile-desc">
-          Hybrid "Craft-Code" operátor kombinující 14 let praxe v CNC/výrobě s Python, GCP a LLM-asistovanými workflow. Specializace na přemostění fyzického výrobního procesu a cloudové datové infrastruktury.
-        </div>
-        <div class="profile-meta">
-          <div class="pm-row">
-            <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <div class="pm-text"><strong>14 let</strong> off-grid výstavby a fyzických systémů</div>
-          </div>
-          <div class="pm-row">
-            <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-            <div class="pm-text"><strong>GCP</strong> · Cloud Run · Cloud Functions · Firestore · GCS</div>
-          </div>
-          <div class="pm-row">
-            <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            <div class="pm-text"><strong>Python</strong> · binární RE · ETL pipeline · Docker · REST API</div>
-          </div>
-          <div class="pm-row">
-            <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-            <div class="pm-text"><strong>CNC waterjet</strong> (NCstudio 10) · Ruida CAM · VCutWorks RE</div>
-          </div>
-          <div class="pm-row">
-            <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            <div class="pm-text"><strong>70+ pitevní záznamy</strong> · RAW FIRST metodika · Frakční kompilace</div>
-          </div>
-        </div>
-      </div>
-      <div class="skills-block">
-        <h4>TECHNICKÉ KOMPETENCE</h4>
-        <div class="skill-rows">
-          <div class="skill-row">
-            <div class="skill-top"><span class="skill-name">Python / binární RE</span><span class="skill-pct">95%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
-          </div>
-          <div class="skill-row">
-            <div class="skill-top"><span class="skill-name">GCP Cloud infrastructure</span><span class="skill-pct">82%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:82%"></div></div>
-          </div>
-          <div class="skill-row">
-            <div class="skill-top"><span class="skill-name">CNC / Ruida CAM</span><span class="skill-pct">90%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div>
-          </div>
-          <div class="skill-row">
-            <div class="skill-top"><span class="skill-name">Docker / REST API design</span><span class="skill-pct">78%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:78%"></div></div>
-          </div>
-          <div class="skill-row">
-            <div class="skill-top"><span class="skill-name">Off-grid / elektrické systémy</span><span class="skill-pct">88%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div>
-          </div>
-          <div class="skill-row">
-            <div class="skill-top"><span class="skill-name">LLM-asistované workflow</span><span class="skill-pct">85%</span></div>
-            <div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div>
-          </div>
-        </div>
-        <div class="timeline">
-          <div class="tl-label">VYBRANÉ PROJEKTY</div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-content">
-              <div class="tl-date">2026</div>
-              <div class="tl-text"><strong>SYSTEQ / vcut-parser</strong> — první open-source VCF binární parser. B2B SaaS model.</div>
-            </div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-content">
-              <div class="tl-date">2026 · Q1</div>
-              <div class="tl-text"><strong>GCP produkční stack</strong> — Cloud Run, Firestore, ČHMÚ ETL pipeline, BMS telemetrie, Bazoš.cz scrapers. Postaven from zero za 45 dní.</div>
-            </div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-content">
-              <div class="tl-date">2026</div>
-              <div class="tl-text"><strong>cad2llm</strong> — SketchUp/COLLADA → JSON pipeline. 4×4 transformační matice. 0% geometrických chyb na 30 uzlech.</div>
-            </div>
-          </div>
-          <div class="tl-item">
-            <div class="tl-dot"></div>
-            <div class="tl-content">
-              <div class="tl-date">2012–2026</div>
-              <div class="tl-text"><strong>Off-grid "Outpost"</strong> — hand-soldered PV panely, 8S2P LiFePO4, DIY LowCost solar systém. Praha 8 – Dolní Chabry.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ─── ABOUT MEDIA FOOTER ─── -->
-    <div class="about-media">
-      <div class="am-audio">
-        <div class="am-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-        </div>
-        <div class="am-body">
-          <div class="am-title">Jak komprese reality spojuje mozek a CNC</div>
-          <div class="am-desc">Audio esej · 16 MB · MP3</div>
-          <div class="am-ctrl">
-            <audio controls preload="none" style="width:100%;height:32px;border-radius:4px">
+    <div class="lab-grid">
+      <div class="lab-card lab-audio-card">
+        <div class="lab-card-accent"></div>
+        <div class="lab-card-body">
+          <div class="lab-card-label">// audio esej</div>
+          <div class="lab-card-title">Jak komprese reality spojuje mozek a CNC</div>
+          <div class="lab-card-desc">Audio esej propojující deterministický parser VCF s teorií mozku jako geometrického procesoru. Vzniklo na základě manifestu níže.</div>
+          <div class="lab-card-player">
+            <audio controls preload="none" style="width:100%;height:34px;border-radius:4px">
               <source src="https://systeq.cz/docs/audio/Jak_komprese_reality_spojuje_mozek_a_CNC.mp3" type="audio/mpeg">
             </audio>
           </div>
         </div>
+        <div class="lab-card-media">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.3)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+        </div>
       </div>
-      <div class="am-links">
-        <a class="am-btn" href="../docs/cv/Sousek_CV_portfolio.pdf" target="_blank" rel="noopener">
+      <div class="lab-card lab-manifest-card">
+        <div class="lab-card-accent accent-manifest"></div>
+        <div class="lab-card-body">
+          <div class="lab-card-label">// manifest · v2.1</div>
+          <div class="lab-card-title">Mozek jako geometrické GPU</div>
+          <div class="lab-card-desc">Teoretická esej — základní rámec kompresního realismu pro SYSTEQ projekt. Bilingual CZ/EN. 54 KB.</div>
+          <a class="lab-card-btn" href="https://github.com/outpost2026/Kazuistiky-LLM-sprint/blob/main/brain_geometric_processor_summary_v2.1.md" target="_blank" rel="noopener">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Přečíst na GitHubu
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>
+        <div class="lab-card-media">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(192,132,252,.3)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ OPERÁTOR · PROFIL ═══════════ -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eye">// operátor · profil</div>
+      <div class="sec-title">Ondřej Soušek</div>
+    </div>
+    <div class="profile-full">
+      <div class="profile-full-top">
+        <div>
+          <div class="profile-title">OSVČ · Systémový integrátor · Praha 8 – Dolní Chabry</div>
+          <div class="profile-desc">
+            Hybrid "Craft-Code" operátor kombinující 14 let praxe v CNC/výrobě s Python, GCP a LLM-asistovanými workflow. Specializace na přemostění fyzického výrobního procesu a cloudové datové infrastruktury.
+          </div>
+        </div>
+        <a class="cv-btn" href="../docs/cv/Sousek_CV_portfolio.pdf" target="_blank" rel="noopener">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Stáhnout CV (PDF)
+          Stáhnout CV
         </a>
-        <a class="am-btn" href="../docs/brain_geometric_processor_summary_v2.1.md" target="_blank" rel="noopener">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-          Přečíst manifest (v2.1)
-        </a>
+      </div>
+      <div class="profile-meta">
+        <div class="pm-row">
+          <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <div class="pm-text"><strong>14 let</strong> off-grid výstavby a fyzických systémů</div>
+        </div>
+        <div class="pm-row">
+          <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          <div class="pm-text"><strong>GCP</strong> · Cloud Run · Cloud Functions · Firestore · GCS</div>
+        </div>
+        <div class="pm-row">
+          <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <div class="pm-text"><strong>Python</strong> · binární RE · ETL pipeline · Docker · REST API</div>
+        </div>
+        <div class="pm-row">
+          <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          <div class="pm-text"><strong>CNC waterjet</strong> (NCstudio 10) · Ruida CAM · VCutWorks RE</div>
+        </div>
+        <div class="pm-row">
+          <svg class="pm-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <div class="pm-text"><strong>70+ pitevní záznamy</strong> · RAW FIRST metodika · Frakční kompilace</div>
+        </div>
+      </div>
+    </div>
+    <div class="timeline-split">
+      <div class="ts-col">
+        <div class="tl-label">// enterprise</div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026</div>
+            <div class="tl-text"><strong>SYSTEQ / vcut-parser</strong> — první open-source VCF binární parser. B2B SaaS model.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026 · Q1</div>
+            <div class="tl-text"><strong>GCP produkční stack</strong> — Cloud Run, Firestore, ČHMÚ ETL pipeline. From zero za 45 dní.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026</div>
+            <div class="tl-text"><strong>cad2llm</strong> — SketchUp/COLLADA → JSON. 0% geometrických chyb na 30 uzlech.</div>
+          </div>
+        </div>
+      </div>
+      <div class="ts-col">
+        <div class="tl-label">// diy & r&d</div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <div class="tl-date">2012–2026</div>
+            <div class="tl-text"><strong>Off-grid "Outpost"</strong> — hand-soldered PV panely, 8S2P LiFePO4, DIY LowCost solar.</div>
+          </div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <div class="tl-content">
+            <div class="tl-date">2026</div>
+            <div class="tl-text"><strong>CNC_2_LLM</strong> — DXF → strukturovaná data pipeline pro ML a ERP.</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
