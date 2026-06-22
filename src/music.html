@@ -100,6 +100,7 @@ header{
 
 .track-card.placeholder{opacity:.45;filter:grayscale(.8);pointer-events:none}
 .track-card.placeholder .play-btn{opacity:0}
+.placeholder-label{font-size:.6rem;letter-spacing:.18em;color:var(--text-dim);text-transform:uppercase;text-align:center;padding:.5rem;border-top:1px solid var(--dirt)}
 
 /* cover */
 .track-cover{
@@ -129,6 +130,7 @@ header{
 }
 .play-btn:hover{background:rgba(183,65,14,.25);border-color:var(--rust-border);color:var(--rust)}
 .play-btn.playing{background:rgba(183,65,14,0.2);border-color:var(--rust-border);color:var(--rust)}
+.play-btn.error{color:#6b0000;border-color:rgba(107,0,0,.4)}
 
 /* progress bar at bottom of cover */
 .track-progress{
@@ -184,6 +186,9 @@ footer{border-top:1px solid var(--dirt);padding:1.25rem 0}
   .hero{padding:1.75rem 0 1.5rem}
   .tracks-section{padding:1.5rem 0 2.5rem}
   .header-inner{flex-wrap:wrap;gap:.5rem}
+  .h1-symbol{font-size:2em}
+  .hero h1{font-size:clamp(1.6rem,7vw,2.4rem)}
+  .hero-sub{font-size:.82rem}
 }
 </style>
 </head>
@@ -421,6 +426,7 @@ function renderTracks() {
       : '';
     const playBtnHtml = isPlaceholder ? '' : `<button class="play-btn" data-index="${i}">▶</button>`;
 
+    const durationId = `duration-${i}`;
     card.innerHTML = `
       <div class="track-cover">
         ${coverHtml}
@@ -429,12 +435,25 @@ function renderTracks() {
       </div>
       <div class="track-body">
         <div class="track-title">${t.title}</div>
-        <div class="track-meta">${metaParts.join(' · ')}</div>
+        <div class="track-meta"><span data-duration="${durationId}">${t.duration}</span>${t.bpm ? ` · <span class="bpm">${t.bpm}</span>` : ''}${t.tuning ? ` · <span class="tuning">${t.tuning}</span>` : ''}</div>
       </div>
       <div class="track-lyrics"><pre>${t.lyrics.join('\n')}</pre></div>
-      ${t.audio ? `<audio data-audio="${i}" preload="none" src="${t.audio}" type="${t.audio.endsWith('.mp3') ? 'audio/mpeg' : 'audio/mp4'}"></audio>` : ''}
+      ${isPlaceholder ? '<div class="placeholder-label">coming soon</div>' : ''}
+      ${t.audio ? `<audio data-audio="${i}" preload="metadata" src="${t.audio}" type="${t.audio.endsWith('.mp3') ? 'audio/mpeg' : 'audio/mp4'}"></audio>` : ''}
     `;
     grid.appendChild(card);
+
+    // Auto-detect duration from audio metadata
+    if (t.audio) {
+      const audioEl = card.querySelector('audio');
+      const durEl = card.querySelector(`[data-duration="${durationId}"]`);
+      audioEl.onloadedmetadata = () => {
+        const sec = Math.floor(audioEl.duration);
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        durEl.textContent = `${m}:${String(s).padStart(2, '0')}`;
+      };
+    }
   });
 }
 
@@ -526,7 +545,11 @@ function togglePlay(idx) {
   card.classList.add('playing');
   rafId = requestAnimationFrame(updateProgress);
 
-  audio.onerror = () => { stopPlayback(); };
+  audio.onerror = () => {
+    btn.textContent = '✕';
+    btn.classList.add('error');
+    stopPlayback();
+  };
   audio.onended = () => { stopPlayback(); };
 }
 
