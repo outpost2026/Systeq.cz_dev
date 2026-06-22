@@ -72,8 +72,9 @@ header{
 /* ─── HERO ─── */
 .hero{padding:2.5rem 0 2rem;border-bottom:1px solid var(--dirt)}
 .hero-eyebrow{font-size:.6rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.35rem}
-.hero h1{font-size:clamp(1.6rem,3.6vw,2.6rem);font-weight:900;letter-spacing:.04em;line-height:1.1;margin-bottom:.5rem}
-.hero-sub{font-size:.72rem;color:var(--text-muted);font-weight:400;letter-spacing:.06em;max-width:560px;line-height:1.7}
+.h1-symbol{color:var(--rust);font-size:2.9em;display:inline-block;margin-right:.25rem;vertical-align:middle;line-height:1;filter:drop-shadow(0 0 10px rgba(183,65,14,.35)) drop-shadow(0 0 2px rgba(183,65,14,.5));opacity:.92;position:relative;top:-.03em}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);font-weight:900;letter-spacing:.04em;line-height:1.1;margin-bottom:.5rem;color:#ddd;text-shadow:-2px 0 2px rgba(183,65,14,.35),2px 0 2px rgba(13,148,136,.25),0 0 1px rgba(255,255,255,.06);display:flex;align-items:center}
+.hero-sub{font-size:1rem;color:var(--concrete);font-weight:400;letter-spacing:.06em;max-width:560px;line-height:1.7}
 
 /* ─── FILTERS ─── */
 .category-filter{display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap}
@@ -140,7 +141,7 @@ header{
 
 /* info below cover */
 .track-body{padding:.85rem .9rem;flex:1;display:flex;flex-direction:column;gap:.35rem}
-.track-title{font-size:.82rem;font-weight:700;letter-spacing:.04em;color:var(--concrete);line-height:1.3}
+.track-title{font-size:.82rem;font-weight:700;letter-spacing:.04em;color:#b0b0b0;line-height:1.3}
 .track-meta{font-size:.62rem;color:var(--text-muted);letter-spacing:.06em;display:flex;gap:.75rem}
 .track-meta span{display:flex;align-items:center;gap:.25rem}
 .track-meta .bpm{color:var(--rust);opacity:.7}
@@ -151,7 +152,7 @@ header{
 .track-lyrics pre{
   font-family:var(--font);
   font-size:.62rem;
-  color:var(--text-muted);
+  color:#b0b0b0;
   line-height:1.7;
   max-height:160px;
   overflow-y:auto;
@@ -206,8 +207,8 @@ footer{border-top:1px solid var(--dirt);padding:1.25rem 0}
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero">
   <div class="container">
-    <div class="hero-eyebrow">// SYSTEQ // FREKVENČNÍ POLE // SENSORIC OUTPOST</div>
-    <h1>Ateliér můz</h1>
+    <!-- <div class="hero-eyebrow">// SYSTEQ // FREKVENČNÍ POLE // SENSORIC OUTPOST</div> -->
+    <h1><span class="h1-symbol">Ψ</span> Ateliér můz</h1>
     <p class="hero-sub">
       Iterativní syntéza lidského textu a neuronálního zvuku. Generování významových struktur, frekvenčního balastu a sonických miniatur z okraje metropole.
     </p>
@@ -332,6 +333,40 @@ const TRACKS = [
     ]
   },
   {
+    id: 'nahradi-algoritmus',
+    title: 'Nahradí algoritmus intuici zkušeného mistra?',
+    category: 'neuro-philosophy',
+    format: 'esej',
+    duration: '—',
+    bpm: null,
+    tuning: null,
+    cover: 'music/covers/cover_brain.jpg',
+    audio: 'music/Nahradi_algoritmus_intuici_mistra_.mp3',
+    date: '2026',
+    lyrics: [
+      'Praktická a byznysově orientovaná analýza,',
+      'která staví rigidní, deterministickou architekturu',
+      'platformy SYSTEQ do přímého kontrastu',
+      's módním „scaling hypem“ současného AI průmyslu.',
+      '',
+      '— Fyzikální realita jako první vrstva —',
+      'Proč se fyzika u mašiny nedá ošidit a jak parser',
+      'preventivně eliminuje rizika vacuum fixation',
+      'či destrukci břitů u mikrosegmentů pod 1 mm.',
+      '',
+      '— Outsider Architect —',
+      'Paralela mezi vývojem SYSTEQ a reduktivním',
+      'přístupem Word2vec. Jak izolace od korporátního',
+      'šumu chrání inženýrskou čistotu kódu.',
+      '',
+      '— Křemíkový spánek (EWC) —',
+      'Jak Elastic Weight Consolidation umožňuje',
+      'autonomnímu systému absorbovat nové know-how,',
+      'aniž by došlo ke katastrofálnímu zapomínání',
+      'jeho rigidního matematického jádra.'
+    ]
+  },
+  {
     id: 'placeholder-valley-miniature',
     title: '— miniatura z údolí —',
     category: 'valley-miniatures',
@@ -397,7 +432,7 @@ function renderTracks() {
         <div class="track-meta">${metaParts.join(' · ')}</div>
       </div>
       <div class="track-lyrics"><pre>${t.lyrics.join('\n')}</pre></div>
-      ${t.audio ? `<audio data-audio="${i}" preload="none" src="${t.audio}" type="audio/mp4"></audio>` : ''}
+      ${t.audio ? `<audio data-audio="${i}" preload="none" src="${t.audio}" type="${t.audio.endsWith('.mp3') ? 'audio/mpeg' : 'audio/mp4'}"></audio>` : ''}
     `;
     grid.appendChild(card);
   });

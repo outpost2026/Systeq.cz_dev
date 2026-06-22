@@ -21,3 +21,10 @@ Thumbs.db
 
 # Windows artifacts
 nul
+
+# Media files (too large for git, deployed via FTP)
+music/audio/
+music/video/
+
+# Session state (not for repo)
+.ai_state.json

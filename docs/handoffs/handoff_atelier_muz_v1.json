@@ -1,0 +1,131 @@
+{
+  "handoff": "SYSTEQ Ateliér můz — V1 Dev Journal",
+  "date": "22.06.2026",
+  "author": "Ondřej Soušek (outpost2026)",
+  "context": "Ateliér můz je experimentální hudební substránka SYSTEQ webu. Umožňuje inline přehrávání MP3/MP4 skladeb s cover artem, texty, filtrování podle žánru. Single-file HTML, vanilla JS, žádný build step.",
+
+  "dev_notes": {
+    "first_impression": "Chtěl jsem místo, kde vedle sebe stojí fentanyl-core doom, neuro-filosofické eseje syntetizované LLM a parodie z údolí — všechno v jednom gridu, s možností filtrování, přehrávání, s industriální vizuální identitou oddělenou od hlavního B2B webu.",
+    "what_worked": [
+      "TRACKS pole jako jediný zdroj dat — přidání skladby = jeden blok v JS array, žádná databáze, žádné API",
+      "Dataset.category + .hidden class pro filtrování — žádný framework, 20 řádků JS, funguje okamžitě",
+      "Inline přehrávání v kartě — progress bar přes requestAnimationFrame, pause/resume, auto-stop",
+      "Dynamický type=\"audio/mpeg\" vs \"audio/mp4\" podle přípony souboru — browser si poradí s oběma",
+      "Placeholder karty pro budoucí tracky (audio: null) — šedé, neklikatelné, ready k doplnění",
+      "Industriální CSS paleta (rust, blood, concrete, dirt) — oddělená od teal/orange hlavní stránky"
+    ],
+    "what_broke_laughably": [
+      "Editace cover:null v TRACKS matchla špatný řádek a vytvořila záznam s duplicitními klíči — karta neměla play button protože audio bylo prependováno na null",
+      "Zapomněl jsem, že soubory jsou .mp3 ne .mp4 — první render měl pevně type=\"audio/mp4\" a browser si s MP3 neporadil",
+      "Placeholder 'Karel Pruška' s konkrétním jménem na veřejném webu — musel být okamžitě nahrazen generickým '— miniatura z údolí —'"
+    ],
+    "surprisingly_easy": [
+      "dataset.category filtrování — toggle('hidden') na všechny karty, 5 řádků kódu",
+      "Ψ symbol v h1 s chroma text-shadow efektem — drop-shadow + text-shadow, žádný SVG, žádný obrázek",
+      "CRT scanline overlay — jedna CSS pseudo-třída, repeating-linear-gradient, funguje na celé stránce"
+    ]
+  },
+
+  "architecture": {
+    "pattern": "single-file HTML",
+    "dependencies": "JetBrains Mono (Google Fonts CDN)",
+    "data_layer": "const TRACKS = [ ... ] — pole objektů, každý track má id, title, category, format, duration, bpm, tuning, cover, audio, date, lyrics[]",
+    "render": "renderTracks() — dynamické vytvoření karet z TRACKS pole, podpora placeholder tracků (audio: null → .placeholder class, žádný play button)",
+    "filtering": "setupFilters() — click listener na .filter-btn, toggle .hidden podle dataset.category",
+    "playback": "togglePlay() — jeden <audio> element per karta, requestAnimationFrame progress bar, stopPlayback() při změně tracku",
+    "categories": [
+      { "id": "fentanyl-core", "label": "fentanyl_core", "description": "Industriální doom, syrové texty, sub-contra ladění" },
+      { "id": "neuro-philosophy", "label": "neuro_eseje", "description": "LLM-syntetizované eseje, kognitivní věda, epistemologie" },
+      { "id": "valley-miniatures", "label": "miniatury_z_udoli", "description": "Satirické miniatury, parodie, glosy z údolí" }
+    ]
+  },
+
+  "visual_identity": {
+    "palette": {
+      "bg_base": "#080a0c",
+      "rust": "#b7410e",
+      "blood": "#6b0000",
+      "concrete": "#8a8a8a",
+      "text_muted": "#5c5c5c",
+      "text_dim": "#2a2a2a",
+      "dirt": "rgba(255,255,255,.035)"
+    },
+    "typography": "JetBrains Mono (400, 500, 700, 900)",
+    "hero_symbol": "Ψ (U+03A8) — rust #b7410e, 2.9em, drop-shadow glow",
+    "hero_text_effect": "chroma CRT aberration — text-shadow: -2px 0 2px rgba(183,65,14,.35) / +2px 0 2px rgba(13,148,136,.25)",
+    "cards": "border-radius: 0, border: 1px solid var(--dirt), cover aspect-ratio: 1/1, saturate(.65) contrast(1.1)",
+    "placeholder_cards": "opacity: .45, filter: grayscale(.8), pointer-events: none"
+  },
+
+  "current_state": {
+    "deployed_tracks": 3,
+    "placeholder_tracks": 2,
+    "tracks": [
+      { "id": "my-jsme-prave-uhly", "title": "My jsme pravý úhly", "category": "fentanyl-core", "format": "hudba", "status": "deployed" },
+      { "id": "vykrvacet-do-svislice", "title": "Vykrvácet do svislice", "category": "fentanyl-core", "format": "hudba", "status": "deployed" },
+      { "id": "nahradi-algoritmus", "title": "Nahradí algoritmus intuici zkušeného mistra?", "category": "neuro-philosophy", "format": "esej", "status": "deployed" },
+      { "id": "placeholder-valley-miniature", "title": "— miniatura z údolí —", "category": "valley-miniatures", "format": "parodie", "status": "placeholder" },
+      { "id": "manifest-kompresniho-realismu", "title": "Manifest kompresního realismu", "category": "neuro-philosophy", "format": "esej", "status": "placeholder" }
+    ],
+    "strengths": [
+      "Čistá single-file architektura — žádný build step, deploy přes FTP, okamžitá změna",
+      "Kategorizace umožňuje škálování — nový žánr = nové tlačítko + nový track s category",
+      "Placeholder systém umožňuje mít 'připravované' tracky viditelné, aniž by lámaly UI",
+      "Vizuální identita oddělená od hlavního B2B webu — industriální paleta, žádný teal/orange konflikt"
+    ],
+    "weaknesses": [
+      "Chybí automatická detekce délky skladeb — duration se musí psát ručně nebo nechat '—'",
+      "Placeholder karty nemají cover art — tmavý čtverec bez indikace 'coming soon' textu",
+      "Žádná responzivní úprava pro hero symbol — Ψ je fixní 2.9em, na mobilu může být příliš velký",
+      "Filtrování používá display:none — žádná plynulá animace při přepnutí kategorie",
+      "Audio soubory nejsou versionované v repu — pouze na FTP serveru, riziko ztráty"
+    ]
+  },
+
+  "next_iteration_priorities": [
+    {
+      "priority": "P1",
+      "task": "Doplnit cover art pro všechny existující tracky (včetně placeholderů s 'coming soon' grafikou)",
+      "eroi": "MAX — vizuální konzistence gridu"
+    },
+    {
+      "priority": "P2",
+      "task": "Automatická detekce duration z audio metadat přes JS (audio.onloadedmetadata)",
+      "eroi": "VYSOKÉ — odstraní ruční údržbu '—' hodnot"
+    },
+    {
+      "priority": "P3",
+      "task": "Přidat valley-miniatures a neuro-philosophy placeholdery jako reálné tracky",
+      "eroi": "VYSOKÉ — naplní všechny tři kategorie"
+    },
+    {
+      "priority": "P4",
+      "task": "Přidat kategorii 'all' filtr — aktuálně je 'all' jen tlačítko bez logiky (dataset.category='all' neexistuje)",
+      "eroi": "STŘEDNÍ — konzistence UX"
+    },
+    {
+      "priority": "P5",
+      "task": "Mobile optimalizace hero sekce — Ψ symbol by měl na mobilu klesnout na 2em",
+      "eroi": "NÍZKÉ — zatím desktop primární"
+    }
+  ],
+
+  "technical_debt": [
+    "track-card.hidden používá display:none !important — nelze animovat, řešení by vyžadovalo wrapper div s pozicí",
+    "Playback logika předpokládá všechna audio v MP4 formátu s fallbackem na MP3 — chybí podpora pro OGG/FLAC/WAV",
+    "stopPlayback() spoléhá na dataset.index — při přidání/odebrání tracku by se indexy posunuly a querySelector by selhal",
+    "Chybí error state pro uživatele — pokud audio selže, tlačítko se resetuje, ale není žádná vizuální indikace 'soubor nenalezen'",
+    "Guide průvodce v docs/Audio/ není prolinkovaný z music.html — uživatel musí vědět, že existuje"
+  ],
+
+  "files": {
+    "src/music.html": "V1 — Ateliér můz, single-file, TRACKS array, kategorie, inline přehrávač",
+    "src/index.html": "Upraven — přidán odkaz 'Ateliér můz' v header nav",
+    "music/covers/my_jsme_prave_uhly.png": "Cover art — My jsme pravý úhly",
+    "music/covers/vykrvacet_do_svislice.png": "Cover art — Vykrvácet do svislice",
+    "docs/Audio/guide_pridavani_skladeb.md": "Průvodce pro přidávání skladeb (uživatelský manuál)",
+    "docs/handoffs/handoff_atelier_muz_v1.json": "Tento dokument"
+  },
+
+  "sign_off": "Ateliér můz v1 — 3 deploynuté tracky, 2 placeholdery, 3 kategorie, industriální vizuál, Ψ symbol, inline přehrávání. Postaveno za 1 den jako single-file HTML. Další iterace: cover art pro placeholdery, auto-duration, reálné tracky ve zbývajících kategoriích."
+}
