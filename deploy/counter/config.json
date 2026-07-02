@@ -1,0 +1,10 @@
+{
+  "excluded_ips": [],
+  "excluded_ip_ranges": ["127.0.0.0/8", "10.0.0.0/8", "192.168.0.0/16", "172.16.0.0/12"],
+  "excluded_user_agents": ["WinSCP", "FileZilla", "FTP", "curl", "wget", "Go-http-client"],
+  "hash_salt": "SYSTEQ_COUNTER_SALT_CHANGE_ME",
+  "unique_window_hours": 24,
+  "log_user_agent": false,
+  "log_referrer": true,
+  "_comment": "IP ranges, user agents, and hash_salt are used to filter your own traffic. excluded_ips: add static IPs of your devices. excluded_ip_ranges: private/local ranges always excluded. excluded_user_agents: FTP clients, bots, etc."
+}

@@ -28,3 +28,6 @@ music/video/
 
 # Session state (not for repo)
 .ai_state.json
+
+# Visitor counter data (generated on server)
+deploy/counter/data/
