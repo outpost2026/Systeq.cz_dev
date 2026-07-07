@@ -23,6 +23,16 @@ $windowHours = $config['unique_window_hours'] ?? 24;
 $logUa = $config['log_user_agent'] ?? false;
 $logRef = $config['log_referrer'] ?? true;
 
+$action = $_GET['action'] ?? '';
+$token = $_GET['token'] ?? '';
+
+// ---- action: set skip cookie ----
+if ($action === 'skip_me' && $token !== '' && $token === ($config['skip_token'] ?? '')) {
+    setcookie('systeq_skip_counter', '1', time() + 315360000, '/', '', false, true);
+    http_response_code(204);
+    exit;
+}
+
 $ip = $_SERVER['REMOTE_ADDR'] ?? '';
 $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
 $referrer = $_GET['ref'] ?? '';           // from JS document.referrer

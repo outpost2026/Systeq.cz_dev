@@ -6,5 +6,6 @@
   "unique_window_hours": 24,
   "log_user_agent": false,
   "log_referrer": true,
-  "_comment": "IP ranges, user agents, and hash_salt are used to filter your own traffic. excluded_ips: add static IPs of your devices. excluded_ip_ranges: private/local ranges always excluded. excluded_user_agents: FTP clients, bots, etc."
+  "skip_token": "SYSTEQ_SKIP_TOKEN_CHANGE_ME",
+  "_comment": "IP ranges, user agents, and hash_salt are used to filter your own traffic. excluded_ips: add static IPs of your devices. excluded_ip_ranges: private/local ranges always excluded. excluded_user_agents: FTP clients, bots, etc. skip_token: secret for ?action=skip_me to set skip cookie."
 }
