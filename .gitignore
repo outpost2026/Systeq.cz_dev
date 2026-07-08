@@ -31,3 +31,7 @@ music/video/
 
 # Visitor counter data (generated on server)
 deploy/counter/data/
+
+# Client/internal project documents (not for public repo)
+projekty/strecha_uvaly/
+projekty/dodavka_kuba/

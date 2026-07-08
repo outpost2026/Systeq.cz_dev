@@ -88,7 +88,22 @@ Design není "až potom". Repozitář obsahuje systematickou dokumentaci:
 Barevná paleta EGA (16 barev), font JetBrains Mono, CRT scanline overlay,
 Norton Commander HUD — vše jsou vědomá rozhodnutí, ne náhody.
 
-### 6. Testování jako regresní síť
+### 6. Tři pilíře webu — SYSTEQ, Ateliér můz, Projekty
+
+Web není monolit. Jsou to **tři sémantické vrstvy** odpovídající třem identitám autora:
+
+| Pilíř | Cíl | Umístění |
+|-------|-----|----------|
+| **SYSTEQ** (B2B CAM Automation) | Produktová landing page, parser demo, API docs | `src/index.html` |
+| **Ateliér můz** (kreativa) | Audio tvorba, neuro-eseje, hudební experimenty | `src/music.html` |
+| **Projekty** (fyzická realizace) | Dashboard stavebních a technických zakázek | `projekty/index.html` |
+
+Každá vrstva má vlastní design accent (teal / rust / brick), ale sdílený dark theme a typografii.
+Interní dokumenty projektů (s citlivými klient daty) jsou v `.gitignore` — na GitHubu jen dashboard.
+
+---
+
+### 8. Testování jako regresní síť
 
 `Demo_Threejs/tests/` obsahuje **golden-master testy** v Pythonu
 (Playwright + Pillow):
@@ -109,7 +124,14 @@ requestAnimationFrame-based animaci bez časového rozptylu.
 ```
 web_integrace_systeq/
 │
-├── src/index.html               # PRODUKCE: landing page (systeq.cz)
+├── src/
+│   ├── index.html               # PRODUKCE: landing page (systeq.cz)
+│   └── music.html               # PRODUKCE: Ateliér můz (audio/eseje)
+│
+├── projekty/
+│   ├── index.html               # Dashboard vedlejších projektů (fyzické realizace)
+│   ├── strecha_uvaly/           # INTERNÍ — client docs (v .gitignore, FTP only)
+│   └── dodavka_kuba/            # INTERNÍ — client docs (v .gitignore, FTP only)
 │
 ├── Demo_Threejs/
 │   ├── systeq_v3.html           # PRODUKCE: 4-fázové 3D demo
@@ -150,7 +172,7 @@ web_integrace_systeq/
 │   └── DXF_modul/   # DXF parser artefakty (vč. tool configu)
 │
 ├── archive/         # Starší iterace (index_0.1.html, beta)
-└── deploy/          # Připraveno pro nasazení
+└── deploy/          # PHP counter, config pro FTP
 ```
 
 ---

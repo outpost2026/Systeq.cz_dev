@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYSTEQ // Projekty</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg-base:#0a0e14;
+  --bg-panel:#0e1320;
+  --bg-card:#131926;
+  --bg-card-hover:#181f2e;
+  --bg-inset:#0c1018;
+  --accent:#b8541a;
+  --accent-dim:rgba(184,84,26,.10);
+  --accent-border:rgba(184,84,26,.32);
+  --accent-hover:#c95e20;
+  --text-primary:#e2e8f0;
+  --text-muted:#64748b;
+  --text-dim:#2e3d52;
+  --border-subtle:rgba(255,255,255,.055);
+  --border-mid:rgba(255,255,255,.10);
+  --border-strong:rgba(255,255,255,.16);
+  --green:#22c55e;
+  --green-dim:rgba(34,197,94,.12);
+  --green-border:rgba(34,197,94,.3);
+  --amber:#f59e0b;
+  --amber-dim:rgba(245,158,11,.10);
+  --sand:#b8860b;
+  --rust:#b7410e;
+  --blue:#3b82f6;
+  --blue-dim:rgba(59,130,246,.10);
+  --font:'JetBrains Mono',monospace;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);background:var(--bg-base);color:var(--text-primary);
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.055) 3px,rgba(0,0,0,.055) 4px);
+  pointer-events:none;z-index:0;
+}
+.container{max-width:1120px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
+section{position:relative;z-index:1}
+
+/* ─── HEADER ─── */
+header{
+  border-bottom:1px solid var(--border-subtle);
+  background:rgba(10,14,20,.94);backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:200;
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;gap:1rem;flex-wrap:wrap}
+.logo{font-size:1.05rem;font-weight:700;letter-spacing:.12em;color:var(--text-primary);text-decoration:none;display:flex;align-items:center;gap:.4rem}
+.logo:hover{color:var(--text-primary)}
+.logo-sys{color:#0d9488;font-weight:700}
+.logo-teq{color:#D35400;font-weight:700}
+.logo-tag{font-size:.65rem;color:var(--text-muted);font-weight:400;letter-spacing:.08em;margin-left:.5rem;padding-left:.5rem;border-left:1px solid var(--border-mid)}
+.hnav{display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap}
+.hlink{color:var(--text-muted);text-decoration:none;font-size:.75rem;letter-spacing:.07em;transition:color .2s;display:flex;align-items:center;gap:.3rem}
+.hlink:hover{color:var(--text-primary)}
+.hnav-cur{color:var(--accent);font-size:.75rem;letter-spacing:.1em;font-weight:500}
+
+/* ─── HERO ─── */
+.hero{padding:3rem 0 2rem;border-bottom:1px solid var(--border-subtle)}
+.hero-eyebrow{font-size:.62rem;letter-spacing:.24em;color:var(--text-dim);margin-bottom:.6rem}
+.hero h1{font-size:clamp(1.6rem,4vw,2.6rem);font-weight:700;letter-spacing:.02em;line-height:1.15;margin-bottom:.8rem}
+.hero h1 em{color:var(--accent);font-style:normal}
+.hero-sub{font-size:.95rem;color:#94a3b8;max-width:620px;line-height:1.7;font-weight:300}
+
+/* ─── PROJECT GRID ─── */
+.projects-section{padding:2.5rem 0 4rem}
+.projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1.25rem}
+
+.project-card{
+  background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:6px;
+  overflow:hidden;transition:border-color .25s,background .25s,transform .2s;position:relative;
+}
+.project-card:hover{border-color:var(--accent-border);background:var(--bg-card-hover);transform:translateY(-2px)}
+.project-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .3s;
+}
+.project-card:hover::before{transform:scaleX(1)}
+.project-card.strecha::before{background:var(--sand)}
+.project-card.strecha:hover{border-color:rgba(184,134,11,.3)}
+.project-card.dodavka::before{background:var(--blue)}
+.project-card.dodavka:hover{border-color:rgba(59,130,246,.3)}
+.project-card.strecha .p-status{background:var(--green-dim);color:var(--green);border-color:var(--green-border)}
+.project-card.dodavka .p-status{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+
+.p-head{padding:1.35rem 1.5rem .75rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.p-category{font-size:.6rem;letter-spacing:.2em;margin-bottom:.25rem}
+.project-card.strecha .p-category{color:var(--sand)}
+.project-card.dodavka .p-category{color:var(--blue)}
+.p-title{font-size:1.25rem;font-weight:600;letter-spacing:.03em;margin-bottom:.3rem}
+.p-sub{font-size:.72rem;color:var(--text-muted);font-weight:300;line-height:1.6}
+.p-status{
+  font-size:.6rem;letter-spacing:.12em;padding:.2rem .65rem;border-radius:4px;
+  border:1px solid;white-space:nowrap;font-weight:600;flex-shrink:0;
+}
+
+.p-body{padding:0 1.5rem 1rem}
+.p-meta{display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-bottom:.75rem}
+.pm-item{font-size:.68rem;color:var(--text-muted)}
+.pm-item strong{color:var(--text-primary);font-weight:500}
+
+.p-section-label{font-size:.6rem;letter-spacing:.16em;color:var(--text-dim);margin:.5rem 0 .35rem;padding-top:.5rem;border-top:1px solid var(--border-subtle)}
+.p-docs{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.5rem}
+.p-doc{
+  display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:var(--text-muted);
+  text-decoration:none;padding:.35rem .5rem;border-radius:4px;
+  transition:color .2s,background .2s;
+}
+.p-doc:hover{color:var(--text-primary);background:var(--bg-card-hover)}
+.p-doc svg{flex-shrink:0;width:14px;height:14px}
+.project-card.strecha .p-doc:hover{color:var(--sand)}
+.project-card.dodavka .p-doc:hover{color:var(--blue)}
+
+.p-contact{font-size:.68rem;color:var(--text-muted);line-height:1.6;margin-top:.35rem}
+.p-contact strong{color:var(--text-primary);font-weight:500}
+
+@media(max-width:620px){
+  .container{padding:0 1.1rem}
+  .hero{padding:2rem 0 1.5rem}
+  .projects-grid{grid-template-columns:1fr}
+}
+
+/* scrollbar */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg-inset)}
+::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--border-strong)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <a class="logo" href="../index.html">
+        <span class="logo-sys">SYS</span><span class="logo-teq">TEQ</span><span class="logo-tag">Projekty</span>
+      </a>
+      <nav class="hnav">
+        <span class="hnav-cur">Projekty</span>
+        <a class="hlink" href="../index.html">Domů</a>
+        <a class="hlink" href="../music.html">Ateliér můz</a>
+        <a class="hlink" href="../index.html#contact">Kontakt</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">// SYSTEQ // SIDE PROJECTS</div>
+    <h1>Realizační <em>projekty</em></h1>
+    <p class="hero-sub">
+      Vedle B2B softwaru se věnuji také fyzickým realizacím — stavbám, rekonstrukcím
+      a technickým projektům. Tady najdete přehled aktuálních zakázek, jejich dokumentaci
+      a kontaktní osoby.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════ PROJECTS ═══════════ -->
+<section class="projects-section">
+  <div class="container">
+    <div class="projects-grid">
+
+      <!-- ─── STŘECHA ÚVALY ─── -->
+      <div class="project-card strecha">
+        <div class="p-head">
+          <div>
+            <div class="p-category">fyzická realizace</div>
+            <div class="p-title">Střecha přístřešku</div>
+            <div class="p-sub">Úvaly — nová střecha na dřevěném přístřešku (159 m², SBS asfaltové pásy)</div>
+          </div>
+          <div class="p-status">v realizaci</div>
+        </div>
+        <div class="p-body">
+          <div class="p-meta">
+            <div class="pm-item"><strong>Klient:</strong> p. Mašek</div>
+            <div class="pm-item"><strong>Kontakt:</strong> Martin Zábojník · 735 286 795</div>
+            <div class="pm-item"><strong>Termín:</strong> 6. 7. – 31. 7. 2026</div>
+            <div class="pm-item"><strong>Cena práce:</strong> 35 000 Kč</div>
+          </div>
+
+          <div class="p-section-label">Dokumenty</div>
+          <div class="p-docs">
+            <a class="p-doc" href="strecha_uvaly/klient.html" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Souhrn pro klienta
+            </a>
+            <a class="p-doc" href="strecha_uvaly/report.html" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Interní realizační report
+            </a>
+          </div>
+
+          <div class="p-section-label">Realizační tým</div>
+          <div class="p-contact">
+            <strong>Ondřej Soušek</strong> · 735 045 256 · řízení projektu a realizace<br>
+            <strong>Ondřej Žikovský</strong> · spolurealizátor
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── DODÁVKA KUBA ─── -->
+      <div class="project-card dodavka">
+        <div class="p-head">
+          <div>
+            <div class="p-category">technický projekt</div>
+            <div class="p-title">Elektrifikace dodávky</div>
+            <div class="p-sub">Peugeot Boxer 2021 — off-grid 12V/230V, Victron MultiPlus, solár AIKO 445W</div>
+          </div>
+          <div class="p-status">ve výstavbě</div>
+        </div>
+        <div class="p-body">
+          <div class="p-meta">
+            <div class="pm-item"><strong>Klient:</strong> Jakub Sládek</div>
+            <div class="pm-item"><strong>Tel.:</strong> 731 457 863</div>
+            <div class="pm-item"><strong>Jádro:</strong> Victron MultiPlus C 12/1600/70-16</div>
+            <div class="pm-item"><strong>Baterie:</strong> Wattcycle 314Ah LiFePO4</div>
+          </div>
+
+          <div class="p-section-label">Dokumenty</div>
+          <div class="p-docs">
+            <a class="p-doc" href="dodavka_kuba/elektro.html" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Schéma zapojení s detaily
+            </a>
+          </div>
+
+          <div class="p-section-label">Realizační tým</div>
+          <div class="p-contact">
+            <strong>Ondřej Soušek</strong> · 735 045 256 · návrh a realizace
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

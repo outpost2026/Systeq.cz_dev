@@ -1,7 +1,7 @@
 # GROUND TRUTH — SYSTEQ Web Integration Project
 
-> **Fáze**: v0.4 beta | **Datum snapshotu**: 10.06.2026  
-> **Autor**: Otevřená kódová základna — stav reportován před migrací do `web_integrace_systeq`
+> **Fáze**: v0.5 | **Datum snapshotu**: 08.07.2026  
+> **Autor**: Otevřená kódová základna — integrace vedlejších projektů
 
 ---
 
@@ -15,6 +15,8 @@
 | **Streamlit dashboard DXF** | Deployovaný, semantic embedding + download artefaktů |
 | **Web prezentační vrstva** | `systeq_v0.4.html` — single-file HTML demo s embedovanými daty |
 | **Landing page** | `index.html` — produkční B2B landing s API docs a kontaktem |
+| **Projektový dashboard** | `projekty/index.html` — rozcestník vedlejších fyzických projektů |
+| **Ateliér můz** | `music.html` — audio tvorba, neuro-eseje, hudba |
 | **Backend API** | **CHYBÍ** — demo používá deterministická embedded data, žádné live endpointy |
 
 ---
@@ -169,7 +171,7 @@ DXF_DATA = {
 
 ---
 
-## 7. Adresářová struktura (po migraci)
+## 7. Adresářová struktura (v0.5)
 
 ```
 web_integrace_systeq/
@@ -178,17 +180,24 @@ web_integrace_systeq/
 ├── GROUND_TRUTH.md              ← tento soubor
 ├── CHANGELOG.md
 ├── src/
-│   ├── index.html               ← produkční landing page
-│   └── systeq_v0.4.html         ← hlavní parser demo
+│   ├── index.html               ← produkční landing page (SYSTEQ B2B)
+│   └── music.html               ← Ateliér můz (audio/eseje)
+├── projekty/
+│   ├── index.html               ← Dashboard rozcestník vedlejších projektů
+│   ├── strecha_uvaly/           ← INTERNÍ (v .gitignore, pouze na FTP)
+│   └── dodavka_kuba/            ← INTERNÍ (v .gitignore, pouze na FTP)
+├── Demo_Threejs/
+│   └── ...                      ← 3D demo, testy
 ├── docs/
 │   ├── design/                  ← brand analýza, grafická vrstva, UI pilot
 │   ├── planning/                ← dev plány, assessmenty
 │   ├── handoffs/                ← dev poznámky, claude notes
+│   ├── Audio/                   ← průvodce zvukovou tvorbou
 │   └── GROUND_TRUTH.json        ← referenční data z VCF parseru
 ├── data/
 │   ├── VCF_modul/               ← CSV, MD, zdrojové VCF
 │   └── DXF_modul/               ← CSV, TXT, PNG, DXF
-├── deploy/                      ← (připraveno pro deployment konfiguraci)
+├── deploy/                      ← PHP counter, config
 └── archive/                     ← starší HTML iterace (v03_beta, 0.1)
 ```
 
