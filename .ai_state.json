@@ -1,0 +1,68 @@
+{
+  "session": {
+    "id": "20260708_projects_integration",
+    "date": "2026-07-08",
+    "mode": "build",
+    "goal": "Integrace vedlejších projektů (střecha Tlustovousy, dodávka Kuba Sládek) do webové struktury"
+  },
+
+  "git": {
+    "branch": "main",
+    "last_commit": "— pending —",
+    "remote": "origin/main"
+  },
+
+  "completed_this_session": [
+    "Semantická analýza webu — identifikovány 3 vrstvy: SYSTEQ (B2B), Ateliér můz (kreativa), Projekty (fyzická realizace)",
+    "Vytvořena adresářová struktura projekty/strecha_uvaly/, projekty/dodavka_kuba/",
+    "Přesunuty a přejmenovány artefakty do podadresářů",
+    "Vytvořen projekty/index.html — dashboard rozcestník s přehledem obou projektů",
+    "Aktualizována navigace v index.html a music.html — přidán odkaz Projekty",
+    "Interní dokumenty projektů přidány do .gitignore (necommitováno)"
+  ],
+
+  "pending_tasks": [
+    {
+      "id": "p1",
+      "priority": "P1",
+      "task": "Upload audio files to FTP server (Dutá_maska.mp3, Sráčky_v_Hlavě.mp4, etc.)",
+      "status": "pending",
+      "blocked_by": "autor: nahrání souborů na server"
+    },
+    {
+      "id": "p2",
+      "priority": "P2",
+      "task": "Doplnit cover art pro placeholder tracky (miniatura z údolí, Manifest kompresního realismu)",
+      "status": "pending",
+      "blocked_by": "autor: tvorba grafiky"
+    },
+    {
+      "id": "p3",
+      "priority": "P3",
+      "task": "Přidat reálné tracky pro valley-miniatures a neuro-philosophy",
+      "status": "pending",
+      "blocked_by": "autor: připravit audio soubory"
+    },
+    {
+      "id": "p4",
+      "priority": "P2",
+      "task": "Změnit hash_salt v deploy/counter/config.json na náhodný řetězec",
+      "status": "pending",
+      "blocked_by": "autor: rozhodnutí"
+    }
+  ],
+
+  "known_issues": [
+    "Audio soubory nejsou versionované v repu — pouze na FTP serveru",
+    "Guide průvodce v docs/Audio/ není prolinkovaný z music.html",
+    "Visitors/counter data nejsou v repu — pouze na FTP (deploy/counter/data/ v .gitignore)",
+    "Interní dokumenty projektů (strecha_uvaly/, dodavka_kuba/) nejsou v repu — pouze na FTP"
+  ],
+
+  "agent_context": {
+    "start_here": "AGENTS.md",
+    "hosting_provider": "Webzdarma (FTP, PHP support)",
+    "ftp_root_maps_to": "repo root (src/ je jen lokální konvence)",
+    "critical_rule": "relativní cesty v HTML vychází z FTP rootu, ne z src/"
+  }
+}
