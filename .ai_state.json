@@ -1,9 +1,9 @@
 {
   "session": {
-    "id": "20260712_atelier_muz_rozsireni",
-    "date": "2026-07-12",
+    "id": "20260720_projekty_portfolio",
+    "date": "2026-07-20",
     "mode": "build",
-    "goal": "Rozšíření Ateliéru můz — 3 nové audio tracky (valley-miniatures), úprava gridu a stylů"
+    "goal": "Rozšíření projekty/index.html na portfolio služeb — 5 domén (zahrada, offgrid, dřevostavby, IoT, zabezpečení)"
   },
 
   "git": {
@@ -13,51 +13,34 @@
   },
 
   "completed_this_session": [
-    "Přidány 3 nové karty do music.html: Odmítnout vertikálu, Ven z mý rokle, VAN LIFE (vše valley-miniatures, 30 BPM, Drop-F0)",
-    "Načtena lyrics z music/lyrics/*.txt do všech 3 nových tracků",
-    "Doplněny cover art obrázky (odmitnout_vertikalu.jpg, ven_z_my_rokle.jpg, van_life.jpg)",
-    "Odstraněny 2 placeholder karty (— miniatura z údolí —, Manifest kompresního realismu)",
-    "Zakomentován snippet My jsme pravý úhly (30s verze) — není v aktivním gridu",
-    "Přeuspořádáno 6 aktivních tracků: neuro-esej → fentanyl-core → VAN LIFE → valley-miniatures → neuro-esej",
-    "Opravena duplicita je-lidska-inteligence v TRACKS poli",
-    "Zvětšen .track-title na 1.15rem (+40%), barva změněna na #d0c8b8 (teplá krémová)",
-    "Přejmenován van_life → VAN LIFE"
+    "Hero přepsán na servisní portfolio (návrh, realizace & správa)",
+    "Přidána sekce SLUŽBY s 5 kartami: Zahradní práce, Offgrid & FVE, Dřevěné konstrukce, IoT & dálková správa, Zabezpečení",
+    "Každá služba má barevnou indentaci, SVG ikonu, popis, tagy a cenové rozpětí",
+    "Přidána sekce JAK PRACUJI (4-krokový proces: kontakt → návrh → realizace → předání)",
+    "Přidána CTA sekce s kontaktem (telefon, email) pro domluvení konzultace",
+    "Sekce projektů přejmenována na REFERENCE — původní karty (střecha Úvaly, dodávka Kuba) zachovány",
+    "Stránka narostla z 257 na 494 řádků, zachován dark theme + brick accent + single-file HTML pattern"
   ],
 
   "pending_tasks": [
     {
       "id": "p1",
       "priority": "P2",
-      "task": "Doplnit chybějící cover art obrázky (dodáno — covers hotovy)",
-      "status": "completed"
+      "task": "Nahrát projekty/index.html na FTP (FileZilla)",
+      "status": "pending"
     },
     {
       "id": "p2",
-      "priority": "P3",
-      "task": "Přidat reálné tracky pro valley-miniatures (dodáno — 3 tracky aktivní)",
-      "status": "completed"
+      "priority": "P2",
+      "task": "Případně doplnit fotky k službám na FTP (garden/offgrid/wood reference)",
+      "status": "pending"
     },
     {
       "id": "p3",
-      "priority": "P2",
-      "task": "Změnit hash_salt v deploy/counter/config.json na náhodný řetězec",
-      "status": "pending",
-      "blocked_by": "autor: rozhodnutí"
-    },
-    {
-      "id": "p4",
       "priority": "P3",
-      "task": "Možné rozšíření o live API endpoint pro backend parser",
-      "status": "pending",
-      "blocked_by": "autor: backend integrace"
+      "task": "Doplnit oborové tagy do hero description pro SEO",
+      "status": "pending"
     }
-  ],
-
-  "known_issues": [
-    "My jsme pravý úhly je zakomentován jako snippet (30s verze) — lze odkomentovat a vrátit do gridu",
-    "Audio soubory nejsou versionované v repu — pouze na FTP serveru",
-    "Cover art pro fentanyl-core tracky (my_jsme_prave_uhly.png, vykrvacet_do_svislice.png) existují jen v repu, ne na FTP",
-    "Interní dokumenty projektů (strecha_uvaly/, dodavka_kuba/) nejsou v repu — pouze na FTP"
   ],
 
   "agent_context": {
@@ -65,8 +48,7 @@
     "hosting_provider": "Webzdarma (FTP, PHP support)",
     "ftp_root_maps_to": "repo root (src/ je jen lokální konvence)",
     "critical_rule": "relativní cesty v HTML vychází z FTP rootu, ne z src/",
-    "music_tracks_total": 6,
-    "music_categories": ["fentanyl-core (1 snippet)", "valley-miniatures (3)", "neuro-philosophy (2)"],
-    "lyrics_location": "music/lyrics/*.txt"
+    "projects_page": "projekty/index.html (494 lines, 5 service cards + 2 project references)",
+    "service_domains": ["zahradni_prace", "offgrid_fve", "drevene_konstrukce", "iot_sprava", "zabezpeceni"]
   }
 }
