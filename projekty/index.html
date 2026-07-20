@@ -161,6 +161,34 @@ header{
 .cta-btn:hover{background:var(--accent-hover);color:#fff;transform:translateY(-1px)}
 .cta-link{font-size:.75rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:.35rem;padding:.6rem 0}
 
+/* ─── CONTACT FORM ─── */
+.form-section{padding:2rem 0 3rem;border-top:1px solid var(--border-subtle)}
+.form-box{background:var(--bg-card);border:1px solid var(--border-mid);border-radius:6px;padding:2rem;max-width:600px;margin:0 auto}
+.form-box h2{font-size:1.05rem;font-weight:600;letter-spacing:.02em;margin-bottom:.3rem;text-align:center}
+.form-box .sub{font-size:.78rem;color:var(--text-muted);text-align:center;margin-bottom:1.5rem;font-weight:300}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-grid .full{grid-column:1/-1}
+.form-label{display:block;font-size:.68rem;color:var(--text-muted);margin-bottom:.25rem;letter-spacing:.05em}
+.form-input,.form-select,.form-textarea{
+  width:100%;background:var(--bg-inset);border:1px solid var(--border-mid);border-radius:4px;
+  color:var(--text-primary);font-family:var(--font);font-size:.8rem;padding:.55rem .7rem;
+  transition:border-color .2s;outline:none;
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent-border)}
+.form-textarea{resize:vertical;min-height:90px}
+.form-select option{background:var(--bg-card);color:var(--text-primary)}
+.form-submit{
+  width:100%;background:var(--accent);color:#fff;font-family:var(--font);font-size:.82rem;font-weight:500;
+  padding:.65rem 1.25rem;border:none;border-radius:4px;letter-spacing:.05em;cursor:pointer;
+  transition:background .2s,transform .15s;margin-top:.5rem;
+}
+.form-submit:hover{background:var(--accent-hover);transform:translateY(-1px)}
+.form-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.form-msg{font-size:.75rem;text-align:center;margin-top:.75rem;padding:.5rem;border-radius:4px;display:none}
+.form-msg.ok{display:block;background:var(--green-dim);color:var(--green);border:1px solid var(--green-border)}
+.form-msg.err{display:block;background:var(--red-dim);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+@media(max-width:620px){.form-grid{grid-template-columns:1fr}}
+
 /* ─── PROJECT GRID ─── */
 .projects-section{padding:2.5rem 0 4rem}
 .projects-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1.25rem}
@@ -417,6 +445,48 @@ header{
   </div>
 </section>
 
+<!-- ═══════════ FORM ═══════════ -->
+<section class="form-section" id="form">
+  <div class="container">
+    <div class="form-box">
+      <h2>Napište mi</h2>
+      <p class="sub">Stačí pár údajů — ozvu se do 24 hodin</p>
+      <form id="contactForm" action="send.php" method="POST">
+        <div class="form-grid">
+          <div class="full">
+            <label class="form-label" for="cf_name">Jméno *</label>
+            <input class="form-input" type="text" id="cf_name" name="name" required placeholder="Jak Vás mám oslovovat?">
+          </div>
+          <div>
+            <label class="form-label" for="cf_contact">Telefon nebo email *</label>
+            <input class="form-input" type="text" id="cf_contact" name="contact" required placeholder="735 045 256 nebo email@domena.cz">
+          </div>
+          <div>
+            <label class="form-label" for="cf_service">Oblast zájmu</label>
+            <select class="form-select" id="cf_service" name="service">
+              <option value="">— Vyberte —</option>
+              <option value="zahrada">Zahradní práce</option>
+              <option value="offgrid">Offgrid & FVE</option>
+              <option value="drevo">Dřevěné konstrukce</option>
+              <option value="iot">IoT & dálková správa</option>
+              <option value="zabezpeceni">Zabezpečení</option>
+              <option value="jine">Jiné / nevím</option>
+            </select>
+          </div>
+          <div class="full">
+            <label class="form-label" for="cf_msg">Zpráva</label>
+            <textarea class="form-textarea" id="cf_msg" name="message" placeholder="Stručně popište, co potřebujete — místo, rozsah, představa o termínu..."></textarea>
+          </div>
+          <div class="full">
+            <button class="form-submit" type="submit">Odeslat poptávku</button>
+            <div class="form-msg" id="formMsg"></div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════ REFERENCE ═══════════ -->
 <section class="projects-section">
   <div class="container">
@@ -485,5 +555,18 @@ header{
   </div>
 </section>
 
+<script>
+document.getElementById('contactForm').addEventListener('submit',async function(e){
+  e.preventDefault();const b=this.querySelector('.form-submit'),m=document.getElementById('formMsg');
+  m.className='form-msg';b.disabled=true;b.textContent='Odesílám...';
+  try{
+    const r=await fetch(this.action,{method:'POST',body:new FormData(this)});
+    const d=await r.json();
+    if(d.ok){m.className='form-msg ok';m.textContent='Děkuji! Ozvu se do 24 hodin.';this.reset();}
+    else{m.className='form-msg err';m.textContent=d.error||'Chyba při odesílání.';}
+  }catch(e){m.className='form-msg err';m.textContent='Chyba připojení. Zkuste to prosím znovu.';}
+  b.disabled=false;b.textContent='Odeslat poptávku';
+});
+</script>
 </body>
 </html>
