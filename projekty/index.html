@@ -559,8 +559,9 @@ header{
 document.getElementById('contactForm').addEventListener('submit',async function(e){
   e.preventDefault();const b=this.querySelector('.form-submit'),m=document.getElementById('formMsg');
   m.className='form-msg';b.disabled=true;b.textContent='Odesílám...';
+  const url = new URL(this.action, location.href).pathname.replace(/\/[^/]*$/, '/') + 'send.php';
   try{
-    const r=await fetch(this.action,{method:'POST',body:new FormData(this)});
+    const r=await fetch(url,{method:'POST',body:new FormData(this)});
     const t=await r.text();let d;try{d=JSON.parse(t);}catch(_){throw new Error('Odpověď serveru: '+(t.slice(0,80)||'prázdná'));}
     if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);
     if(d.ok){m.className='form-msg ok';m.textContent='Děkuji! Ozvu se do 24 hodin.';this.reset();}
