@@ -96,10 +96,14 @@ Web není monolit. Jsou to **tři sémantické vrstvy** odpovídající třem id
 |-------|-----|----------|
 | **SYSTEQ** (B2B CAM Automation) | Produktová landing page, parser demo, API docs | `src/index.html` |
 | **Ateliér můz** (kreativa) | Audio tvorba, neuro-eseje, hudební experimenty | `src/music.html` |
-| **Projekty** (fyzická realizace) | Dashboard stavebních a technických zakázek | `projekty/index.html` |
+| **Projekty** (fyzická realizace) | Prodejní portfolio služeb — offgrid, dřevo, IoT, zabezpečení, zahrada + formulář | `projekty/index.html` |
 
 Každá vrstva má vlastní design accent (teal / rust / brick), ale sdílený dark theme a typografii.
 Interní dokumenty projektů (s citlivými klient daty) jsou v `.gitignore` — na GitHubu jen dashboard.
+
+`projekty/index.html` prošel Fází 1 (2026-07-20): hero rewrite, ceny zvýrazněny, CTA posílena,
+SEO optimalizováno, kontaktní formulář (PHP backend). Karty služeb: offgrid → wood → iot → security → garden.
+Interní artifacty v `docs/projects/` (gitignored).
 
 ---
 

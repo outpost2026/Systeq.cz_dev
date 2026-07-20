@@ -1,44 +1,42 @@
 {
   "session": {
-    "id": "20260720_projekty_portfolio",
+    "id": "20260720_projekty_faze1_final",
     "date": "2026-07-20",
     "mode": "build",
-    "goal": "Rozšíření projekty/index.html na portfolio služeb — 5 domén (zahrada, offgrid, dřevostavby, IoT, zabezpečení)"
+    "goal": "Fáze 1 projekty/index.html finalizována: hero rewrite, ceny, CTA, SEO, kontaktní formulář, layout final (CTA tail, garden karta poslední)"
   },
 
   "git": {
     "branch": "main",
-    "last_commit": "— pending —",
+    "last_commit": "370f88e — [PROJEKTY] debug: detailní chybová zpráva",
     "remote": "origin/main"
   },
 
   "completed_this_session": [
-    "Hero přepsán na servisní portfolio (návrh, realizace & správa)",
-    "Přidána sekce SLUŽBY s 5 kartami: Zahradní práce, Offgrid & FVE, Dřevěné konstrukce, IoT & dálková správa, Zabezpečení",
-    "Každá služba má barevnou indentaci, SVG ikonu, popis, tagy a cenové rozpětí",
-    "Přidána sekce JAK PRACUJI (4-krokový proces: kontakt → návrh → realizace → předání)",
-    "Přidána CTA sekce s kontaktem (telefon, email) pro domluvení konzultace",
-    "Sekce projektů přejmenována na REFERENCE — původní karty (střecha Úvaly, dodávka Kuba) zachovány",
-    "Stránka narostla z 257 na 494 řádků, zachován dark theme + brick accent + single-file HTML pattern"
+    "Hero přepsán na prodejní tón: 'Potřebujete postavit, zapojit nebo opravit?'",
+    "5 service karet: offgrid, wood, iot, security, garden (garden přesunuta na poslední pozici)",
+    "Ceny zvýrazněny (sc-price) v každé kartě",
+    "CTA posílena: 'Do 48h návrh', 'Volné termíny: srpen–září 2026' (font dle .track-title)",
+    "CTA box přesunut na konec stránky (za reference, před script)",
+    "Kontaktní formulář (HTML + PHP send.php + JSONL log) — otestován (send.php FTP upload, email doručen ✅)",
+    "PII sanitace report.html (anonymizace klienta, zprostředkovatele, O.Žikovský, interní finance)",
+    "klient.html datumy v1.1 (posun o 3 týdny: 28.7.–16.8.)",
+    "SEO: title + meta description optimalizovány",
+    "docs/projects/ vytvořeno (interní snapshot, gitignored)",
+    "Context files aktualizovány (index.md, CONTEXT_REPOS.md, .ai_state.json, README.md)"
   ],
 
   "pending_tasks": [
     {
       "id": "p1",
       "priority": "P2",
-      "task": "Nahrát projekty/index.html na FTP (FileZilla)",
+      "task": "Nahrát aktuální projekty/index.html na FTP (FileZilla)",
       "status": "pending"
     },
     {
       "id": "p2",
-      "priority": "P2",
-      "task": "Případně doplnit fotky k službám na FTP (garden/offgrid/wood reference)",
-      "status": "pending"
-    },
-    {
-      "id": "p3",
       "priority": "P3",
-      "task": "Doplnit oborové tagy do hero description pro SEO",
+      "task": "Doplnit fotky placeholder do projektových karet",
       "status": "pending"
     }
   ],
@@ -48,7 +46,7 @@
     "hosting_provider": "Webzdarma (FTP, PHP support)",
     "ftp_root_maps_to": "repo root (src/ je jen lokální konvence)",
     "critical_rule": "relativní cesty v HTML vychází z FTP rootu, ne z src/",
-    "projects_page": "projekty/index.html (494 lines, 5 service cards + 2 project references)",
-    "service_domains": ["zahradni_prace", "offgrid_fve", "drevene_konstrukce", "iot_sprava", "zabezpeceni"]
+    "projects_page": "projekty/index.html (575 lines, 5 service cards + 2 project references + form)",
+    "service_domains": ["offgrid_fve", "drevene_konstrukce", "iot_sprava", "zabezpeceni", "zahradni_prace"]
   }
 }

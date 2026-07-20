@@ -1,6 +1,6 @@
 # GROUND TRUTH — SYSTEQ Web Integration Project
 
-> **Fáze**: v0.5 | **Datum snapshotu**: 08.07.2026  
+> **Fáze**: v0.6 | **Datum snapshotu**: 20.07.2026  
 > **Autor**: Otevřená kódová základna — integrace vedlejších projektů
 
 ---
@@ -15,7 +15,7 @@
 | **Streamlit dashboard DXF** | Deployovaný, semantic embedding + download artefaktů |
 | **Web prezentační vrstva** | `systeq_v0.4.html` — single-file HTML demo s embedovanými daty |
 | **Landing page** | `index.html` — produkční B2B landing s API docs a kontaktem |
-| **Projektový dashboard** | `projekty/index.html` — rozcestník vedlejších fyzických projektů |
+| **Projektový dashboard** | `projekty/index.html` — portfolio 5 služeb (offgrid, dřevo, IoT, zabezpečení, zahrada) + kontaktní formulář (PHP) |
 | **Ateliér můz** | `music.html` — audio tvorba, neuro-eseje, hudba |
 | **Backend API** | **CHYBÍ** — demo používá deterministická embedded data, žádné live endpointy |
 
@@ -183,17 +183,20 @@ web_integrace_systeq/
 │   ├── index.html               ← produkční landing page (SYSTEQ B2B)
 │   └── music.html               ← Ateliér můz (audio/eseje)
 ├── projekty/
-│   ├── index.html               ← Dashboard rozcestník vedlejších projektů
+│   ├── index.html               ← Portfolio služeb (5 domén) + kontaktní formulář (PHP backend)
 │   ├── strecha_uvaly/           ← INTERNÍ (v .gitignore, pouze na FTP)
-│   └── dodavka_kuba/            ← INTERNÍ (v .gitignore, pouze na FTP)
-├── Demo_Threejs/
-│   └── ...                      ← 3D demo, testy
+│   ├── dodavka_kuba/            ← INTERNÍ (v .gitignore, pouze na FTP)
+│   ├── send.php                 ← PHP handler kontaktního formuláře (mail + JSONL log)
+│   └── data/                    ← Logy formuláře (v .gitignore)
 ├── docs/
+│   ├── projects/                ← Interní snapshoty projektových artifactů (gitignored)
 │   ├── design/                  ← brand analýza, grafická vrstva, UI pilot
 │   ├── planning/                ← dev plány, assessmenty
 │   ├── handoffs/                ← dev poznámky, claude notes
 │   ├── Audio/                   ← průvodce zvukovou tvorbou
 │   └── GROUND_TRUTH.json        ← referenční data z VCF parseru
+├── Demo_Threejs/
+│   └── ...                      ← 3D demo, testy
 ├── data/
 │   ├── VCF_modul/               ← CSV, MD, zdrojové VCF
 │   └── DXF_modul/               ← CSV, TXT, PNG, DXF
