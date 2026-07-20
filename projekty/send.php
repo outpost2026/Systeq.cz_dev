@@ -28,16 +28,9 @@ $serviceLabels = [
 ];
 $serviceLabel = $serviceLabels[$service] ?? '—';
 
-$body = "Jméno: $name\nKontakt: $contact\nOblast: $serviceLabel\n\nZpráva:\n$message\n";
-$bodySafe = iconv('UTF-8', 'UTF-8//IGNORE', $body);
-
-$to      = 'sousek@systeq.cz';
-$subject = '=?UTF-8?B?' . base64_encode("Poptávka z webu — $name") . '?=';
-$headers = "From: $name <noreply@systeq.cz>\r\n"
-         . "Reply-To: $contact\r\n"
-         . "MIME-Version: 1.0\r\n"
-         . "Content-Type: text/plain; charset=utf-8\r\n"
-         . "X-Mailer: PHP/" . phpversion();
+$safeName   = preg_replace('/[^\p{L}\p{N} _.-]/u', '', $name);
+$safeContact = preg_replace('/[^\p{L}\p{N}@. _\-\+]/u', '', $contact);
+$safeContact = substr($safeContact, 0, 120);
 
 $logDir = __DIR__ . '/data';
 if (!is_dir($logDir)) mkdir($logDir, 0755, true);
@@ -47,10 +40,19 @@ $logEntry = json_encode([
 ], JSON_UNESCAPED_UNICODE) . "\n";
 file_put_contents($logDir . '/poptavky.jsonl', $logEntry, FILE_APPEND | LOCK_EX);
 
-$ok = mail($to, $subject, $bodySafe, $headers);
+$body = "Jméno: $name\nKontakt: $contact\nOblast: $serviceLabel\n\nZpráva:\n$message\n";
+$to   = 'sousek@systeq.cz';
+$subj = '=?UTF-8?B?' . base64_encode("Poptavka z webu - $safeName") . '?=';
+$hdrs = "From: noreply@systeq.cz\r\n"
+      . "Reply-To: $safeContact\r\n"
+      . "MIME-Version: 1.0\r\n"
+      . "Content-Type: text/plain; charset=utf-8\r\n"
+      . "X-Mailer: PHP/" . phpversion();
+
+$ok = @mail($to, $subj, $body, $hdrs);
 
 if ($ok) {
     echo json_encode(['ok' => true]);
 } else {
-    echo json_encode(['ok' => false, 'error' => 'Odeslání selhalo. Zkuste to prosím později nebo zavolejte na 735 045 256.']);
+    echo json_encode(['ok' => false, 'error' => 'Odeslání selhalo. Zavolejte prosím na 735 045 256.']);
 }
