@@ -35,3 +35,6 @@ deploy/counter/data/
 # Client/internal project documents (not for public repo)
 projekty/strecha_uvaly/
 projekty/dodavka_kuba/
+
+# Internal project documentation (synced from projekty/, not for public repo)
+docs/projects/

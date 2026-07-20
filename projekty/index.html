@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Služby a projekty — offgrid systémy, dřevěné konstrukce, IoT, zabezpečení, zahradní práce. Realizace na klíč od návrhu po provedení.">
-<title>Projekty // služby a realizace</title>
+<meta name="description" content="Offgrid elektrifikace, dřevěné konstrukce, IoT telemetrie, zabezpečení a zahradní práce na klíč. Osobní přístup, měření na místě, návrh + realizace. Bez zbytečné administrativy.">
+<title>Služby a realizace // SYSTEQ — offgrid, dřevo, IoT, zabezpečení, zahrada</title>
 <link rel="icon" type="image/svg+xml" href="../favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,7 +121,9 @@ header{
 .service-card.security .sc-icon svg{color:var(--red)}
 
 .sc-title{font-size:1rem;font-weight:600;letter-spacing:.02em}
-.sc-desc{font-size:.8rem;color:var(--text-muted);line-height:1.65;margin-bottom:.75rem;font-weight:300}
+.sc-desc{font-size:.8rem;color:var(--text-muted);line-height:1.65;margin-bottom:.6rem;font-weight:300}
+.sc-price{font-size:1.05rem;font-weight:700;color:var(--accent);margin-bottom:.6rem;letter-spacing:.01em}
+.sc-price sub{font-size:.65rem;font-weight:400;color:var(--text-muted);letter-spacing:.05em}
 .sc-tags{display:flex;flex-wrap:wrap;gap:.35rem}
 .sc-tag{
   font-size:.6rem;letter-spacing:.08em;padding:.15rem .5rem;border-radius:3px;
@@ -247,11 +249,12 @@ header{
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero">
   <div class="container">
-    <div class="hero-eyebrow">// SLUŽBY A REFERENCE</div>
-    <h1>Návrh, realizace <em>& správa</em></h1>
+    <div class="hero-eyebrow">// FYZICKÉ PROJEKTY NA KLÍČ</div>
+    <h1>Potřebujete postavit, <em>zapojit</em> nebo <em>opravit</em>?</h1>
     <p class="hero-sub">
-      Od off-grid elektrifikace po dřevěné konstrukce, od IoT telemetrie po zahradní úpravy.
-      Každý projekt stavím na systémovém přístupu — změřím, navrhnu, zrealizuji, ošetřím rizika.
+      Offgrid elektrifikace, dřevěné konstrukce, IoT telemetrie, zabezpečení, zahradní úpravy —
+      od návrhu po hotové dílo. Přijedu na místo, změřím, navrhnu řešení a zrealizuju.
+      Bez zbytečné administrativy a dohadů.
     </p>
   </div>
 </section>
@@ -273,12 +276,12 @@ header{
           Výsadba a údržba zeleně, terénní úpravy, zakládání zahrad, sadové úpravy.
           Od malých zákroků po komplexní revitalizaci pozemků.
         </div>
-        <div class="sc-tags">
-          <span class="sc-tag">výsadba</span>
-          <span class="sc-tag">terén</span>
-          <span class="sc-tag">údržba</span>
-          <span class="sc-tag">od 2 000 Kč/den</span>
-        </div>
+          <div class="sc-price">od 2 000 Kč<sub> /den + materiál dle dohody</sub></div>
+          <div class="sc-tags">
+            <span class="sc-tag">výsadba</span>
+            <span class="sc-tag">terén</span>
+            <span class="sc-tag">údržba</span>
+          </div>
       </div>
 
       <div class="service-card offgrid">
@@ -292,12 +295,12 @@ header{
           Návrh a stavba ostrovních systémů — LiFePO4 bateriová úložiště, fotovoltaika,
           jištění, měniče. Kompletní dimenzování dle spotřeby a lokality.
         </div>
-        <div class="sc-tags">
-          <span class="sc-tag">fotovoltaika</span>
-          <span class="sc-tag">LiFePO4</span>
-          <span class="sc-tag">jištění</span>
-          <span class="sc-tag">od 5 000 Kč/den</span>
-        </div>
+          <div class="sc-price">od 5 000 Kč<sub> /den + dimenzování zdarma</sub></div>
+          <div class="sc-tags">
+            <span class="sc-tag">fotovoltaika</span>
+            <span class="sc-tag">LiFePO4</span>
+            <span class="sc-tag">jištění</span>
+          </div>
       </div>
 
       <div class="service-card wood">
@@ -311,12 +314,12 @@ header{
           Pergoly, přístřešky, vyvýšené záhony, zahradní sprchy, terasy, altány.
           Návrh na míru dle terénu a účelu — od minimalistických po plně izolované dřevostavby.
         </div>
-        <div class="sc-tags">
-          <span class="sc-tag">pergoly</span>
-          <span class="sc-tag">přístřešky</span>
-          <span class="sc-tag">dřevostavby</span>
-          <span class="sc-tag">od 2 500 Kč/den</span>
-        </div>
+          <div class="sc-price">od 2 500 Kč<sub> /den + materiál (lze zajistit)</sub></div>
+          <div class="sc-tags">
+            <span class="sc-tag">pergoly</span>
+            <span class="sc-tag">přístřešky</span>
+            <span class="sc-tag">dřevostavby</span>
+          </div>
       </div>
 
       <div class="service-card iot">
@@ -330,12 +333,12 @@ header{
           ESP32/ESP8266 telemetrie, senzorické sítě, BMS monitoring, remote management,
           webová vizualizace dat. Propojení fyzického světa s cloudem.
         </div>
-        <div class="sc-tags">
-          <span class="sc-tag">ESP32</span>
-          <span class="sc-tag">telemetrie</span>
-          <span class="sc-tag">BMS</span>
-          <span class="sc-tag">od 3 500 Kč/den</span>
-        </div>
+          <div class="sc-price">od 3 500 Kč<sub> /den + HW dle specifikace</sub></div>
+          <div class="sc-tags">
+            <span class="sc-tag">ESP32</span>
+            <span class="sc-tag">telemetrie</span>
+            <span class="sc-tag">BMS</span>
+          </div>
       </div>
 
       <div class="service-card security">
@@ -349,12 +352,12 @@ header{
           Motion detekce, alarmové systémy, kamerové systémy, perimetrická ochrana.
           Návrh bezpečnostní vrstvy pro objekty, pozemky i vzdálené lokality.
         </div>
-        <div class="sc-tags">
-          <span class="sc-tag">alarmy</span>
-          <span class="sc-tag">kamery</span>
-          <span class="sc-tag">perimetr</span>
-          <span class="sc-tag">od 2 000 Kč/den</span>
-        </div>
+          <div class="sc-price">od 2 000 Kč<sub> /den + HW dle rozsahu</sub></div>
+          <div class="sc-tags">
+            <span class="sc-tag">alarmy</span>
+            <span class="sc-tag">kamery</span>
+            <span class="sc-tag">perimetr</span>
+          </div>
       </div>
 
     </div>
@@ -394,10 +397,11 @@ header{
 <section class="cta-section" id="contact">
   <div class="container">
     <div class="cta-box">
-      <h2>Máte projekt? <span style="color:var(--accent)">Domluvme si konzultaci</span></h2>
+      <h2>Máte konkrétní představu? <span style="color:var(--accent)">Ozvěte se</span></h2>
       <p>
-        Nezávazně probereme, co potřebujete — osobně, telefonicky nebo online.
-        V případě zájmu dodám strukturovaný návrh včetně cen.
+        Zavolejte nebo napište — domluvíme si obhlídku na místě (Praha / Středočeský kraj).
+        Do 48 hodin dodám strukturovaný návrh včetně rozpisu nákladů.
+        <br><span style="color:var(--text-muted);font-size:.75rem">Volné termíny: srpen–září 2026</span>
       </p>
       <div class="cta-links">
         <a class="cta-btn" href="tel:+420735045256">
@@ -416,7 +420,7 @@ header{
 <!-- ═══════════ REFERENCE ═══════════ -->
 <section class="projects-section">
   <div class="container">
-    <div class="sec-label">// REFERENCE — probíhající zakázky</div>
+    <div class="sec-label">// REFERENCE — aktuální projekty</div>
     <div class="projects-grid">
 
       <!-- ─── STŘECHA ÚVALY ─── -->
@@ -432,7 +436,7 @@ header{
         <div class="p-body">
           <div class="p-meta">
             <div class="pm-item"><strong>Rozsah:</strong> 159 m², SBS asfaltové pásy</div>
-            <div class="pm-item"><strong>Termín:</strong> červenec 2026</div>
+            <div class="pm-item"><strong>Termín:</strong> červenec–srpen 2026</div>
           </div>
           <div class="p-section-label">Dokumenty</div>
           <div class="p-docs">
