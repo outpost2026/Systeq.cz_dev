@@ -207,8 +207,13 @@ header{
 .project-card.strecha:hover{border-color:rgba(184,134,11,.3)}
 .project-card.dodavka::before{background:var(--blue)}
 .project-card.dodavka:hover{border-color:rgba(59,130,246,.3)}
+.project-card.svah::before{background:var(--green)}
+.project-card.svah:hover{border-color:var(--green-border)}
+.project-card.svah .p-category{color:var(--green)}
+.project-card.svah .p-doc:hover{color:var(--green)}
 .project-card.strecha .p-status{background:var(--green-dim);color:var(--green);border-color:var(--green-border)}
 .project-card.dodavka .p-status{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
+.project-card.svah .p-status{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-border)}
 
 .p-head{padding:1.35rem 1.5rem .75rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
 .p-category{font-size:.6rem;letter-spacing:.2em;margin-bottom:.25rem}
@@ -519,6 +524,35 @@ header{
             <a class="p-doc" href="dodavka_kuba/elektro.html" target="_blank">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
               Schéma zapojení s detaily
+            </a>
+          </div>
+          <div class="p-section-label">Realizační tým</div>
+          <div class="p-contact">
+            <strong>Ondřej Soušek</strong> · návrh a realizace
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SVAH HOSTICE-VODOCHODY ─── -->
+      <div class="project-card svah">
+        <div class="p-head">
+          <div>
+            <div class="p-category">zahradní práce</div>
+            <div class="p-title">Zpevnění svahu u cesty</div>
+            <div class="p-sub">Vodochody-Hostice — žlábek nad hranou, nízká zídka ZB15, opukové terasy (10–30 bm)</div>
+          </div>
+          <div class="p-status">zaměřování</div>
+        </div>
+        <div class="p-body">
+          <div class="p-meta">
+            <div class="pm-item"><strong>Rozsah:</strong> žlábek + zídka do 50 cm + 1–2 terasy</div>
+            <div class="pm-item"><strong>Termín:</strong> říjen 2026, zídka dle počasí</div>
+          </div>
+          <div class="p-section-label">Dokumenty</div>
+          <div class="p-docs">
+            <a class="p-doc" href="hostice_vodochody/index.html" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Návrh a dokumentace
             </a>
           </div>
           <div class="p-section-label">Realizační tým</div>
